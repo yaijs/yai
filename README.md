@@ -36,9 +36,9 @@ For YaiTabs:
 - ✅ **Dynamic Content Loading** - Fetch remote content with abort controllers
 - ✅ **Container Isolation** - Unique IDs prevent cross-contamination
 
-**[View YaiTabs Documentation →](tabs/README.md)**
+**[View YaiTabs Documentation →](https://yaijs.github.io/yai/tabs/)**
 
-**[Try Live Demo →](tabs/Example.html)**
+**[Try Live Demo →](https://yaijs.github.io/yai/tabs/Example.html)**
 
 ## Quick Start
 
