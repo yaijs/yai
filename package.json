@@ -1,0 +1,69 @@
+{
+  "name": "@yaijs/core",
+  "version": "1.0.0-beta.1",
+  "description": "Advanced web components built on YpsilonEventHandler - the world's first DOM Event Scoping System",
+  "main": "yai-core.js",
+  "type": "module",
+  "exports": {
+    ".": "./yai-core.js",
+    "./core": "./yai-core.js",
+    "./tabs": "./tabs/yai-tabs.js",
+    "./autoswitch": "./auto-switch.js"
+  },
+  "files": [
+    "yai-core.js",
+    "yai-core.d.ts",
+    "auto-switch.js",
+    "auto-switch.d.ts",
+    "tabs/"
+  ],
+  "scripts": {
+    "test": "echo \"No build pipeline required - use browser-based validation with Example.html files\"",
+    "demo": "echo \"Open tabs/Example.html in browser for live demo\""
+  },
+  "keywords": [
+    "web-components",
+    "tabs",
+    "ui-components",
+    "ypsilon-event-handler",
+    "y-e-h",
+    "yeh",
+    "performance",
+    "o1-scaling",
+    "accessibility",
+    "wcag",
+    "aria",
+    "es6-modules",
+    "vanilla-js",
+    "framework-agnostic",
+    "dom-scoping",
+    "event-handling",
+    "enterprise"
+  ],
+  "author": {
+    "name": "yaijs",
+    "url": "https://github.com/yaijs"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/yaijs/yai",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yaijs/yai.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yaijs/yai/issues"
+  },
+  "dependencies": {},
+  "peerDependencies": {
+    "@yaijs/yeh": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "not ie 11"
+  ]
+}

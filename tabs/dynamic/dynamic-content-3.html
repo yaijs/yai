@@ -1,0 +1,387 @@
+<div class="ynfiniti-wrapper">
+<h2>🚀 Dynamic Content Successfully Loaded</h2>
+
+<p>This content was loaded via AJAX as <a href="./dynamic/dynamic-content-3.html" target="_blank">plain HTML</a>. The component below uses the same event listener as the root component - no additional initialization needed!</p>
+
+<div class="architecture-visual">
+    <h3>📊 Current Architecture Overview</h3>
+    <div class="visual">
+        <div class="level">Document (12 Total Event Listeners)</div>
+        <div class="level">→ 3 Root Tab Components (6 listeners)</div>
+        <div class="level">→ → Dynamic Tab Component <span class="current">(You are here - using existing listeners)</span></div>
+        <div class="level">→ → → Next Level (Click "Try Ynfiniti" to "Load More Tabs")</div>
+    </div>
+</div>
+
+<div data-yai-tabs data-behavior="fade" data-nav="top">
+    <nav data-controller data-align="center" data-grow>
+        <button data-tab-action="open" data-open="1" data-default>How It Works</button>
+        <button data-tab-action="open" data-open="2">Performance Benefits</button>
+        <button data-tab-action="open" data-open="3" data-trigger-ynfiniti>Try Ynfiniti</button>
+        <button data-tab-action="open" data-open="4">Configuration</button>
+    </nav>
+    <div data-content>
+        <div data-tab="1" data-spaceless>
+            <div class="info-card">
+                <h3>Single Listener Architecture</h3>
+                <p>YaiTabs uses YpsilonEventHandler's DOM Event Scoping System for efficient event handling:</p>
+                <ul class="mb-0">
+                    <li><strong>Event delegation</strong> - One listener handles all components regardless of nesting depth</li>
+                    <li><strong>Automatic scope isolation</strong> - Each component operates independently</li>
+                    <li><strong>Zero initialization required</strong> - Components work immediately after DOM insertion</li>
+                    <li><strong>Consistent O(1) performance</strong> - Scaling remains constant regardless of nesting complexity</li>
+                </ul>
+            </div>
+
+            <div class="info-card">
+                <h3>Initialization Workflow</h3>
+                <ol class="mb-0">
+                    <li>Page loads with <code>[data-yai-tabs]</code> components</li>
+                    <li>If <code>autoDisambiguate: true</code>, nested components are marked as lazy</li>
+                    <li>Root components receive event listeners (click + keydown per component)</li>
+                    <li>Dynamic content uses existing listeners - no re-initialization needed</li>
+                </ol>
+            </div>
+        </div>
+
+        <div data-tab="2">
+            <h2>⚡ Performance Advantages</h2>
+
+            <div class="performance-comparison">
+                <div class="comparison-item">
+                    <h4>Traditional Approach</h4>
+                    <ul>
+                        <li>Each component needs its own listener</li>
+                        <li>Memory usage grows with component count</li>
+                        <li>Initialization required for dynamic content</li>
+                        <li>Nested components create complex cleanup requirements</li>
+                        <li>Memory bloat with deep nesting</li>
+                    </ul>
+                </div>
+
+                <div class="comparison-item highlight">
+                    <h4>YaiTabs Approach</h4>
+                    <ul>
+                        <li><strong>Single listener handles all components</strong></li>
+                        <li><strong>Constant memory usage</strong> (only 2 listeners per root component)</li>
+                        <li><strong>No initialization needed</strong> for dynamic content</li>
+                        <li><strong>Automatic cleanup through DOM scoping</strong> only root components have listeners (In this Example, we have 2 root components)</li>
+                        <li><strong>O(1) scaling</strong> regardless of component count</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="benchmark">
+                <h4>Memory Usage Comparison</h4>
+                <div class="benchmark-visual">
+                    <div class="benchmark-bar traditional" style="width: 100%">
+                        <span>Traditional: 90% memory usage</span>
+                    </div>
+                    <div class="benchmark-bar yaitabs" style="width: 10%;min-width: 140px;">
+                        <span>YaiTabs: 10% memory usage</span>
+                    </div>
+                </div>
+                <p><em>Estimated memory usage for 100 tab components</em></p>
+
+                <hr>
+
+                <!-- Nested tab component -->
+                <div
+                    data-yai-tabs
+                    data-behavior="fade"
+                    data-nav="top"
+                    style="margin-top:1rem">
+                    <nav data-controller>
+                        <button data-tab-action="open" data-open="1" data-default>Deep Nesting</button>
+                    </nav>
+                    <div data-content>
+                        <div data-tab="1">
+                            <h3>Deep Nesting Demo (copy&pasted)</h3>
+                            <p>Below we nest some top-nav with some other navs left and right.</p>
+
+                            <div
+                                data-yai-tabs
+                                data-behavior="fade"
+                                data-nav="top">
+
+                                <nav data-controller data-grow>
+                                    <button data-tab-action="open" data-open="1">Animations</button>
+                                    <button data-tab-action="open" data-open="2">URL State</button>
+                                    <button data-tab-action="open" data-open="3">Reduced Motion</button>
+                                </nav>
+
+                                <div data-content>
+                                    <!-- L2 TAB 1 -->
+                                    <div data-tab="1">
+                                        <h4>Animations</h4>
+                                        <p>Switch between <code>fade</code>, <code>slide-*</code>, <code>zoom</code>, or <code>flip</code> via <code>data-behavior</code>. Keep transitions short (150–300ms) for snappy feel.</p>
+                                        <p class="mb-0"><small>For content that shifts layout, consider overflow gating to avoid jank.</small></p>
+                                    </div>
+
+                                    <!-- L2 TAB 2 -->
+                                    <div data-tab="2">
+                                        <h4>URL State & Deep Links</h4>
+                                        <ul>
+                                            <li>Each container uses a unique <code>data-ref-path</code> key.</li>
+                                            <li>On open, the route map updates and writes to the hash.</li>
+                                            <li>On <code>hashchange</code>, containers reconcile their state (no loops: guarded writes).</li>
+                                        </ul>
+                                        <p><small>Use <code>data-history-mode="replace"</code> to keep Back-stack clean on frequent tabbing.</small></p>
+
+                                        <!-- Nested level 3 -->
+                                        <div
+                                            data-yai-tabs
+                                            data-behavior="fade"
+                                            data-nav="right">
+
+                                            <nav data-controller>
+                                                <button data-tab-action="open" data-open="1">API Basics</button>
+                                                <button data-tab-action="open" data-open="2">Async Content</button>
+                                                <button data-tab-action="open" data-open="3">Troubleshooting</button>
+                                                <button data-tab-action="open" data-open="4">Local metrics</button>
+                                            </nav>
+
+                                            <div data-content>
+                                                <!-- L3 TAB 1 -->
+                                                <div data-tab="1">
+                                                    <h5>API Basics</h5>
+                                                    <ul>
+                                                        <li><code>data-default</code> marks the initial tab.</li>
+                                                        <li><code>data-open</code> sets the target panel ID.</li>
+                                                        <li><code>data-nav</code> controls nav position: <em>top/bottom/left/right</em>.</li>
+                                                    </ul>
+                                                    <p class="mb-0"><small>Initialize only once per container; the component is idempotent by design.</small></p>
+                                                </div>
+
+                                                <!-- L3 TAB 2 -->
+                                                <div data-tab="2">
+                                                    <h5>Async Content</h5>
+                                                    <p>When loading remote HTML:</p>
+                                                    <ul>
+                                                        <li>Set <code>aria-busy="true"</code> before fetch; reset to <code>false</code> after.</li>
+                                                        <li>Optionally set <code>aria-live="polite"</code> for subtle SR announcements.</li>
+                                                        <li>Re-run accessibility setup on nested content if it includes new tab containers.</li>
+                                                    </ul>
+                                                    <p class="mb-0"><small>Consider caching for quick back-navigation.</small></p>
+                                                </div>
+
+                                                <!-- L3 TAB 3 -->
+                                                <div data-tab="3">
+                                                    <h5>Troubleshooting</h5>
+                                                    <ul>
+                                                        <li>Duplicate listeners? Ensure only one init per container file & no legacy helpers.</li>
+                                                        <li>Stale hash? Remove the key when closing a tab or fallback to default.</li>
+                                                        <li>Focus lost? Keep one <code>tabindex="0"</code> per tablist (roving tabindex).</li>
+                                                    </ul>
+                                                    <!-- Nested level 4 -->
+                                                    <div
+                                                        data-yai-tabs
+                                                        data-behavior="fade"
+                                                        data-nav="bottom">
+
+                                                        <nav data-controller data-grow>
+                                                            <button data-tab-action="open" data-open="1">Checklists</button>
+                                                            <button data-tab-action="open" data-open="2">Design Notes</button>
+                                                            <button data-tab-action="open" data-open="3">Changelog</button>
+                                                        </nav>
+
+                                                        <div data-content>
+                                                            <div data-tab="1">
+                                                                <h6>Pre-Ship Checklist</h6>
+                                                                <ul>
+                                                                    <li>Unique <code>data-ref-path</code> per container</li>
+                                                                    <li>Visible <code>:focus-visible</code> ring for all interactive elements</li>
+                                                                    <li><code>aria-orientation</code> consistent with computed layout</li>
+                                                                    <li>Reduced-motion guard on heavy transitions</li>
+                                                                </ul>
+                                                            </div>
+                                                            <div data-tab="2">
+                                                                <h6>Design Notes</h6>
+                                                                <ul>
+                                                                    <li>Prefer subtle elevation for active tabs and maintain a consistent hit-area (min-height ~40px).</li>
+                                                                    <li>Use semantic color tokens for easy theming.</li>
+                                                                </ul>
+                                                            </div>
+                                                            <div data-tab="3">
+                                                                <h6>Changelog (Excerpt)</h6>
+                                                                <ul>
+                                                                    <li><strong>3.1:</strong> URL state for nested tabs; orientation via computed layout.</li>
+                                                                    <li><strong>3.0:</strong> Single-listener event model; idempotent accessibility setup.</li>
+                                                                    <li><strong>2.x:</strong> Roving tabindex + APG keyboard model.</li>
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <!-- / Nested 4 -->
+                                                </div>
+
+                                                <!-- L3 TAB 4 -->
+                                                <div data-tab="4">
+                                                    <h5>A new Reality</h5>
+<pre class="hljs">&lt;!--
+Ca. <span class="hljs-number">350</span> clicks
+Reached level: <span class="hljs-number">55</span>
+--&gt;
+&lt;div data-yai-tabs data-nesting=<span class="hljs-string">&quot;55&quot;</span> /&gt;</pre>
+
+<pre class="hljs">Local metrics
+
+Largest Contentful Paint (LCP) <span class="hljs-number">0.16</span> s
+Your local LCP value of <span class="hljs-number">0.16</span> s is good. LCP elem. p
+
+Cumulative Layout Shift (CLS) <span class="hljs-number">0.17</span>
+Your local CLS value of <span class="hljs-number">0.17</span> needs improvement.
+
+Worst cluster <span class="hljs-number">2</span> shifts Interaction to Next Paint (INP) <span class="hljs-number">1</span>,<span class="hljs-number">192</span> ms
+Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-number">192</span> ms is poor.</pre>
+
+                                                    <pre class="hljs mb-0">What? Poor? Over 300 interactions, <i>LEVEL 55</i>, who you call poor?</pre>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- / Nested 3 -->
+                                    </div>
+
+                                    <!-- L2 TAB 3 -->
+                                    <div data-tab="3">
+                                        <h4>Reduced Motion</h4>
+                                        <p>Respect user preferences with a simple CSS gate:</p>
+<pre class="hljs">
+<span class="hljs-keyword">@media</span> (<span class="hljs-attribute">prefers-reduced-motion</span>: reduce) {
+    <span class="hljs-selector-attr">[data-yai-tabs]</span> <span class="hljs-selector-attr">[data-tab]</span> {
+        <span class="hljs-attribute">transition</span>: none;
+        <span class="hljs-attribute">animation</span>: none;
+    }
+}</pre>
+                                        <p class="mb-0"><small>Keep parity in UX by retaining visual state changes without movement.</small></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div data-tab="3">
+            <h2>🎯 Experience Infinite Nesting</h2>
+
+            <div class="interactive-demo">
+                <p>Click the "Load More Tabs" button below to experience truly infinite nesting. Each level will load <a href="./dynamic/dynamic-content-3.html" target="_blank">the same already nested HTML</a> tab component dynamically and insert it into the next hierarchy level. Just inserting the HTML transforms each insertion into a scoped standalone component. This components get never registered, only processed to adjust ARIA attributes. They can be deleted the same way they were injected, just llike that.</p>
+
+                <div class="action-panel">
+                    <button
+                        class="load-more-btn"
+                        data-action="remoteClick"
+                        data-target-selector="nav[data-controller] [data-trigger-ynfiniti]"
+                        data-open="3"
+                        data-url="dynamic/dynamic-content-3.html"
+                        data-delay="500"
+                        data-post-delay="500"
+                        data-replace-target="true"
+                        data-text-content="Loading..."
+                        data-restore-text="Ynfiniti"
+                        data-aria-label="Load more nested content levels"
+                        data-loading-class="loading">
+                        Load More Tabs →
+                    </button>
+
+                    <p class="note"><small>Demonstrates delay attributes: 500ms pre-fetch + 500ms post-fetch delay</small></p>
+                </div>
+
+                <div class="architecture-visual">
+                    <h4>📊 YaiTabs Listener Distribution</h4>
+                    <p class="visual-description">Total of 7 listeners handle all components, regardless of nesting depth</p>
+
+                    <div class="visual">
+                        <div class="level root">window: <b>1 listener</b> (hashchange)</div>
+
+                        <div class="level branch">
+                            <div class="level">body.example-init: <b>2 listeners</b> (click, change)</div>
+
+                            <div class="level branch">
+                                <div class="level">div#demo-tabs.tab-active: <b>2 listeners</b> (click, keydown)</div>
+                                <div class="level">div#yai-tabs-container-1757822036946-3j1vi9f29: <b>2 listeners</b> (click, keydown)</div>
+                            </div>
+                        </div>
+
+                        <div class="level footer">
+                            <hr>
+                            <div class="stats">
+                                <span>📊 Total Elements with Listeners: <b>4</b></span>
+                                <span>🔥 Total Event Listeners: <b>7</b></span>
+                                <span>📈 Average per Element: <b>1.75</b></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="architecture-note">
+                        <p>💡 <strong>Key Insight:</strong> Nested tab components require <strong>0 additional listeners</strong> -
+                        they reuse the existing root component listeners through YpsilonEventHandler's DOM event scoping system.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div data-tab="4">
+            <h2>⚙️ Configuration Options</h2>
+
+            <div class="config-options">
+                <div class="option-group">
+                    <h4>Core Configuration</h4>
+                    <pre><code>const tabs = new YaiTabs({
+  // Allow closing tabs
+  <b>closable: true,</b>
+  // Default tab index if none specified
+  <b>openDefault: 50,</b>
+  // Automatic ARIA attributes
+  <b>autoAccessibility: true,</b>
+  // Auto-focus first tab
+  <b>autoFocus: false,</b>
+  // Auto-resolve ID conflicts
+  <b>autoDisambiguate: true,</b>
+});</code></pre>
+                </div>
+
+                <div class="option-group">
+                    <h4>Lifecycle Hooks</h4>
+                    <pre><code>// Hook system for custom loading behavior
+callbacks: {
+  // When loading state should be applied
+  <b>setLoading: null,</b>
+  // When loading state should be removed
+  <b>removeLoading: null,</b>
+  // When content is ready for animation
+  <b>contentReady: null,</b>
+  // After everything completes
+  <b>afterLoad: null,</b>
+}</code></pre>
+                </div>
+
+                <div class="option-group">
+                    <h4>Event Handling Options</h4>
+                    <pre><code>events: {
+  <b>enableStats: true,</b>
+  <b>autoTargetResolution: true,</b>
+  <b>actionableAttributes: ['data-tab-action'],</b>
+  <b>actionableTags: [],</b>
+}</code></pre>
+                </div>
+
+                <div class="option-group">
+                    <h4>HTML Delay Attributes</h4>
+                    <pre><code>// Pre-fetch delay (before request)
+<b>data-delay="1000"</b>
+// Post-fetch delay (after content loads)
+<b>data-post-delay="500"</b>
+// Minimum loading time (prevents flicker)
+<b>data-min-loading="800"</b></code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
