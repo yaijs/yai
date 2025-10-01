@@ -55,7 +55,7 @@ All nested and dynamically added components utilize the root component's event l
 - Uses 2 event listeners per root component (click + keydown)
 - Nested components inherit event handling from parent
 - Dynamic content requires no additional listeners
-- No cleanup needed - since no listeners are added to nested/dynamic components, none need removal
+- No cleanup needed, only root components are registered
 - Performance remains constant regardless of nesting depth
 
 ### Component Lifecycle
@@ -83,7 +83,7 @@ All nested and dynamically added components utilize the root component's event l
 | Attribute | Purpose | Values |
 |-----------|---------|--------|
 | `data-yai-tabs` | Marks as tab component | (required) |
-| `data-yai-tabs-lazy` | Alter initialization (use instead of `data-yai-tabs`) | (presence only) |
+| `data-yai-tabs-lazy` | Alter initialization for nested tabs (use instead of `data-yai-tabs`) | (presence only) |
 | `data-theme` | Theme/look | `default` (or override) |
 | `data-color-scheme` | Color variant | `red`, `blue`, `light`, `dark`,  (or custom) |
 | `data-behavior` | Transition effect | `fade`, `slide-*`, `blur`, `zoom`, `flip`, `instant` |
@@ -175,26 +175,28 @@ All nested and dynamically added components utilize the root component's event l
 
 ## ⚙️ Configuration Options
 
-```javascript
+```js
 const tabs = new YaiTabs({
   closable: true,           // Allow closing tabs
-  openDefault: 50,          // Default tab index if none specified
-  autoAccessibility: true,  // Automatic ARIA attributes
+  openDefault: null,        // Default tab index if none specified
+  defaultBehavior: 'fade',  // Default animation behavior
   autoFocus: false,         // Auto-focus first tab
-  autoDisambiguate: true,   // Ensures unique IDs across nested components
+  autoAccessibility: true,  // Automatic ARIA attributes
+  autoDisambiguate: false,  // Ensures unique IDs across nested components
 
   events: {
-    enableStats: true,
+    enableStats: false,
     autoTargetResolution: true,
     actionableAttributes: ['data-tab-action'],
-    actionableTags: ['button'],
+    actionableClasses: [],
+    actionableTags: [],
   }
 });
 ```
 
 ## 🔧 Lifecycle Hooks
 
-```javascript
+```js
 // Available callback hooks
 this.config = {
   callbacks: {
@@ -348,7 +350,7 @@ Complete theme overrides
 ## 🔍 Debugging & Monitoring
 
 Check event listeners after initialization ([Example.html](./Example.html)):
-```javascript
+```js
 // Console script to check listener count
 🎯 SCAN COMPLETE:
 📊 Total Elements with Listeners: 5
@@ -452,6 +454,8 @@ This architecture enables truly infinite nesting without performance degradation
 
 
 ## Screenshot
+
+**[Try Live Demo →](https://yaijs.github.io/yai/tabs/Example.html)**
 
 ![YaiTabs Screenshot with multiple nested tabs open](dynamic/YaiTabs-Screenshot.png)
 

@@ -11,9 +11,10 @@ class YaiTabs extends YaiCore {
             closable: true,                      /** @var bool Closable tabs, click on active tab button closes the tab */
             openDefault: null,                   /** @var int If no data-default is set, use to open predefined index */
             defaultBehavior: 'fade',             /** @var string Default animation behavior if no data-behavior is specified */
-            autoFocus: true,                     /** @var bool Automatically focus the first container's active tab on init */
+            autoFocus: false,                    /** @var bool Automatically focus the first container's active tab on init */
             autoAccessibility: true,             /** @var bool Enable comprehensive ARIA accessibility setup */
-            autoDisambiguate: false,             /** @var bool Automatically make identical data-open/data-tab values unique to prevent cross-contamination */
+            autoDisambiguate: true,              /** @var bool Automatically make identical data-open/data-tab values unique to prevent cross-contamination */
+            lazyNestedComponents: true,          /** @var bool On init, marks nested tab components as laty "data-yai-tabs-lazy" */
 
             // Override eventHandler configs
             dispatchName: 'yai.tabs',
@@ -66,7 +67,9 @@ class YaiTabs extends YaiCore {
         });
 
         // Prep lazy components
-        this._markLazyComponents();
+        if (this.config.lazyNestedComponents) {
+            this._markLazyComponents();
+        }
 
         /**
          * Create event handler using YaiCore factory | this.events
@@ -85,7 +88,9 @@ class YaiTabs extends YaiCore {
         );
 
         // Activate lazy components after event registration
-        this._activateLazyComponents();
+        if (this.config.lazyNestedComponents) {
+            this._activateLazyComponents();
+        }
 
         // Hash routing state
         this.routeMap = new Map();
@@ -422,7 +427,7 @@ class YaiTabs extends YaiCore {
 
             // Set initial focus on the first visible container's active tab
             if (this.config.autoFocus && index === 0) {
-                defaultButton.focus();
+                defaultButton.focus({ preventScroll: true });
             }
         }
     }
@@ -750,7 +755,7 @@ class YaiTabs extends YaiCore {
                     container.closest('[data-yai-tabs]')
                 );
                 if (visibleTabButton) {
-                    visibleTabButton.focus();
+                    visibleTabButton.focus({ preventScroll: true });
                 } else {
                     document.activeElement.blur();
                 }
@@ -891,7 +896,7 @@ class YaiTabs extends YaiCore {
 
             // Optional: Move focus to panel for screen readers (only on Enter/Space, NOT arrow keys)
             if (event && (event.key === 'Enter' || event.key === ' ')) {
-                content.focus();
+                content.focus({ preventScroll: true });
             }
 
             this._markRootContainer(container, true);
@@ -1107,7 +1112,7 @@ class YaiTabs extends YaiCore {
                 if (!button.classList.contains('active')) {
                     this.simulateClick(button);
                 }
-            }, 100);
+            }, 50);
         });
     }
 
@@ -1294,7 +1299,6 @@ class YaiTabs extends YaiCore {
     _activateDefaultTabs(container) {
         // Find all data-default buttons within the provided scope that aren't active yet
         const defaultButtons = container.querySelectorAll('[data-content] button[data-default]:not(.active)');
-
         // Small delay to ensure DOM is settled after initialization
         setTimeout(() => {
             defaultButtons.forEach(button => {
@@ -1307,12 +1311,6 @@ class YaiTabs extends YaiCore {
 
     /**
      * Get route data for a given data-ref-path
-     *
-     * Given the following hash:
-     * #main-tabs=3&lvl-1-tabs=4&lvl-2-tabs-repeat=1
-     *
-     * We need a function, that can recreate the path, when only the following is given:
-     * lvl-2-tabs-repeat=1
      *
      * @param {string} targetRef - The ref-path to find (e.g., "lvl-2-tabs-repeat")
      * @param {Element} [containerElement=document] - Root element to search within

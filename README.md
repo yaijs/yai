@@ -88,10 +88,13 @@ yai/                         // Published at github.com/yaijs/Yai
 │   ├── Example.html         // Interactive demo
 │   ├── README.md            // Component documentation
 │   └── dynamic/             // Dynamic content examples
+├── utils/
+│   ├── auto-switch.js       // Component testing utility (~250 LOC)
+│   ├── auto-switch.d.ts     // AutoSwitch TypeScript definitions
+│   ├── yai-viewport.js      // Viewport util
+│   └── yai-viewport.d.ts    // Viewport util TypeScript definitions
 ├── yai-core.js              // Shared base class (~700 LOC)
 ├── yai-core.d.ts            // Core TypeScript definitions
-├── auto-switch.js           // Component testing utility (~250 LOC)
-├── auto-switch.d.ts         // AutoSwitch TypeScript definitions
 └── README.md                // Yai documentation
 ```
 

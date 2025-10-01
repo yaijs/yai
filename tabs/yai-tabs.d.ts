@@ -25,7 +25,7 @@
  * @version 1.0.0-beta.1
  * @author YaiJS Team - Advanced component architecture
  * @license MIT
- * @see https://github.com/yaijs/Yai/tree/main/YaiTabs
+ * @see https://github.com/yaijs/yai/tree/main/tabs
  */
 
 import { HookContext, LifecycleCallbacks, YaiCore, YaiCoreConfig } from '../yai-core.js';

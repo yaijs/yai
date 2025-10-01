@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YaiTabs - Tabs Browser Component</title>
+    <title>YaiTabs - Advance Tab Browser Component</title>
     <meta name="description" content="Advance Tab Browser Component with 9 animations, Dynamic content support, DeepLinks & implements WCAG 2.1 AA compliant tab navigation with full screen reader support">
     <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAYNJREFUOI2lkz9S20AYxX+7ttOgGDOjQKMZmMEt8lapdQQdISlInRJTcQ5ofAPgBOgG2citMrEnNBpnAgFBgdBuCs8a2TEMjF+1/97b7739VhwWllUgV2I/J1Cu0THWaDc31uhyjc6rBEqLahQmmQzTnlubDNPe46/furSoFwVKiypG2RzZ4ebycrsYZQmS6DmBuBhlycNtsQ6wuafO3YYbP9wW67nWF0A8J2Aln/JUnzqyH6q+EE+HhCD2Q9UH+LAXfi8luoIDAHF4b49zrfcB3r33/nZ2u1+FYfB/XFOLAA3MYDJMe1tKnTRNZT4CtINg3Nzw48cKWmIZHVoNOlc/sjNXKYCsPBn5oeo3fT9qwtGfof7myqujgoNc6wtH3lLqBMMXUevEOE/1aT24WQ6SmU2ATaU+O5tioZXjq5/ZYHZLqARAnmrrMtrY7cYYkrlXqOHM2+lG7SAYL1poB8HY2+lGdfKyCoBpKzcKk0ghFUxbufJk1LrjevHsUoG3YOXf+A/28K0/S+gHCgAAAABJRU5ErkJggg==" />
     <!-- Example page styles -->
@@ -252,6 +252,7 @@
         padding: 30px 0;
         font-size: 14px;
         text-align: center;
+        color: #151515;
     }
     footer nav {
         margin-bottom: 0.75rem;
@@ -260,6 +261,9 @@
     }
     footer p {
         font-size: 12px;
+    }
+    footer a {
+        color: #1806ff;
     }
     #demo-tabs > [data-content] > [data-tab] > [data-yai-tabs].dynamically-added {
         max-height: 40vh;
@@ -482,7 +486,7 @@
         animation: yFadeOut var(--yai-fade-out) ease-in-out both;
     }
     .text-muted {
-        color: #787980;
+        color: #676e9f;
     }
     .good-to-know > nav::after {
         content: 'Ynception Unlocked';
@@ -495,6 +499,14 @@
         line-height: 1;
         font-size: .9rem;
         color: #432124;
+    }
+    .yvp-is-visible {
+        box-shadow: 0 0 8px 1px #2c304b;
+        transition: all .6s ease-in;
+    }
+    .yvp-is-visible.yvp-is-leaving {
+        box-shadow: 0 0 4px 0 #9998fc;
+        transition: all .4s ease-out;
     }
 
     /* Ycons */
@@ -552,6 +564,7 @@
     .ycon-white-exclamation-mark::before { content: "\2755"; }          /* ❕ */
     .ycon-print-screen::before { content: "\2398"; }                    /* ⎘  */
     .ycon-link::before { content: "\1F517"; }                           /* 🔗 */
+    .ycon-katakana-letter::before { content: "\FF90"; }                  /* ﾐ */
 
     /** Animation keyframes */
     @keyframes yFadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -666,18 +679,17 @@
     </style>
 
     <style>
-    .ynfiniti-wrapper .architecture-visual {
+    .ynfiniti-wrapper .architecture-visual,
+    .ynfiniti-wrapper .architecture-note {
         margin: 1.5rem 0;
         padding: 1.5rem;
         background: #f8f9fa;
         border-radius: 8px;
         border: 1px solid #eaeaea;
     }
-    .ynfiniti-wrapper [data-tab] [data-yai-tabs] .architecture-visual {
+    .ynfiniti-wrapper [data-tab] [data-yai-tabs] .architecture-visual,
+    .ynfiniti-wrapper [data-tab] [data-yai-tabs] .architecture-note {
         display: none;
-    }
-    .ynfiniti-wrapper [data-tab] [data-tab] [data-yai-tabs] {
-        margin-top: 15px;
     }
     [data-yai-tabs]#demo-tabs .ynfiniti-wrapper [data-tab]:not([data-spaceless]) {
         padding: 20px 8px 10px;
@@ -796,6 +808,7 @@
         border-radius: 8px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
     }
+    .ynfiniti-wrapper [data-tab] .option-group h3,
     .ynfiniti-wrapper [data-tab] .option-group h4 {
         margin: 12px;
     }
@@ -973,7 +986,7 @@
         </h2>
         <ul>
             <li>Ynfiniti Achieved</li>
-            <li>Ultra lightweight: ~2,000 LOC JS & ~500 LOC CSS</li>
+            <li>Ultra lightweight: ~2,200 LOC JS & ~500 LOC CSS</li>
             <li>
                 Fully automated ARIA attribute generator for
                 <a href="https://www.w3.org/WAI/ARIA/apg/patterns/tabs/" target="_blank" rel="nofollow">
@@ -1033,7 +1046,7 @@
                                 <option value="blur">blur</option>
                                 <option value="zoom">zoom</option>
                                 <option value="flip">flip</option>
-                                <option value="instant (9)">instant</option>
+                                <option value="instant">instant (9)</option>
                             </select>
                         </div>
                     </div>
@@ -1152,7 +1165,6 @@
             </nav>
             <div data-content>
                 <div data-tab="1" data-spaceless>
-
                     <div
                         data-yai-tabs
                         class="good-to-know"
@@ -1167,7 +1179,7 @@
                         </nav>
                         <div data-content>
                             <div data-tab="1">
-                                <div class="yp-3">
+                                <div class="yp-1">
                                     <p>Open <button
                                             class="btn-link"
                                             data-action="remoteClick"
@@ -1252,21 +1264,18 @@
     </div>
 
     <!-- Quick Event delegation reminder -->
-    <div class="box short-note removable">
+    <div class="box short-note info-2 removable">
         <h2>
             <span class="ycon ycon-satellite-antenna ycon-sm ycon-fix-top-1 ycon-is-left" aria-hidden="true"></span>
              Event Delegation Architecture
         </h2>
         <p>Each YaiTabs root component uses exactly <strong>2 event listeners</strong> <small>(click &amp; keydown)</small> regardless of tab count. Auto scoped container isolation prevents conflicts.</p>
-        <p class="mb-0">Sidenote: This demo's
-            <a data-action="refPathProcess" data-yai-ref-path="lvl-1-tabs=5">ExampleHandler</a>
-
-        ExampleHandler class uses a single <code>&lt;body&gt;</code> click listener via <a href="https://github.com/yaijs/yeh" target="_blank">YEH</a> (required and included for YaiTabs anyway) to manage additional page interactions needed. They even work within Tab components.</p>
+        <p class="mb-0">Sidenote: This demo's <a data-action="refPathProcess" data-yai-ref-path="lvl-1-tabs=5">ExampleHandler</a> class uses a single <code>&lt;body&gt;</code> click listener via <a href="https://github.com/yaijs/yeh" target="_blank">YEH <span class="ycon ycon-print-screen ycon-xxs flip ycon-is-right ycon-fix-top-1" aria-hidden="true"></span></a> (required and included for YaiTabs anyway) to manage additional page interactions needed. They even work within Tab components.</p>
         <hr>
         <!-- DeepLinks -->
         <div id="deeplink-container">
             <h2 class="y-flex-between-center mb-0">
-                <span>
+                <span title="Exclusive for Example page">
                     <small class="ycon ycon-link ycon-xs ycon-fix-top-1 ycon-is-left" aria-hidden="true"></small>
                     DeepLinks <small class="text-muted">beta</small>
                 </span>
@@ -1282,12 +1291,15 @@
 </pre>
 <pre class="y-flex-item mb-0">
 <a data-yai-ref-path="styles=1">Colors</a>
-  <a data-yai-ref-path="s-red=2|s-blue=3">…/Def 2 & Blu 3</a>
-  <a data-yai-ref-path="s-red=3|s-blue=2|s-dark=4">…/Def 3 & Blu 2 & Dar U</a>
-    <a data-yai-ref-path="s-light=1">…/Mixed</a>
+  <a data-yai-ref-path="s-red=2|s-blue=3">…/Def & Blue</a>
+  <a data-yai-ref-path="s-red=3|s-blue=2|s-dark=4">…/Def & Blue & Dark</a>
+    <a data-yai-ref-path="y-s-light=1" data-scroll-to>…/Mixed</a>
 </pre>
 <pre class="y-flex-item mb-0">
-<a data-yai-ref-path="lvl-2-tabs=1|s-red=2">Animations + …/Default 2</a>
+<a data-yai-ref-path="lvl-1-tabs=1|styles=1">Mixed Light</a>
+  <a data-yai-ref-path="lvl-2-tabs=2|s-red=2">Mixed Medium</a>
+    <a data-yai-ref-path="lvl-3-tabs-repeat=1|styles=1|s-red=1|s-dark=1">Mixed Extreme</a>
+      <a data-yai-ref-path="lvl-4-tabs-repeat=1|y-s-light=1|s-red=3|s-blue=2|s-dark=4">YEH & YAI</a>
 </pre>
             </nav>
         </div>
@@ -1311,7 +1323,7 @@
             data-yai-tabs
             data-theme="default"
             data-nav="top"
-            data-behavior="fade"
+            data-behavior="blur"
             data-history-mode="replace"
             data-ref-path="main-tabs">
             <!-- Tab controller -->
@@ -1359,9 +1371,9 @@
                     <hr>
                     <h3>Why it’s fast</h3>
                     <ol>
-                    <li><strong>Delegated Events:</strong> 1 listener per container; no N×M explosion with nesting.</li>
-                    <li><strong>DOM Distance Cache:</strong> Resolves closest targets efficiently inside containers.</li>
-                    <li><strong>Idempotent Init:</strong> Prevents re-IDing and duplicate listeners.</li>
+                    <li><strong>Delegated Events:</strong> 2 listener per component; no N×M explosion with nesting.</li>
+                    <li><strong>DOM Distance Cache:</strong> Resolves closest targets efficiently inside component.</li>
+                    <li><strong>Idempotent Init:</strong> Prevents re-binding and duplicate listeners.</li>
                     </ol>
                     <h3>Practical Tips</h3>
                     <ul>
@@ -1759,7 +1771,7 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
 
 <pre class="hljs">
 <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;module&quot;</span>&gt;</span><span class="language-javascript"><span class="hljs-comment">// If class is not already in window.YEH</span>
-<span class="hljs-keyword">import</span> {<span class="hljs-title class_">YEH</span>} <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;https://cdn.jsdelivr.net/npm/ypsilon-event-handler@1.8.3/+esm&#x27;</span>
+<span class="hljs-keyword">import</span> {<span class="hljs-title class_">YEH</span>} <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;https://cdn.jsdelivr.net/npm/@yaijs/yeh@1.0/+esm&#x27;</span>
 
 <span class="hljs-keyword">class</span> <span class="hljs-title class_">YourHandler</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_ inherited__">YEH</span> {
     <span class="hljs-comment">// Add EventListeners (YEH)</span>
@@ -1939,7 +1951,7 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
                                                                         data-behavior="slide-down"
                                                                         data-nav="top"
                                                                         data-color-scheme="light"
-                                                                        data-ref-path="s-light">
+                                                                        data-ref-path="y-s-light">
                                                                         <nav data-controller>
                                                                             <button data-tab-action="open" data-open="1">Level 5: Light Scheme</button>
                                                                         </nav>
@@ -2117,26 +2129,61 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
 
 <footer>
     <nav>
-        <a href="https://github.com/yaijs/yeh">YEH on GitHub</a>
+        <a href="https://github.com/yaijs/yai">YAI</a>
+        <small class="ycon ycon-katakana-letter ycon-xs ycon-is-left ycon-is-right"></small>
+        <a href="https://github.com/yaijs/yeh">YEH</a>
     </nav>
     <p><b>© <span title="DOM pun intended">Claude Van DOM</span> &amp; Engin Ypsilon</b></p>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@yaijs/yeh"></script>
-<script src="../auto-switch.js"></script>
+<script src="../utils/yai-viewport.js"></script>
+<script src="../utils/auto-switch.js"></script>
 <script src="../yai-core.js"></script>
 <script src="yai-tabs.js"></script>
 
 <script>
     /**
+     * Viewport tracker
+     */
+    const yViewport = new YaiViewport({
+        throttle: {
+            resize: 1000,
+            scroll: 150,
+        },
+        threshold: {
+            pageTop: 50,
+            pageEnd: 150,
+            pageScrolled: 50,
+            elementVisible: -100,
+            elementHidden: 50,
+            elementLeaving: -150,
+            elementLeft: 50,
+        },
+        set: {
+            selector: {
+                trackDistance: null,
+                isVisibleAttr: null,
+                isVisibleClass: 'yvp-is-visible',
+                pageTop: 'yvp-is-top',
+                pageEnd: 'yvp-is-page-end',
+                pageScrolled: 'yvp-is-scrolled',
+                isLeavingClass: 'yvp-is-leaving',
+                hasBeenVisibleClass: 'yvp-was-visible'
+            }
+        },
+    }).track('.box, .section');
+
+    /**
      * Init YaiTabs
      */
     const tabs = new YaiTabs({
         closable: true,
-        openDefault: 50,
+        openDefault: null,
         autoAccessibility: true,
-        autoFocus: true,
+        autoFocus: false,
         autoDisambiguate: true,
+        lazyNestedComponents: true,
         events: {
             enableStats: false,
             autoTargetResolution: true,
@@ -2223,9 +2270,6 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
         constructor() {
             super({
                 body: ['click', 'change'],
-                document: [{
-                    type: `${tabs.config.dispatchName}.tabReady`,
-                    handler: 'onTabReady' }],
             }, {}, {
                 autoTargetResolution: true,
                 enableConfigValidation:  false,
@@ -2246,14 +2290,14 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
                 this.behaviorSelect.value = this.initBehavior
             }
 
+            this.on(`${tabs.config.dispatchName}.tabReady`, 'onTabReady');
+
             this.countComponents();
             this.watchUrl();
         }
 
-        // this.on(`${tabs.config.dispatchName}.tabReady`, 'onTabReady');
         onTabReady(event) {
             const eventDetail = event.detail;
-            // console.log(eventDetail)
         }
 
         /**
@@ -2302,57 +2346,45 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
                 const getTarget = document.getElementById(scrollto);
                 if (getTarget) {
                     window.history.replaceState({}, document.title, `${location.origin}${location.pathname}`);
-                    document.documentElement.style.scrollBehavior = 'instant';
-                    getTarget.scrollIntoView({ behavior: 'instant', block: 'nearest' });
+                    getTarget.scrollIntoView({ behavior: 'auto', block: 'nearest' });
                 }
             }
         }
 
         refPathProcess(target, event, parentContainer) {
             event.preventDefault();
-            event.stopPropagation();
 
-            const url = new URL(target.href);
-            const hash = url.hash;
             const getFirstRefPath = target.dataset.refPathFirst;
+            const newHash = target.href.split('#')?.[1];
+            const params = new URLSearchParams(newHash);
+            const parsedParams = Object.fromEntries(params);
 
             // Close all active tabs by simulating clicks (triggers proper closeTab behavior)
-            const allActiveTabs = document.querySelectorAll('[data-yai-tabs][data-ref-path] [data-open].active');
+            let allActiveTabs = document.querySelectorAll('[data-yai-tabs][data-ref-path] [data-open].active');
 
-            allActiveTabs.forEach(activeTab => {
-                // Simulate click to trigger proper tab closing with all animations/cleanup
-                activeTab.click();
+            if (allActiveTabs.length) {
+                allActiveTabs = [...allActiveTabs].reverse();
+                allActiveTabs.forEach(activeTab => { activeTab.click() });
+            }
+
+            Object.keys(parsedParams).forEach((key, index) => {
+                const value = parsedParams[key];
+                const targetTab = parentContainer.querySelector(`[data-ref-path="${key}"]>[data-controller] [data-original-id="${value}"]`);
+                if (targetTab) {
+                    targetTab.click();
+                }
             });
 
-            // Small delay to let close animations start, then update hash
-            setTimeout(() => {
-                if (hash && hash !== window.location.hash) {
-                    window.location.hash = hash;
-                }
-
+            if (typeof target.dataset.scrollTo !== 'undefined') {
                 // Scroll to first ref after tabs open
                 if (getFirstRefPath) {
                     setTimeout(() => {
                         const getFirstRef = parentContainer.querySelector(`[data-ref-path="${getFirstRefPath}"]`);
                         if (getFirstRef) {
-                            getFirstRef.scrollIntoView({ behavior: 'auto', block: 'nearest' });
+                            getFirstRef.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'center' });
                         }
                     }, 50);
                 }
-            }, 100); // Let close animations start before opening new tabs
-        }
-
-        /**
-         * Toggle CSS Variable Fallback Mode
-         */
-        toggleFallbackMode(target, event) {
-            const body = document.body;
-            const isChecked = target.checked;
-
-            if (isChecked) {
-                body.classList.add('yai-fallback-mode');
-            } else {
-                body.classList.remove('yai-fallback-mode');
             }
         }
 
@@ -2445,18 +2477,43 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
                     targetEl.textContent = components.length;
                     setTimeout(() => { targetEl.classList.add('y-fade-in') }, 10);
                     if (consoleLog.checked) {
-                        console.log(components)
+                        const params = new URLSearchParams(location.hash.substring(1));
+                        const elements = {
+                            components,
+                            tabButtons: document.querySelectorAll('[data-yai-tabs] [data-controller] button[data-open]'),
+                            tabContents: document.querySelectorAll('[data-yai-tabs] [data-content] [data-tab]'),
+                            activeComponents: document.querySelectorAll('[data-yai-tabs].tab-active'),
+                            activeButtons: document.querySelectorAll('[data-yai-tabs] [data-controller] button[data-open].active'),
+                            activeContents: document.querySelectorAll('[data-yai-tabs] [data-content] [data-tab].active'),
+                        }
+                        console.log({
+                            elements,
+                            count: {
+                                components: elements.components.length,
+                                tabButtons: elements.tabButtons.length,
+                                tabContents: elements.tabContents.length,
+                                activeComponents: elements.activeComponents.length,
+                                activeButtons: elements.activeButtons.length,
+                                activeContents: elements.activeContents.length,
+                            },
+                            misc: {
+                                hash: Object.fromEntries(params),
+                            }
+                        })
                     }
                 });
             }
         }
 
         toggleBodyMaxWidth(target, event) {
-            if (target.checked) {
-                document.body.classList.add('y-max-width');
-            } else {
-                document.body.classList.remove('y-max-width');
-            }
+            const toggleFn = target.checked ? 'add' : 'remove';
+            document.body.classList[toggleFn]('y-max-width');
+        }
+
+        // Toggle CSS Variable Fallback Mode
+        toggleFallbackMode(target, event) {
+            const toggleFn = target.checked ? 'add' : 'remove';
+            document.body.classList[toggleFn]('yai-fallback-mode');
         }
 
         removeParent(target, event, parentNode) {

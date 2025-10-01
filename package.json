@@ -8,14 +8,14 @@
     ".": "./yai-core.js",
     "./core": "./yai-core.js",
     "./tabs": "./tabs/yai-tabs.js",
-    "./autoswitch": "./auto-switch.js"
+    "./autoswitch": "./utils/auto-switch.js",
+    "./viewport": "./utils/yai-viewport.js"
   },
   "files": [
     "yai-core.js",
     "yai-core.d.ts",
-    "auto-switch.js",
-    "auto-switch.d.ts",
-    "tabs/"
+    "tabs/",
+    "utils/"
   ],
   "scripts": {
     "test": "echo \"No build pipeline required - use browser-based validation with Example.html files\"",
@@ -38,7 +38,8 @@
     "framework-agnostic",
     "dom-scoping",
     "event-handling",
-    "enterprise"
+    "enterprise",
+    "viewport"
   ],
   "author": {
     "name": "yaijs",

@@ -531,6 +531,7 @@ div[data-content].yai-loading::after {
     opacity: 1;
     pointer-events: all;
     background: var(--yai-bg);
+    transform: none;
 }
 .yai-fallback-mode [data-yai-tabs]:not(.tab-active) [data-content]:before,
 .yai-fallback-mode [data-yai-tabs] [data-content]:before {

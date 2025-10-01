@@ -10,20 +10,22 @@
  */
 class YaiCore {
     constructor(customConfig = {}) {
-        /**
-         * Shared configuration with sensible defaults
-         */
+        // Shared configuration with sensible defaults
         const baseConfig = this.getDefaultConfig();
 
-        // Merge base emitable events with any custom emitable events
-        if (customConfig.emitable) {
-            customConfig.emitable = { ...YaiCore.getBaseEmitableEvents(), ...customConfig.emitable };
-        } else {
-            // Ensure base config gets base events if no custom emitable provided
-            baseConfig.emitable = YaiCore.getBaseEmitableEvents();
-        }
+        this.config = { ...baseConfig };
 
-        this.config = this.deepMerge(baseConfig, customConfig);
+        this._safeShallowMerge(this.config, customConfig);
+
+        // Handle emitable events with safety
+        if (customConfig.emitable && typeof customConfig.emitable === 'object') {
+            this.config.emitable = {
+                ...YaiCore.getBaseEmitableEvents(),
+                ...this._safeCopyConfig(customConfig.emitable)
+            };
+        } else {
+            this.config.emitable = YaiCore.getBaseEmitableEvents();
+        }
 
         this.getUserPreferences();
 
@@ -80,6 +82,7 @@ class YaiCore {
                 autoTargetResolution: true,
                 enableDistanceCache: false,
                 actionableAttributes: ['data-yai'],
+                actionableClasses: [],
                 actionableTags: [],
             },
 
@@ -128,6 +131,39 @@ class YaiCore {
     }
 
     /**
+     * Static base emitable events - consistent across all Yai components
+     * These are non-overridable core events that every component should have
+     */
+    static getBaseEmitableEvents() {
+        return {
+            // Lifecycle events
+            beforeInit: 'beforeInit',
+            afterInit: 'afterInit',
+            beforeDestroy: 'beforeDestroy',
+            afterDestroy: 'afterDestroy',
+
+            // State events
+            processingStart: 'processingStart',
+            processingEnd: 'processingEnd',
+            stateChange: 'stateChange',
+
+            // Content events
+            contentLoaded: 'contentLoaded',
+            contentError: 'contentError',
+
+            // User interaction events
+            change: 'change',
+            open: 'open',
+            close: 'close',
+
+            // System events
+            error: 'error',
+            notification: 'notification',
+            alert: 'alert',
+        };
+    }
+
+    /**
      * Factory method to create YpsilonEventHandler with component-specific config
      * @param {Object} selectors - Event listener selectors
      * @param {Object} aliases - Event method aliases
@@ -161,6 +197,22 @@ class YaiCore {
     }
 
     /**
+     * Safe shallow merge without prototype pollution risk
+     */
+    _safeShallowMerge(target, source) {
+        if (!source || typeof source !== 'object') return;
+
+        for (const key in source) {
+            if (Object.prototype.hasOwnProperty.call(source, key) &&
+                key !== '__proto__' &&
+                key !== 'constructor' &&
+                key !== 'prototype') {
+                target[key] = source[key];
+            }
+        }
+    }
+
+    /**
      * Deep merge utility for configuration objects
      */
     deepMerge(target, source) {
@@ -171,14 +223,86 @@ class YaiCore {
      * Static deep merge utility for configuration objects
      */
     static deepMerge(target, source) {
-        for (const key in source) {
-            if (source[key] instanceof Object && !Array.isArray(source[key])) {
-                target[key] = YaiCore.deepMerge(target[key] || {}, source[key]);
-            } else {
-                target[key] = source[key];
+        // Handle null/undefined sources
+        if (source == null || typeof source !== 'object') {
+            return target;
+        }
+
+        // Always start with a fresh object or use existing target
+        const result = target && typeof target === 'object' ? Object.create(null) : {};
+
+        // Copy target properties safely if target is an object
+        if (target && typeof target === 'object') {
+            for (const key in target) {
+                if (Object.prototype.hasOwnProperty.call(target, key) &&
+                    key !== '__proto__' &&
+                    key !== 'constructor' &&
+                    key !== 'prototype') {
+                    result[key] = target[key];
+                }
             }
         }
-        return target;
+
+        // Merge source properties safely
+        for (const key in source) {
+            // Skip dangerous keys and prototype properties
+            if (!Object.prototype.hasOwnProperty.call(source, key) ||
+                key === '__proto__' ||
+                key === 'constructor' ||
+                key === 'prototype') {
+                continue;
+            }
+
+            const sourceVal = source[key];
+            const targetVal = result[key];
+
+            // Only merge if both values are plain objects (not arrays, not null)
+            if (sourceVal && typeof sourceVal === 'object' &&
+                !Array.isArray(sourceVal) &&
+                targetVal && typeof targetVal === 'object' &&
+                !Array.isArray(targetVal)) {
+                // Recursive merge for objects
+                result[key] = YaiCore.deepMerge(targetVal, sourceVal);
+            } else {
+                result[key] = sourceVal;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Create a safe copy of configuration by removing prototype pollution vectors
+     * @param {Object} config - Configuration object to sanitize
+     * @returns {Object} - Safe configuration copy
+     */
+    _safeCopyConfig(config) {
+        if (!config || typeof config !== 'object' || Array.isArray(config)) {
+            return {};
+        }
+
+        const safeConfig = Object.create(null);
+
+        for (const key in config) {
+            // Skip prototype properties and dangerous keys
+            if (!Object.prototype.hasOwnProperty.call(config, key) ||
+                key === '__proto__' ||
+                key === 'constructor' ||
+                key === 'prototype') {
+                continue;
+            }
+
+            const value = config[key];
+
+            // Recursively sanitize nested objects (but avoid circular references)
+            if (value && typeof value === 'object' && !Array.isArray(value)) {
+                safeConfig[key] = this._safeCopyConfig(value);
+            } else {
+                safeConfig[key] = value;
+            }
+        }
+
+        return safeConfig;
     }
 
     /**
@@ -186,39 +310,6 @@ class YaiCore {
      */
     static generateId(prefix = 'yai') {
         return `${prefix}-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
-    }
-
-    /**
-     * Static base emitable events - consistent across all Yai components
-     * These are non-overridable core events that every component should have
-     */
-    static getBaseEmitableEvents() {
-        return {
-            // Lifecycle events
-            beforeInit: 'beforeInit',
-            afterInit: 'afterInit',
-            beforeDestroy: 'beforeDestroy',
-            afterDestroy: 'afterDestroy',
-
-            // State events
-            processingStart: 'processingStart',
-            processingEnd: 'processingEnd',
-            stateChange: 'stateChange',
-
-            // Content events
-            contentLoaded: 'contentLoaded',
-            contentError: 'contentError',
-
-            // User interaction events
-            change: 'change',
-            open: 'open',
-            close: 'close',
-
-            // System events
-            error: 'error',
-            notification: 'notification',
-            alert: 'alert',
-        };
     }
 
     /**
@@ -762,28 +853,36 @@ class YaiCore {
         // Trim whitespace and normalize
         url = url.trim();
 
-        // Block obviously malicious patterns (data: and javascript: schemes)
-        if (url.match(/^(data|javascript):/i)) {
+        // Block dangerous URL schemes using the same logic as _isDangerousUrl
+        if (this._isDangerousUrl(url)) {
             console.warn(`${this.config.dispatchName}: Blocked potentially dangerous URL scheme:`, url);
             return false;
         }
 
-        // Block URLs with suspicious characters that might indicate injection attempts
-        if (url.match(/[<>'"]/)) {
-            console.warn(`${this.config.dispatchName}: Blocked URL containing suspicious characters:`, url);
-            return false;
-        }
-
-        // Allow relative paths (most common use case)
-        if (!url.match(/^https?:/i)) {
+        // Allow relative paths and absolute URLs with safe schemes
+        if (url.startsWith('/') || url.startsWith('./') || url.startsWith('../') ||
+            url.startsWith('#') || url.startsWith('?')) {
             return true;
         }
 
-        // For absolute URLs, basic validation
+        // For absolute URLs, validate properly
         try {
-            new URL(url);
+            const parsedUrl = new URL(url);
+
+            // Only allow http, https, and relative protocols
+            if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+                console.warn(`${this.config.dispatchName}: Unsupported URL protocol:`, parsedUrl.protocol);
+                return false;
+            }
+
             return true;
         } catch (e) {
+            // If URL parsing fails, it might be a relative URL
+            // Do additional checks for relative URLs
+            if (!url.includes('://') && !url.includes(' ')) {
+                return true;
+            }
+
             console.warn(`${this.config.dispatchName}: Invalid URL format:`, url);
             return false;
         }
@@ -824,25 +923,96 @@ class YaiCore {
         allElements.forEach(el => {
             // Remove all on* event attributes
             Array.from(el.attributes).forEach(attr => {
-                if (attr.name.startsWith('on')) {
+                if (attr.name.startsWith('on') && attr.name.length > 2) {
                     el.removeAttribute(attr.name);
                 }
             });
 
-            // Remove javascript: hrefs
-            if (el.hasAttribute('href') && el.getAttribute('href').trim().toLowerCase().startsWith('javascript:')) {
-                el.removeAttribute('href');
-            }
-
-            // Remove javascript: in other attributes
-            ['src', 'action', 'formaction'].forEach(attr => {
-                if (el.hasAttribute(attr) && el.getAttribute(attr).trim().toLowerCase().startsWith('javascript:')) {
-                    el.removeAttribute(attr);
-                }
-            });
+            // Remove dangerous URLs from href and other attributes
+            this._removeDangerousUrls(el);
         });
 
         return temp.innerHTML;
+    }
+
+    /**
+     * Check if a URL is dangerous
+     * @param {string} url - URL to check
+     * @returns {boolean} - True if dangerous
+     */
+    _isDangerousUrl(url) {
+        if (!url || typeof url !== 'string') {
+            return false;
+        }
+
+        const trimmedUrl = url.trim().toLowerCase();
+
+        // List of dangerous URL schemes
+        const dangerousSchemes = [
+            'javascript:',
+            'vbscript:',
+            'data:',
+            'file:',
+            'jar:',
+            'livescript:',
+            'mocha:',
+            'feed:',
+            'about:'
+        ];
+
+        // Check for dangerous schemes
+        if (dangerousSchemes.some(scheme => trimmedUrl.startsWith(scheme))) {
+            return true;
+        }
+
+        // Additional check for data: URLs that contain scripts
+        if (trimmedUrl.startsWith('data:')) {
+            // Block data URLs that might contain scripts or HTML
+            const dangerousDataPattern = /^data:(?:text\/(?:javascript|html|xml)|application\/(?:x-javascript|xml|xhtml\+xml|json)|image\/svg\+xml)/i;
+            if (dangerousDataPattern.test(trimmedUrl)) {
+                return true;
+            }
+
+            // Also block base64 encoded data URLs that could be dangerous
+            if (trimmedUrl.includes('base64') && trimmedUrl.length > 1000) {
+                return true; // Very long base64 data URLs might be suspicious
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Remove dangerous URLs from an element's attributes
+     * @param {Element} el - DOM element to sanitize
+     */
+    _removeDangerousUrls(el) {
+        const urlAttributes = ['href', 'src', 'action', 'formaction', 'background', 'poster', 'cite', 'data', 'codebase', 'profile'];
+
+        urlAttributes.forEach(attr => {
+            if (el.hasAttribute(attr)) {
+                const url = el.getAttribute(attr);
+                if (this._isDangerousUrl(url)) {
+                    el.removeAttribute(attr);
+                }
+            }
+        });
+
+        // Special handling for form attributes
+        if (el.tagName.toLowerCase() === 'form') {
+            const action = el.getAttribute('action');
+            if (this._isDangerousUrl(action)) {
+                el.setAttribute('action', '#'); // Safe fallback
+            }
+        }
+
+        // Special handling for object/embed tags
+        if (['object', 'embed', 'applet'].includes(el.tagName.toLowerCase())) {
+            const data = el.getAttribute('data');
+            if (this._isDangerousUrl(data)) {
+                el.removeAttribute('data');
+            }
+        }
     }
 
     /**

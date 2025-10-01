@@ -6,8 +6,9 @@
 <div class="architecture-visual">
     <h3>📊 Current Architecture Overview</h3>
     <div class="visual">
-        <div class="level">Document (12 Total Event Listeners)</div>
+        <div class="level">Document (10 Total Event Listeners)</div>
         <div class="level">→ 3 Root Tab Components (6 listeners)</div>
+        <div class="level">→ 4 Remaining listeners are handling this Example Page</div>
         <div class="level">→ → Dynamic Tab Component <span class="current">(You are here - using existing listeners)</span></div>
         <div class="level">→ → → Next Level (Click "Try Ynfiniti" to "Load More Tabs")</div>
     </div>
@@ -37,7 +38,7 @@
                 <h3>Initialization Workflow</h3>
                 <ol class="mb-0">
                     <li>Page loads with <code>[data-yai-tabs]</code> components</li>
-                    <li>If <code>autoDisambiguate: true</code>, nested components are marked as lazy</li>
+                    <li>If <code>autoDisambiguate: true</code>, makes identical data-open/data-tab values unique</li>
                     <li>Root components receive event listeners (click + keydown per component)</li>
                     <li>Dynamic content uses existing listeners - no re-initialization needed</li>
                 </ol>
@@ -49,7 +50,7 @@
 
             <div class="performance-comparison">
                 <div class="comparison-item">
-                    <h4>Traditional Approach</h4>
+                    <h3>Traditional Approach</h3>
                     <ul>
                         <li>Each component needs its own listener</li>
                         <li>Memory usage grows with component count</li>
@@ -60,52 +61,43 @@
                 </div>
 
                 <div class="comparison-item highlight">
-                    <h4>YaiTabs Approach</h4>
+                    <h3>YaiTabs Approach</h3>
                     <ul>
                         <li><strong>Single listener handles all components</strong></li>
                         <li><strong>Constant memory usage</strong> (only 2 listeners per root component)</li>
                         <li><strong>No initialization needed</strong> for dynamic content</li>
-                        <li><strong>Automatic cleanup through DOM scoping</strong> only root components have listeners (In this Example, we have 2 root components)</li>
+                        <li><strong>Automatic cleanup through DOM scoping</strong> only root components have listeners (In this Example, we have 3 root components)</li>
                         <li><strong>O(1) scaling</strong> regardless of component count</li>
                     </ul>
                 </div>
             </div>
 
             <div class="benchmark">
-                <h4>Memory Usage Comparison</h4>
-                <div class="benchmark-visual">
-                    <div class="benchmark-bar traditional" style="width: 100%">
-                        <span>Traditional: 90% memory usage</span>
-                    </div>
-                    <div class="benchmark-bar yaitabs" style="width: 10%;min-width: 140px;">
-                        <span>YaiTabs: 10% memory usage</span>
-                    </div>
-                </div>
-                <p><em>Estimated memory usage for 100 tab components</em></p>
-
-                <hr>
-
                 <!-- Nested tab component -->
                 <div
                     data-yai-tabs
-                    data-behavior="fade"
+                    data-behavior="flip"
                     data-nav="top"
+                    data-color-scheme="blue"
                     style="margin-top:1rem">
                     <nav data-controller>
                         <button data-tab-action="open" data-open="1" data-default>Deep Nesting</button>
                     </nav>
                     <div data-content>
-                        <div data-tab="1">
-                            <h3>Deep Nesting Demo (copy&pasted)</h3>
-                            <p>Below we nest some top-nav with some other navs left and right.</p>
+                        <div data-tab="1" data-spaceless>
+                            <div class="yp-3">
+                                <h3>Deep Nesting Demo (copy&pasted)</h3>
+                                <p class="mb-0">Below we nest some top-nav with some other navs left and right.</p>
+                            </div>
 
                             <div
                                 data-yai-tabs
-                                data-behavior="fade"
-                                data-nav="top">
+                                data-behavior="flip"
+                                data-nav="top"
+                                data-color-scheme="dark">
 
                                 <nav data-controller data-grow>
-                                    <button data-tab-action="open" data-open="1">Animations</button>
+                                    <button data-tab-action="open" data-open="1" data-default>Animations</button>
                                     <button data-tab-action="open" data-open="2">URL State</button>
                                     <button data-tab-action="open" data-open="3">Reduced Motion</button>
                                 </nav>
@@ -113,26 +105,31 @@
                                 <div data-content>
                                     <!-- L2 TAB 1 -->
                                     <div data-tab="1">
-                                        <h4>Animations</h4>
-                                        <p>Switch between <code>fade</code>, <code>slide-*</code>, <code>zoom</code>, or <code>flip</code> via <code>data-behavior</code>. Keep transitions short (150–300ms) for snappy feel.</p>
-                                        <p class="mb-0"><small>For content that shifts layout, consider overflow gating to avoid jank.</small></p>
+                                        <div class="yp-1">
+                                            <h4>Animations</h4>
+                                            <p>Switch between <code>fade</code>, <code>slide-*</code>, <code>zoom</code>, or <code>flip</code> via <code>data-behavior</code>. Keep transitions short (150–300ms) for snappy feel.</p>
+                                            <p><small>For content that shifts layout, consider overflow gating to avoid jank.</small></p>
+                                        </div>
                                     </div>
 
                                     <!-- L2 TAB 2 -->
                                     <div data-tab="2">
-                                        <h4>URL State & Deep Links</h4>
-                                        <ul>
-                                            <li>Each container uses a unique <code>data-ref-path</code> key.</li>
-                                            <li>On open, the route map updates and writes to the hash.</li>
-                                            <li>On <code>hashchange</code>, containers reconcile their state (no loops: guarded writes).</li>
-                                        </ul>
-                                        <p><small>Use <code>data-history-mode="replace"</code> to keep Back-stack clean on frequent tabbing.</small></p>
+                                        <div class="yp-1">
+                                            <h4>URL State & Deep Links</h4>
+                                            <ul>
+                                                <li>Each container uses a unique <code>data-ref-path</code> key.</li>
+                                                <li>On open, the route map updates and writes to the hash.</li>
+                                                <li>On <code>hashchange</code>, containers reconcile their state (no loops: guarded writes).</li>
+                                            </ul>
+                                            <p><small>Use <code>data-history-mode="replace"</code> to keep Back-stack clean on frequent tabbing.</small></p>
+                                        </div>
 
                                         <!-- Nested level 3 -->
                                         <div
                                             data-yai-tabs
                                             data-behavior="fade"
-                                            data-nav="right">
+                                            data-nav="right"
+                                            data-color-scheme="light">
 
                                             <nav data-controller>
                                                 <button data-tab-action="open" data-open="1">API Basics</button>
@@ -150,7 +147,7 @@
                                                         <li><code>data-open</code> sets the target panel ID.</li>
                                                         <li><code>data-nav</code> controls nav position: <em>top/bottom/left/right</em>.</li>
                                                     </ul>
-                                                    <p class="mb-0"><small>Initialize only once per container; the component is idempotent by design.</small></p>
+                                                    <p><small>Initialize only once per container; the component is idempotent by design.</small></p>
                                                 </div>
 
                                                 <!-- L3 TAB 2 -->
@@ -162,7 +159,7 @@
                                                         <li>Optionally set <code>aria-live="polite"</code> for subtle SR announcements.</li>
                                                         <li>Re-run accessibility setup on nested content if it includes new tab containers.</li>
                                                     </ul>
-                                                    <p class="mb-0"><small>Consider caching for quick back-navigation.</small></p>
+                                                    <p><small>Consider caching for quick back-navigation.</small></p>
                                                 </div>
 
                                                 <!-- L3 TAB 3 -->
@@ -235,8 +232,6 @@ Your local CLS value of <span class="hljs-number">0.17</span> needs improvement.
 Worst cluster <span class="hljs-number">2</span> shifts Interaction to Next Paint (INP) <span class="hljs-number">1</span>,<span class="hljs-number">192</span> ms
 Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-number">192</span> ms is poor.</pre>
 
-                                                    <pre class="hljs mb-0">What? Poor? Over 300 interactions, <i>LEVEL 55</i>, who you call poor?</pre>
-
                                                 </div>
                                             </div>
                                         </div>
@@ -292,36 +287,9 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
                     <p class="note"><small>Demonstrates delay attributes: 500ms pre-fetch + 500ms post-fetch delay</small></p>
                 </div>
 
-                <div class="architecture-visual">
-                    <h4>📊 YaiTabs Listener Distribution</h4>
-                    <p class="visual-description">Total of 7 listeners handle all components, regardless of nesting depth</p>
-
-                    <div class="visual">
-                        <div class="level root">window: <b>1 listener</b> (hashchange)</div>
-
-                        <div class="level branch">
-                            <div class="level">body.example-init: <b>2 listeners</b> (click, change)</div>
-
-                            <div class="level branch">
-                                <div class="level">div#demo-tabs.tab-active: <b>2 listeners</b> (click, keydown)</div>
-                                <div class="level">div#yai-tabs-container-1757822036946-3j1vi9f29: <b>2 listeners</b> (click, keydown)</div>
-                            </div>
-                        </div>
-
-                        <div class="level footer">
-                            <hr>
-                            <div class="stats">
-                                <span>📊 Total Elements with Listeners: <b>4</b></span>
-                                <span>🔥 Total Event Listeners: <b>7</b></span>
-                                <span>📈 Average per Element: <b>1.75</b></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="architecture-note">
-                        <p>💡 <strong>Key Insight:</strong> Nested tab components require <strong>0 additional listeners</strong> -
-                        they reuse the existing root component listeners through YpsilonEventHandler's DOM event scoping system.</p>
-                    </div>
+                <div class="architecture-note">
+                    <p>💡 <strong>Key Insight:</strong> Nested tab components require <strong>0 additional listeners</strong> -
+                    they reuse the existing root component listeners through YpsilonEventHandler's DOM event scoping system.</p>
                 </div>
             </div>
         </div>
@@ -331,7 +299,7 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
 
             <div class="config-options">
                 <div class="option-group">
-                    <h4>Core Configuration</h4>
+                    <h3>Core Configuration</h3>
                     <pre><code>const tabs = new YaiTabs({
   // Allow closing tabs
   <b>closable: true,</b>
@@ -347,7 +315,7 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
                 </div>
 
                 <div class="option-group">
-                    <h4>Lifecycle Hooks</h4>
+                    <h3>Lifecycle Hooks</h3>
                     <pre><code>// Hook system for custom loading behavior
 callbacks: {
   // When loading state should be applied
@@ -362,7 +330,7 @@ callbacks: {
                 </div>
 
                 <div class="option-group">
-                    <h4>Event Handling Options</h4>
+                    <h3>Event Handling Options</h3>
                     <pre><code>events: {
   <b>enableStats: true,</b>
   <b>autoTargetResolution: true,</b>
@@ -372,7 +340,7 @@ callbacks: {
                 </div>
 
                 <div class="option-group">
-                    <h4>HTML Delay Attributes</h4>
+                    <h3>HTML Delay Attributes</h3>
                     <pre><code>// Pre-fetch delay (before request)
 <b>data-delay="1000"</b>
 // Post-fetch delay (after content loads)
