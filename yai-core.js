@@ -13,7 +13,7 @@ class YaiCore {
         // Shared configuration with sensible defaults
         const baseConfig = this.getDefaultConfig();
 
-        this.config = { ...baseConfig };
+        this.config = baseConfig;
 
         this._safeShallowMerge(this.config, customConfig);
 
@@ -27,7 +27,7 @@ class YaiCore {
             this.config.emitable = YaiCore.getBaseEmitableEvents();
         }
 
-        this.getUserPreferences();
+        this.getUserPreferences = this.getUserPreferences();
 
         /**
          * Shared state management
@@ -81,7 +81,7 @@ class YaiCore {
             events: {
                 autoTargetResolution: true,
                 enableDistanceCache: false,
-                actionableAttributes: ['data-yai'],
+                actionableAttributes: ['data-yai-action'],
                 actionableClasses: [],
                 actionableTags: [],
             },
@@ -89,36 +89,17 @@ class YaiCore {
             // Dispatch
             dispatchName: 'yai.component',
 
-            // Standardized emitable events base
-            emitable: {
-                // Lifecycle events
-                beforeInit: 'beforeInit',
-                afterInit: 'afterInit',
-                beforeDestroy: 'beforeDestroy',
-                afterDestroy: 'afterDestroy',
-
-                // State events
-                processingStart: 'processingStart',
-                processingEnd: 'processingEnd',
-                stateChange: 'stateChange',
-
-                // Content events
-                contentLoaded: 'contentLoaded',
-                contentError: 'contentError',
-
-                // User interaction events
-                change: 'change',
-                open: 'open',
-                close: 'close',
-
-                // System events
-                error: 'error',
-                notification: 'notification',
-                alert: 'alert',
-            },
-
-            // Lifecycle callback hooks
-            callbacks: {
+            // Lifecycle callback hooks for eventListeners
+            callable: {
+                // Event bus, configurable listeners
+                // in tabs, where devs can hook in
+                eventClick: null,
+                eventKeydown: null,
+                eventInput: null,
+                eventChange: null,
+                eventSubmit: null,
+                eventBlur: null,
+                eventFocus: null,
                 // Essential hooks only
                 setLoading: null,       // When loading state should be applied
                 removeLoading: null,    // When loading state should be removed
@@ -126,6 +107,7 @@ class YaiCore {
                 sanitizeHtml: null,     // Custom HTML sanitization for dynamic content
                 contentReady: null,     // When content is ready for animation
                 afterLoad: null,        // After everything completes
+                tabClicked: null,       // When a tab button gets clicked
             },
         };
     }
@@ -141,26 +123,38 @@ class YaiCore {
             afterInit: 'afterInit',
             beforeDestroy: 'beforeDestroy',
             afterDestroy: 'afterDestroy',
-
             // State events
             processingStart: 'processingStart',
             processingEnd: 'processingEnd',
             stateChange: 'stateChange',
-
             // Content events
             contentLoaded: 'contentLoaded',
+            contentReady: 'contentReady',
             contentError: 'contentError',
-
+            loadingContent: 'loadingContent',
+            initializeNested: 'initializeNested',
+            lastActiveClosed: 'lastActiveClosed',
             // User interaction events
             change: 'change',
             open: 'open',
             close: 'close',
-
+            tabClicked: 'tabClicked',
+            hashChanged: 'hashChanged',
+            updatingHash: 'updatingHash',
+            usereventClick: 'usereventClick',
+            userClick: 'userClick',
+            userChange: 'userChange',
+            userInput: 'userInput',
+            userKeydown: 'userKeydown',
+            userFocus: 'userFocus',
+            userBlur: 'userBlur',
+            userSubmit: 'userSubmit',
             // System events
             error: 'error',
             notification: 'notification',
             alert: 'alert',
-        };
+            nested: "nested",
+        }
     }
 
     /**
@@ -173,26 +167,28 @@ class YaiCore {
     createEventHandler(selectors, aliases, options = {}) {
         const eventOptions = this.deepMerge(this.config.events, options);
 
-        // Create methods object with component methods
+        // Event type scoped
         const methods = {
-            click:      {      handleClick: (...args) => this.handleClick(...args) },
             keydown:    {    handleKeydown: (...args) => this.handleKeydown(...args) },
             hashchange: { handleHashchange: (...args) => this.handleHashchange(...args) },
+            submit:     {     handleSubmit: (...args) => this.handleEventProxy(...args) },
+            change:     {     handleChange: (...args) => this.handleEventProxy(...args) },
+            click:      {      handleClick: (...args) => this.handleEventProxy(...args) },
+            input:      {      handleInput: (...args) => this.handleEventProxy(...args) },
         };
 
         // Merge with any additional methods from options
         if (options.methods) {
-            this.deepMerge(methods, options.methods);
+            this._safeShallowMerge(methods, options.methods);
         }
 
         const finalOptions = {
-            ...eventOptions,
-            ...options,
-            methods: methods,
-            enableHandlerValidation: true
+            ...eventOptions, ...options,
+            methods: methods, enableHandlerValidation: true
         };
 
         this.events = new YEH(selectors, aliases, finalOptions);
+
         return this.events;
     }
 
@@ -458,15 +454,6 @@ class YaiCore {
         return this.events ? this.events.resolveMethodName(alias, eventType) : null;
     }
 
-    /**
-     * Event dispatch utility (legacy)
-     */
-    dispatch(eventName, data, target) {
-        if (this.events) {
-            this.events.dispatch(eventName, data, target || document);
-        }
-    }
-
     simulateClick(element) {
         this.constructor.simulateClickEvent(element);
     }
@@ -476,12 +463,20 @@ class YaiCore {
     }
 
     /**
+     * Event dispatch utility (legacy)
+     */
+    dispatch(eventName, data, target) {
+        if (this.events) {
+            this.events.dispatch(eventName, data, target || document);
+        }
+    }
+
+    /**
      * Standardized event emission with namespacing
      * @param {string} eventName - Event name from this.config.emitable
      * @param {Object} details - Event details/data
-     * @param {Element} target - Event target (default: document)
      */
-    yaiEmit(eventName, details = {}, target = document) {
+    yaiEmit(eventName, details = {}) {
         // Get the standardized event name
         const standardEventName = this.config.emitable[eventName];
 
@@ -492,9 +487,21 @@ class YaiCore {
 
         // Dispatch with YpsilonEventHandler
         if (this.events) {
+            if (!details.container) {
+                details.container = document
+            }
             // Create namespaced event name
             const namespacedEvent = `${this.config.dispatchName}.${standardEventName}`;
-            this.events.dispatch(namespacedEvent, details, target);
+            // Proxy handler
+            this.events.dispatch(namespacedEvent, details);
+        }
+    }
+
+    debounce(callback, timeout, key = 'debounced') {
+        if (this.events) {
+            this.events.debounce(() => callback(key), timeout, key).apply();
+        } else {
+            YEH.debounce(() => callback(), timeout, key).apply();
         }
     }
 
@@ -561,9 +568,12 @@ class YaiCore {
         for (const [refPath, tabId] of this.routeMap) {
             if (tabId) params.set(refPath, tabId);
         }
-
         const newHash = params.toString();
+
         if (newHash !== window.location.hash.slice(1)) {
+            this.yaiEmit('updatingHash', {
+                newHash, container: container && container.closest('[data-yai-tabs]')
+            });
             // Default: 'replace' for cleaner URL history
             const historyMode = container?.dataset.historyMode || 'replace';
 
@@ -585,6 +595,9 @@ class YaiCore {
                     window.location.hash = newHash;
                 }
             }
+        }
+        else {
+            window.location.hash = newHash;
         }
     }
 
@@ -636,6 +649,10 @@ class YaiCore {
 
         const content = this.find(targetSelector, container);
         if (!content) return;
+
+        this.yaiEmit('loadingContent', {
+            url, targetSelector, container, parentContainer: content.closest('[data-yai-tabs]')
+        });
 
         // Cancel any existing fetch for this container
         this._cancelFetch(container);
@@ -698,16 +715,13 @@ class YaiCore {
             // Initialize any nested YaiTabs components in the loaded content
             this._initializeNestedComponents(content);
 
-            // Reset content height after dynamic content settles
-            this._resetContentHeight(container);
-
             // Post-process the loaded content
             this._postProcessContent(content);
 
             // Execute contentReady hook (perfect timing for animations)
             this._executeHook('contentReady', { html, url, targetSelector, container, append, target, content });
 
-            // Remove loading state (always cleanup, regardless of view status)
+            // // Remove loading state (always cleanup, regardless of view status)
             this._executeHook('removeLoading', { container: content, isLoading: false, target });
 
             // Execute afterLoad hook
@@ -718,15 +732,14 @@ class YaiCore {
         }
         catch (error) {
             // Handle AbortError (request was cancelled)
-            if (error.name === 'AbortError') {
-                return; // Request was cancelled, don't show error
-            }
+            if (error.name === 'AbortError') return;
 
             console.warn('Failed to load content:', error);
-            this.createErrorMessage(content, this.config.errorPlaceholder);
+            const errorText = this.createErrorMessage(this.config.errorPlaceholder);
 
-            // Execute error cleanup hooks
-            this._executeHook('removeLoading', { container: content, isLoading: false, target, error });
+            content.innerHTML = `<div class="alert alert-danger yp-3">${errorText}</div>`;
+            content.classList.add('error-occurred');
+            content.classList.add('active');
 
             // Dispatch error event using standardized events
             this.yaiEmit('contentError', { url, targetSelector, container, error: error.message });
@@ -734,6 +747,12 @@ class YaiCore {
         finally {
             // Clear ARIA busy state
             content.setAttribute('aria-busy', 'false');
+
+            // Reset content height after dynamic content settles
+            this._resetContentHeight(container);
+
+            // Execute error cleanup hooks
+            this._executeHook('removeLoading', { container: content, isLoading: false, target });
 
             // Clean up fetch controller
             this._fetchControllers.delete(container);
@@ -743,14 +762,12 @@ class YaiCore {
     /**
      * Error message helper
      */
-    createErrorMessage(content, error) {
+    createErrorMessage(error) {
         // Escape error message to prevent injection
-        const errorText = String(error).replace(/[<>'"&]/g, (char) => {
+        return String(error).replace(/[<>'"&]/g, (char) => {
             const escapeMap = { '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '&': '&amp;' };
             return escapeMap[char];
         });
-        content.innerHTML = `<div class="alert alert-danger">${errorText}</div>`;
-        content.classList.add('error-occurred');
     }
 
     /**
@@ -781,8 +798,7 @@ class YaiCore {
             nestedContainer.setAttribute('data-yai-initialized', 'true');
 
             // Dispatch event to initialize nested component (legacy dispatch for cross-component communication)
-            this.dispatch('yai.tabs', {
-                type: 'initializeNested',
+            this.yaiEmit('initializeNested', {
                 container: nestedContainer,
                 parentContainer: content.closest('[data-yai-tabs]')
             });
@@ -811,7 +827,7 @@ class YaiCore {
      * @returns {*} Result from callback execution
      */
     _executeHook(hookName, context = {}) {
-        const callback = this.config.callbacks[hookName];
+        const callback = this.config.callable[hookName];
         if (typeof callback === 'function') {
             return callback.call(this, context, this);
         }
@@ -825,8 +841,8 @@ class YaiCore {
      * @returns {YaiCore} Returns this for chaining
      */
     hook(hookName, callback) {
-        if (this.config.callbacks.hasOwnProperty(hookName)) {
-            this.config.callbacks[hookName] = callback;
+        if (this.config.callable.hasOwnProperty(hookName)) {
+            this.config.callable[hookName] = callback;
         }
         return this;
     }
@@ -839,7 +855,7 @@ class YaiCore {
      */
     _validateUrl(url) {
         // Use custom validation callback if provided
-        const customValidator = this.config.callbacks.validateUrl;
+        const customValidator = this.config.callable.validateUrl;
         if (typeof customValidator === 'function') {
             return customValidator.call(this, url);
         }
@@ -897,7 +913,7 @@ class YaiCore {
      */
     _sanitizeHtml(html) {
         // Use custom sanitization callback if provided
-        const customSanitizer = this.config.callbacks.sanitizeHtml;
+        const customSanitizer = this.config.callable.sanitizeHtml;
         if (typeof customSanitizer === 'function') {
             return customSanitizer.call(this, html);
         }
@@ -1065,6 +1081,21 @@ class YaiCore {
     }
 
     /**
+     * Auto focus helper
+     */
+    static autoFocusContent(container, setFocus = true) {
+        if (setFocus) {
+            const activePanel = container.querySelector(':scope > div[data-content] > [data-tab].active');
+            if (activePanel) {
+                const firstFocusable = activePanel.querySelector('button, [href], input, select, textarea, [tabindex="0"]');
+                if (firstFocusable) {
+                    firstFocusable.focus({ preventScroll: true });
+                }
+            }
+        }
+    }
+
+    /**
      * Accessibility utilities
      */
     static _setupAccessibility(container, config = {}) {
@@ -1098,10 +1129,5 @@ class YaiCore {
     }
 }
 
-// Universal module definition (UMD)
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { YaiCore };
-    module.exports.default = YaiCore;
-} else if (typeof window !== 'undefined') {
-    window['YaiCore'] = YaiCore;
-}
+export {YaiCore};
+export default YaiCore;

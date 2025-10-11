@@ -1,468 +1,583 @@
-# YaiTabs - Tab Component with Nested Support
+# YaiTabs
 
-A tab component system that supports unlimited nesting, dynamic content loading, and URL-based routing. Built on YpsilonEventHandler's event delegation architecture.
+Enterprise-grade tab component with O(1) event scaling, unlimited nesting, and hash-based deep linking. Built on [YpsilonEventHandler](https://github.com/yaijs/yeh) architecture.
 
-## 🚀 Quick Start
+**🎯 More Than Tabs - It's an Event Bus!**
+YaiTabs doubles as a powerful application event bus. Add listeners for ANY event type (`click`, `input`, `change`, `submit`, etc.) and handle them through hooks - all with just 2 root listeners. Perfect for building complete SPAs within a single tab component.
+
+## Features
+
+**🚀 Performance**
+- O(1) listener scaling (2 listeners per root, 0 for nested)
+- Handles 70+ nested components without degradation
+- ~350KB memory footprint for deep hierarchies
+
+**🎯 Tab Component Capabilities**
+- Unlimited nesting depth
+- Hash-based URL routing with state preservation
+- Dynamic content loading with abort control
+- 8 animation behaviors + instant mode
+- Full ARIA/WCAG 2.1 AA compliance
+
+**⚡ Event Bus Superpowers**
+- Handle ANY event type within tab containers
+- Single event system for entire application
+- Built-in debouncing and throttling
+- Automatic container scoping
+- Works seamlessly with dynamic content
+
+**🎨 Customization**
+- CSS custom properties theming
+- Built-in color schemes (red, blue, light, dark)
+- Pre-built themes (default, minimal, pills)
+- Component-level scheme inheritance
+
+## Quick Start
 
 ```html
-<!-- Include dependencies -->
-<script src="https://cdn.jsdelivr.net/npm/@yaijs/yeh"></script>
-<script src="../yai-core.js"></script>
-<script src="yai-tabs.js"></script>
-<link rel="stylesheet" href="yai-tabs.css">
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="https://unpkg.com/@yaijs/core@1.0.0-beta.1/tabs/yai-tabs.css">
+</head>
+<body>
+    <div data-yai-tabs>
+        <nav data-controller>
+            <button data-tab-action="open" data-open="1">Tab 1</button>
+            <button data-tab-action="open" data-open="2">Tab 2</button>
+        </nav>
+        <div data-content>
+            <div data-tab="1">Content 1</div>
+            <div data-tab="2">Content 2</div>
+        </div>
+    </div>
 
-<!-- Basic tab component -->
-<div data-yai-tabs data-nav="top">
-  <nav data-controller>
-    <button data-tab-action="open" data-open="1" data-default>Tab 1</button>
-    <button data-tab-action="open" data-open="2">Tab 2</button>
-  </nav>
-  <div data-content>
-    <div data-tab="1">Content 1</div>
-    <div data-tab="2">Content 2</div>
-  </div>
-</div>
+    <!-- YaiJS -->
+    <script src="https://cdn.jsdelivr.net/npm/@yaijs/yeh"></script>
+    <script type="module" src="https://unpkg.com/@yaijs/core@1.0.0-beta.1/dist/yai-bundle.js"></script>
 
-<script>
-  const tabs = new YaiTabs();
-</script>
+    <script type="module">
+        const { YaiTabs } = window.YaiJS;
+
+        const tabs = new YaiTabs({
+            defaultBehavior: 'fade',
+            autoAccessibility: true
+        });
+    </script>
+</body>
+</html>
 ```
-
-## Core Features
-
-- **Nested tab support** - Tabs can contain other tab components without performance degradation
-- **Dynamic content loading** - Load tab content via fetch with loading states
-- **URL routing** - Deep link to nested tab states via hash parameters
-- **Themeable design** - CSS custom properties with built-in themes and color schemes
-- **Multiple animations** - 8 built-in animation behaviors plus instant mode
-- **Accessibility** - Full ARIA implementation with keyboard navigation
-- **Auto-disambiguation** - Optional feature to ensure unique IDs across nested components
 
 ## Architecture
 
 ### Event Delegation Hierarchy
 ```
-• YaiTabs (Root)           → 2 event listeners
-  ├─ YaiTabs (nested)      → 0 listeners (inherits)
-  │  ├─ YaiTabs (level 3)  → 0 listeners (inherits)
-  │  └─ Dynamic YaiTabs    → 0 listeners (inherits)
-  └─ YaiTabs (sibling)     → 0 listeners (inherits)
+Root Component      → 2 listeners (click, keydown)
+  ├─ Nested L2      → 0 listeners (inherits)
+  │  ├─ Nested L3   → 0 listeners (inherits)
+  │  └─ Dynamic     → 0 listeners (inherits)
+  └─ Sibling        → 0 listeners (inherits)
 ```
 
-All nested and dynamically added components utilize the root component's event listeners. Nested components are not "registered" as separate entities - they exist as DOM structures that respond to events delegated from their root ancestor. This allows dynamic HTML injection to work immediately without requiring component re-initialization, as the root listeners continue monitoring their entire DOM territory regardless of structural changes.
+**Key Benefits:**
+- Nested components inherit parent's event listeners
+- Dynamic content requires no re-initialization
+- Performance remains constant regardless of depth
+- Automatic cleanup on component removal
 
-### Event Handling
-- Uses 2 event listeners per root component (click + keydown)
-- Nested components inherit event handling from parent
-- Dynamic content requires no additional listeners
-- No cleanup needed, only root components are registered
-- Performance remains constant regardless of nesting depth
+### Lifecycle
 
-### Component Lifecycle
-1. Components with `[data-yai-tabs]` are detected on page load
-2. Root components initialize with event listeners
-3. Nested components are processed as lightweight delegates
-4. Dynamic content integrates with existing event structure
+1. **Page Load**: Components with `[data-yai-tabs]` detected
+2. **Initialization**: Root components setup event listeners
+3. **Nesting**: Nested components processed as delegates
+4. **Dynamic**: New content integrates automatically
 
-## 📋 Component Structure
+## HTML Structure
 
-### Container Attributes
+### Container
 ```html
-<div
-  data-yai-tabs
-  data-yai-tabs-lazy
-  data-theme="default"
-  data-color-scheme="red"
-  data-behavior="fade"
-  data-nav="top"
-  data-history-mode="replace"
-  data-ref-path="main-tabs"
->
+<div data-yai-tabs
+     data-theme="default"
+     data-color-scheme="dark"
+     data-color-accent="primary"
+     data-behavior="fade"
+     data-nav="top"
+     data-ref-path="main-tabs">
 ```
 
-| Attribute | Purpose | Values |
-|-----------|---------|--------|
-| `data-yai-tabs` | Marks as tab component | (required) |
-| `data-yai-tabs-lazy` | Alter initialization for nested tabs (use instead of `data-yai-tabs`) | (presence only) |
-| `data-theme` | Theme/look | `default` (or override) |
-| `data-color-scheme` | Color variant | `red`, `blue`, `light`, `dark`,  (or custom) |
-| `data-behavior` | Transition effect | `fade`, `slide-*`, `blur`, `zoom`, `flip`, `instant` |
-| `data-nav` | Navigation position | `top`, `right`, `bottom`, `left` |
-| `data-history-mode` | Browser history handling | `replace`, `push` |
-| `data-ref-path` | URL hash parameter key | Unique identifier |
+| Attribute | Values | Description |
+|-----------|--------|-------------|
+| `data-yai-tabs` | – | Required component marker |
+| `data-theme` | `default`, `minimal`, `pills` | Visual theme variant |
+| `data-color-scheme` | `light`, `dark` | Layout color scheme |
+| `data-color-accent` | `primary`, `secondary`, `success`, `warning`, `danger`, `funky`, `dark` | Button accent color |
+| `data-behavior` | `fade`, `slide-*`, `zoom`, `flip`, `instant` | Animation effect |
+| `data-nav` | `top`, `right`, `bottom`, `left` | Navigation position |
+| `data-ref-path` | string | Hash parameter key for routing |
 
-### Navigation Controller
+**Semantic Color System:**
+- `data-color-scheme` - Applies to entire layout (background, text, surfaces)
+- `data-color-accent` - Applies to active buttons only
+- Colors cascade to nested components but can be overridden per level
+
+### Navigation
 ```html
-<nav
-  data-controller
-  data-align="start"
-  data-grow
-  aria-label="Special Demo Tabs"
->
+<nav data-controller
+     data-align="center"
+     data-variant="success"
+     data-grow
+     aria-label="Main Tabs">
 ```
 
-| Attribute | Purpose | Values |
-|-----------|---------|--------|
-| `data-controller` | Marks navigation element | (required) |
-| `data-align` | Button alignment | `start`/`left`, `center`, `end`/`right` |
-| `data-grow` | Button width behavior | (presence enables flex-grow) |
-| `aria-label` | Accessibility label | Custom description |
+| Attribute | Values | Description |
+|-----------|--------|-------------|
+| `data-controller` | – | Required nav marker |
+| `data-align` | `start`, `center`, `end` | Button alignment |
+| `data-variant` | `primary`, `secondary`, `success`, `warning`, `danger`, `funky`, `dark` | Inverts color/background for active button |
+| `data-grow` | – | Enable flex-grow on buttons |
 
-### Tab Buttons
+### Buttons
 ```html
-<button
-  data-tab-action="open"
-  data-open="1"
-  data-default
-  data-delay="500"
-  data-post-delay="300"
-  data-min-loading="800"
-  data-url="dynamic/content.html"
-  data-url-refresh
-  data-restore-text="WILL_BE_RESTORED_AFTER_LOAD"
->
+<button data-tab-action="open"
+        data-open="1"
+        data-default
+        data-url="/content.html"
+        data-url-refresh
+        data-delay="500"
+        data-min-loading="800">
 ```
 
-| Attribute | Purpose | Values |
-|-----------|---------|--------|
-| `data-tab-action` | Button action type | `open` (required) |
-| `data-open` | Target panel ID | Matches `data-tab` value |
-| `data-default` | Initial active tab | (presence only) |
-| `data-delay` | Pre-fetch delay | Milliseconds (before request starts) |
-| `data-post-delay` | Post-fetch delay | Milliseconds (after content loads) |
-| `data-min-loading` | Minimum loading time | Milliseconds (prevents flicker) |
-| `data-url` | Dynamic content URL | Relative/absolute path |
-| `data-url-refresh` | Always reload content | (presence only) |
-| `data-restore-text` | Text to restore after loading | String value restored to button |
+| Attribute | Values | Description |
+|-----------|--------|-------------|
+| `data-tab-action` | `open` | Required action type |
+| `data-open` | string/number | Target panel ID |
+| `data-default` | – | Initially active tab |
+| `data-url` | URL | Dynamic content source |
+| `data-url-refresh` | – | Always reload content |
+| `data-delay` | ms | Pre-fetch delay |
+| `data-min-loading` | ms | Minimum loading duration |
 
-#### Dynamic Content Loading Features
-
-**Text Restoration**: The `data-restore-text` attribute preserves the original button text during loading operations:
-
-```html
-<!-- Before loading: button shows "Load Content" -->
-<button
-  data-tab-action="open"
-  data-open="dynamic"
-  data-url="content.html"
-  data-restore-text="Load Content">
-  Load Content
-</button>
-
-<!-- During loading: text may change to "Loading..." -->
-<!-- After loading: automatically restored to "Load Content" -->
-```
-
-**Loading Delay Control**:
-- `data-delay="500"` - Wait 500ms before starting fetch request
-- `data-post-delay="300"` - Wait 300ms after content loads before display
-- `data-min-loading="800"` - Show loading state for minimum 800ms (prevents flicker)
-
-### Content Panel
+### Content
 ```html
 <div data-content>
-  <div data-tab="1" data-spaceless>
-    <!-- Content -->
-  </div>
+    <div data-tab="1" data-spaceless>
+        <!-- Panel content -->
+    </div>
 </div>
 ```
 
-| Attribute | Purpose | Values |
-|-----------|---------|--------|
-| `data-content` | Content wrapper | (required) |
-| `data-tab` | Panel identifier | Matches `data-open` value |
-| `data-spaceless` | Remove default padding | (presence only) |
+| Attribute | Values | Description |
+|-----------|--------|-------------|
+| `data-content` | – | Required wrapper |
+| `data-tab` | string/number | Panel ID (matches `data-open`) |
+| `data-spaceless` | – | Remove default padding |
 
-## ⚙️ Configuration Options
+## Configuration
 
 ```js
 const tabs = new YaiTabs({
-  closable: true,           // Allow closing tabs
-  openDefault: null,        // Default tab index if none specified
-  defaultBehavior: 'fade',  // Default animation behavior
-  autoFocus: false,         // Auto-focus first tab
-  autoAccessibility: true,  // Automatic ARIA attributes
-  autoDisambiguate: false,  // Ensures unique IDs across nested components
+    // Core options
+    closable: true,              // Allow closing active tabs
+    defaultBehavior: 'fade',     // Default animation
+    autoFocus: false,            // Focus first tab on init
+    autoAccessibility: true,     // Automatic ARIA attributes
+    autoDisambiguate: false,     // Ensure unique IDs across components
+    lazyNestedComponents: true,  // Optimize nested initialization
 
-  events: {
-    enableStats: false,
-    autoTargetResolution: true,
-    actionableAttributes: ['data-tab-action'],
-    actionableClasses: [],
-    actionableTags: [],
-  }
+    // Event system configuration
+    events: {
+        setListener: {
+            window: [
+                // Required for hash routing
+                { type: 'hashchange', debounce: 500 }
+            ],
+            // Each root component will get following listeners
+            // Nested components will use this listeners, too.
+            '[data-yai-tabs]': [
+                'click',
+                'keydown',
+                { type: 'change', debounce: 300 },
+                { type: 'input', debounce: 500 },
+                { type: 'submit' }
+            ]
+        },
+        actionableAttributes: [
+            'data-tab-action',
+            'data-click',
+            'data-input',
+            'data-change',
+            'data-submit'
+        ],
+        // Custom event methods, optionally scopable
+        methods: {
+            submit: {
+                handleSubmit(event, target, container) {
+                    tabs._executeHook(`eventSubmit`, { event, target, container });
+                },
+            },
+        }
+    }
 });
 ```
 
-## 🔧 Lifecycle Hooks
+## Lifecycle Hooks
 
 ```js
-// Available callback hooks
-this.config = {
-  callbacks: {
-    setLoading: null,     // When loading state should be applied
-    removeLoading: null,  // When loading state should be removed
-    contentReady: null,   // When content is ready for animation
-    afterLoad: null,      // After everything completes
-  },
-}
+// Loading states
+tabs.hook('setLoading', ({ container, target }) => {
+    target.textContent = 'Loading...';
+});
 
-// Usage example
-this.hook('setLoading', ({ container, isLoading, target }) => {
-  // Custom loading implementation
+tabs.hook('removeLoading', ({ container, target }) => {
+    target.textContent = 'Done';
+});
+
+// Content lifecycle
+tabs.hook('contentReady', ({ content, target, url }) => {
+    // Perfect timing for animations
+});
+
+tabs.hook('afterLoad', ({ content, url }) => {
+    // After all processing complete
+});
+
+tabs.hook('eventSubmit', ({ content, url }) => {
+    // After submit
 });
 ```
 
-## 🎨 CSS Customization
+## Event Bus System
 
-YaiTabs uses CSS custom properties for theming:
+**The Game Changer:** YaiTabs is also a complete application event bus!
+
+Add listeners for any event type and handle them through hooks. All events are scoped to their container and work seamlessly with nested tabs and dynamic content.
+
+**Default Events** (built-in handlers): `click`, `keydown`, `change`, `input`, `submit`
+
+**Custom Events**: Any additional event type requires a custom handler in `events.methods`.
+
+### Setup
+
+```js
+const tabs = new YaiTabs({
+    events: {
+        setListener: {
+            window: [
+                { type: 'hashchange', debounce: 500 }  // Hash routing (internal)
+            ],
+            '[data-yai-tabs]': [
+                'click',                                // Tab navigation + app clicks
+                'keydown',                              // Tab keyboard navigation + shortcuts
+                { type: 'focus', options: { capture: true } },   // Field activation
+                { type: 'change', debounce: 300 },      // Form selects, checkboxes
+                { type: 'input', debounce: 500 },       // Live search, filters
+                { type: 'submit' }                      // Form submissions
+            ]
+        },
+        actionableAttributes: [
+            'data-tab-action',    // Tab controls (required)
+            'data-click',         // Custom click actions
+            'data-input',         // Input event handlers
+            'data-change',        // Change event handlers
+            'data-submit',        // Submit event handlers
+            'data-focus'          // Focus event handlers
+        ],
+        // Custom methods for non-default events
+        methods: {
+            submit: {
+                // Required for the submit event
+                handleSubmit(event, target, container) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    tabs._executeHook('eventSubmit', { event, target, container });
+                }
+            },
+            focus: {
+                // Required for any additional event
+                handleFocus(event, target, container) {
+                    tabs._executeHook('eventFocus', { event, target, container });
+                }
+            }
+        }
+    }
+});
+```
+
+> **💡 Need More Events?** Add any event type to `setListener`, then create a corresponding handler in `methods`. Methods can be scoped by event type (as keys) or flat in the object.
+
+### Handle Events via Hooks
+
+```js
+// Handle clicks anywhere in tab containers
+tabs.hook('eventClick', ({ event, target, container }) => {
+    // Delete button
+    if (target.matches('[data-action="delete"]')) {
+        deleteItem(target.dataset.id, container);
+    }
+
+    // Load more button
+    if (target.matches('[data-action="loadMore"]')) {
+        loadMoreItems(container);
+    }
+
+    // Any custom action
+    if (target.dataset.action) {
+        executeAction(target.dataset.action, target, container);
+    }
+});
+
+// Live search with automatic debouncing
+tabs.hook('eventInput', ({ target, container }) => {
+    if (target.matches('[data-live-search]')) {
+        performSearch(target.value, container);
+    }
+});
+
+// Field activation on focus
+tabs.hook('eventFocus', ({ target, container }) => {
+    if (target.matches('[data-validate]')) {
+        showFieldHints(target);
+    }
+});
+
+// Form submission
+tabs.hook('eventSubmit', ({ event, target }) => {
+    event.preventDefault();
+    const formData = new FormData(target);
+    submitForm(formData);
+});
+```
+
+### Real-World Example
+
+```html
+<div data-yai-tabs>
+    <div data-tab="dashboard">
+        <!-- Live search -->
+        <input type="text" data-live-search placeholder="Search...">
+
+        <!-- Action buttons -->
+        <button data-action="export">Export</button>
+        <button data-action="refresh">Refresh</button>
+
+        <!-- Form -->
+        <form data-action="saveSettings">
+            <input name="username" data-validate>
+            <button type="submit">Save</button>
+        </form>
+
+        <!-- Load more -->
+        <button data-action="loadMore">Load More Items</button>
+    </div>
+</div>
+```
+
+**Benefits:**
+- ⚡ **2 listeners** handle all interactions (not 20, not 200)
+- 🎯 **Auto-scoping** - every event knows its container
+- ⏱️ **Built-in debouncing** - performance optimized out-of-the-box
+- 🔄 **Dynamic content** - works immediately without re-initialization
+- 🎨 **Clean code** - centralized event handling, no scattered listeners
+
+## Deep Linking
+
+### Hash Routing
+```html
+<!-- URL: #styles=1&s-mixed=1&s-m-dark=1&s-2-r=1 -->
+<div data-yai-tabs data-ref-path="styles">
+    <div data-yai-tabs data-ref-path="s-mixed">
+        <div data-yai-tabs data-ref-path="s-m-dark">
+            <div data-yai-tabs data-ref-path="s-2-r">
+```
+
+### Quick Navigation Links
+```html
+<a data-yai-ref-path="lvl-1=1|styles=1">Dashboard</a>
+<a data-yai-ref-path="lvl-2=2|s-red=2">Settings</a>
+```
+
+### Programmatic URLs
+```js
+// Generate URL for specific tab combination
+const url = YaiTabs.reconstructUrlFromRef('s-m-dark', 1);
+// Returns: #styles=1&s-mixed=1&s-m-dark=1
+
+// Get full path data
+const pathData = YaiTabs.getRefPath('s-2-r');
+// Returns: { fullPath: ['styles', 's-mixed', 's-m-dark', 's-2-r'], ... }
+```
+
+## Theming
+
+YaiTabs uses a **semantic color system** with three levels of customization:
+
+### 1. Color Scheme (Layout-wide)
+Controls background, text, and surface colors for the entire component:
+
+```html
+<div data-yai-tabs data-color-scheme="dark">
+    <!-- Entire layout uses dark theme -->
+</div>
+```
+
+**Available schemes:** `light` (default), `dark`
+
+### 2. Color Accent (Button-only)
+Controls active button colors without affecting layout:
+
+```html
+<div data-yai-tabs data-color-accent="primary">
+    <!-- Active buttons use primary accent color -->
+</div>
+```
+
+**Available accents:** `primary`, `secondary`, `success`, `warning`, `danger`, `funky`, `dark`
+
+### 3. Nav Variant (Inverted buttons)
+Inverts color/background for active navigation buttons:
+
+```html
+<nav data-controller data-variant="success">
+    <!-- Active button: success background, white text -->
+</nav>
+```
+
+**Available variants:** Same as accents
+
+### Complete Example
+
+```html
+<div data-yai-tabs
+     data-color-scheme="dark"
+     data-color-accent="primary">
+
+    <nav data-controller data-variant="success">
+        <button data-tab-action="open" data-open="1">Dashboard</button>
+    </nav>
+
+    <div data-content>
+        <div data-tab="1">
+            <!-- Dark scheme layout + primary accent + success variant button -->
+        </div>
+    </div>
+</div>
+```
+
+### CSS Variables
+
+Customize semantic tokens for complete control:
 
 ```css
 :root {
-    /* Layout & spacing */
-    --yai-content-padding: 20px;
-    --yai-content-line-height: 1.5;
-    --yai-content-min-height: 80px;
-    --yai-button-padding: 2px 20px;
-    --yai-button-min-height: 42px;
+    /* Layout */
+    --yai-tabs-content-padding: 20px;
+    --yai-tabs-button-min-height: 42px;
 
-    /* Closed state */
-    --yai-closed-text: "YaiTabs";
-    --yai-closed-align: center;
-    --yai-closed-timeout: .5s;
+    /* Semantic Colors */
+    --yai-tabs-color-primary: #3a59ae;
+    --yai-tabs-color-secondary: #7c3aed;
+    --yai-tabs-color-success: #059669;
+    --yai-tabs-color-warning: #b45309;
+    --yai-tabs-color-danger: #dc2626;
+    --yai-tabs-color-funky: #c026d3;
+    --yai-tabs-color-dark: #171c29;
 
-    /* Loader */
-    --yai-loader-speed: 1.1s;
-    --yai-loader-button-size: 12px;
-    --yai-loader-content-size: 32px;
+    /* Layout Colors */
+    --yai-tabs-color-text: #49565b;
+    --yai-tabs-color-background: #ffffff;
+    --yai-tabs-color-surface: #f8fafc;
 
-    /* Color scheme */
-
-    /* Core color palette */
-    --yai-primary: #127cdc;
-    --yai-primary-dark: #0a0a56;
-    --yai-secondary: #383896;
-    --yai-accent: #e3260d;
-    --yai-danger: #e3260d;
-
-    /* Semantic colors */
-    --yai-text: #302c41;
-    --yai-text-muted: #6b6969;
-
-    --yai-bg: #ffffff;
-    --yai-bg-surface: #f8f8f8;
-    --yai-bg-surface-alt: #f5f5f5;
-    --yai-bg-overlay: #efefefd7;
-
-    --yai-focus: #2563eb;
-    --yai-focus-dark: #1e40af;
-
-    --yai-shadow: #32323266;
-    --yai-shadow-accent: #801a2199;
-
-    --yai-tabs-nav-bg: var(--yai-bg);
-    --yai-tabs-content-bg: var(--yai-bg-overlay);
-    --yai-tabs-active-bg: var(--yai-bg);
-    --yai-loader-color: var(--yai-secondary);
-}
-```
-
-Simple override, will set containing components automatically through inheritcance, but can be overridden per component.
-
-```css
-[data-color-scheme="red"] {
-    --yai-accent: #e3260d;
-    --yai-danger: #e3260d;
-    --yai-shadow-accent: #801a1a99;
+    /* Animation */
+    --yai-tabs-loader-speed: 1.1s;
+    --yai-tabs-closed-timeout: .5s;
 }
 
-[data-color-scheme="blue"] {
-    --yai-accent: #1f53ff;
-    --yai-shadow: #1a408099;
-    --yai-shadow-accent: #1a408099;
-}
-
+/* Dark Scheme Override */
 [data-color-scheme="dark"] {
-    --yai-primary-dark: #eeeeee;
-    --yai-secondary: #d6d6ff;
-    --yai-accent: #ff4746;
-    --yai-text: #ffffff;
-    --yai-text-muted: #cec6c6;
-    --yai-bg: #252525;
-    --yai-bg-surface: #2d2d2d;
-    --yai-bg-surface-alt: #3d3d3d;
-    --yai-bg-overlay: #353535;
-    --yai-shadow: #99999971;
-    --yai-shadow-accent: #71626299;
-    --yai-tabs-nav-bg: var(--yai-bg);
-    --yai-tabs-content-bg: var(--yai-bg-overlay);
-    --yai-tabs-active-bg: var(--yai-bg);
-    --yai-loader-color: var(--yai-secondary);
+    --yai-tabs-color-text: #ffffff;
+    --yai-tabs-color-background: #252525;
+    --yai-tabs-color-surface: #2d2d2d;
+}
+
+/* Custom Accent */
+[data-color-accent="primary"] {
+    --yai-tabs-color-accent: var(--yai-tabs-color-primary);
 }
 ```
 
-Complete theme overrides
+### Custom Themes
+
+Create complete visual overrides:
 
 ```css
 [data-theme="minimal"] {
     box-shadow: none;
 
     & nav[data-controller] {
-        box-shadow: none;
         background: transparent;
 
-        & button {
-            background: transparent;
-            border-radius: 0;
-            border-bottom: 2px solid transparent;
-
-            &.active {
-                box-shadow: none;
-                border-bottom-color: var(--yai-accent);
-            }
-        }
-    }
-}
-
-[data-theme="pills"] {
-    box-shadow: none;
-
-    & nav[data-controller] {
-        box-shadow: none;
-        background: transparent;
-        gap: 4px;
-
-        & button {
-            background: var(--yai-bg-surface);
-            border-radius: 20px;
-            margin: 0 2px;
-
-            &.active {
-                background: var(--yai-accent);
-                color: var(--yai-text-inverted);
-                box-shadow: 0 2px 4px var(--yai-shadow);
-            }
+        & button.active {
+            border-bottom: 2px solid var(--yai-tabs-color-accent);
         }
     }
 }
 ```
 
-## 🔍 Debugging & Monitoring
+**Colors cascade:** Set scheme/accent on parent, override on nested components as needed.
 
-Check event listeners after initialization ([Example.html](./Example.html)):
-```js
-// Console script to check listener count
-🎯 SCAN COMPLETE:
-📊 Total Elements with Listeners: 5
-🔥 Total Event Listeners Found: 9
-📈 Average Listeners per Element: 1.80
-🥇 Top 5 Listener Hotspots:
-1. body.example-init: 2 listeners
-2. div#demo-tabs.tab-active: 2 listeners
-3. div#yai-....tab-active: 2 listeners
-4. div#yai-...: 2 listeners
-5. window: 1 listeners
-```
-
-After the page is initialized, there are a total of 20 components (3 root and 17 nested components). Additionally, the first component example allows you to load and inject More nested tab components dynamically.
-
-[🔍 Enhanced Real-World Listener Script](https://eypsilon.github.io/YpsilonEventHandler-Examples?tab=readme-ov-file#-real-world-listener-analysis)
-
-## 💡 Best Practices
-
-1. **Use unique IDs** for `data-open`/`data-tab` pairs to avoid disambiguation needs
-2. **Set `data-ref-path`** for hash-based navigation in multi-tab applications
-3. **Use `data-url-refresh`** for content that changes frequently
-4. **Leverage CSS variables** for consistent theming across your application
-5. **Implement loading hooks** for better user experience with dynamic content
-
-
-![YaiTabs Lighthouse Result, Accessibiliy: 100, Best Practices: 100, SEO: 100](dynamic/YaiTabs-Lighthouse.png)
-
-
-## 🔧 Advanced Usage Patterns
-
-### Super Subscriber - Listen to All Events
-Perfect for debugging, analytics, logging, or building wrapper components:
-
-```js
-class TabsMonitor {
-    constructor(tabsInstance) {
-        this.tabs = tabsInstance;
-        this.superSubscriber();
-    }
-
-    /**
-     * Super subscriber - subscribe to all emitable events at once
-     * Useful for debugging, analytics, or comprehensive event handling
-     */
-    onTabs() {
-        console.log('YaiTabs Event:', ...arguments);
-        // Add your analytics/logging logic here
-    }
-
-    superSubscriber() {
-        for (const key in this.tabs.config.emitable) {
-            this.tabs.on(`${this.tabs.config.dispatchName}.${key}`, 'onTabs');
-        }
-    }
-}
-
-// Usage
-const tabs = new YaiTabs();
-const monitor = new TabsMonitor(tabs);
-```
-
-### Event-Driven Architecture Examples
-```js
-// Analytics tracking - use tabReady for reliable tab activation detection
-tabs.on('yai.tabs.tabReady', (event) => {
-    analytics.track('Tab Opened', {
-        tabId: event.detail.id,
-        timestamp: Date.now(),
-        isVisible: event.detail.isVisible
-    });
-});
-
-// Performance monitoring
-tabs.on('yai.tabs.contentLoaded', (event) => {
-    performance.measure('TabContentLoad', event.detail.startTime);
-});
-
-// State synchronization
-tabs.on('yai.tabs.stateChange', (event) => {
-    updateApplicationState(event.detail);
-});
-```
-
-## 🚀 Performance Benefits
-
-- **Single listener architecture** - No memory bloat with nested components
-- **Lazy initialization** - Nested components use existing event listeners
-- **DOM distance caching** - Efficient event target resolution
-- **Automatic cleanup** - No manual listener removal needed
-
-### Performance Metrics
+## Performance Metrics
 
 | Scenario | Components | Listeners | LCP | Memory |
 |----------|------------|-----------|-----|---------|
-| Basic (3 tabs) | 1 | 2 | ~0.10s | ~50KB |
-| Nested (20 tabs) | 20 | 2 | ~0.10s | ~120KB |
-| Deep (70+ tabs) | 70+ | 2 | ~0.10s | ~350KB |
+| Basic | 1 root | 2 | ~0.10s | ~50KB |
+| Nested | 20 components | 2 | ~0.10s | ~120KB |
+| Deep | 70+ components | 2 | ~0.10s | ~350KB |
 
-This architecture enables truly infinite nesting without performance degradation, making YaiTabs ideal for complex applications with deep navigation hierarchies.
+## Accessibility
 
+- ✅ WCAG 2.1 AA compliant
+- ✅ Full ARIA support: `tablist`, `tab`, `tabpanel`
+- ✅ Roving tabindex for keyboard navigation
+- ✅ `inert` attribute for hidden panels
+- ✅ Keyboard shortcuts: Arrow keys, Home, End, Enter, Space
 
-## Screenshot
+**Lighthouse Score: 100/100 for Accessibility, SEO and Best Practices**
 
-**[Try Live Demo →](https://yaijs.github.io/yai/tabs/Example.html)**
+## Best Practices
 
-![YaiTabs Screenshot with multiple nested tabs open](dynamic/YaiTabs-Screenshot.png)
+1. **Unique IDs**: Use unique `data-open`/`data-tab` pairs or enable `autoDisambiguate`
+2. **Hash Routing**: Set `data-ref-path` for deep linkable navigation
+3. **Loading States**: Implement hooks for better UX with dynamic content
+4. **Theming**: Leverage CSS variables for consistent design
+5. **Event Delegation**: Use event hooks instead of multiple listeners
 
-### 👥 **Authors & Contributors**
+## Advanced Examples
 
-- **🏗️ Engin Ypsilon** - Original YpsilonEventHandler architecture and YaiTabs concept
-- **🤖 Claude-3.5-Sonnet** - Implementation, optimization, and hook system architecture
-- **🌟 DeepSeek-V3** - Comprehensive documentation and interactive demo examples
-- **🧠 Grok-2** - Performance analysis and architectural insights
-- **🎨 ChatGPT** - Color scheme and design tokens
+See [ADVANCED.md](./ADVANCED.md) for:
+- Single-tab applications
+- Event bus patterns
+- Analytics integration
+- Dynamic form handling
+- Breadcrumb navigation
+
+## Resources
+
+- **[Live Demo](https://yaijs.github.io/yai/tabs/Example.html)** - Interactive examples with 20+ nested components
+- **[YaiTabs GitHub](https://github.com/yaijs/yai)** - YaiCore, YaiTabs, and components
+- **[YEH GitHub](https://github.com/yaijs/yeh)** - YpsilonEventHandler foundation
+- **[NPM @yaijs/core](https://www.npmjs.com/package/@yaijs/core)** - YaiTabs package
+- **[NPM @yaijs/yeh](https://www.npmjs.com/package/@yaijs/yeh)** - Event handler package
+
+## Authors
+
+**YAI** = **Y**psilon + **AI** 🤖
+
+- **Engin Ypsilon** - Architecture & concept
+- **Claude-3.5-Sonnet** - Implementation & optimization
+- **DeepSeek-V3** - Documentation & examples
+- **Grok-2** - Performance analysis
+- **ChatGPT** - Design tokens
+
+---
+
+**License:** MIT | **Version:** 1.0.0-beta.1

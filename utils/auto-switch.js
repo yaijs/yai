@@ -1,3 +1,5 @@
+"use strict";
+
 /**
  * AutoSwitch - Generic component testing utility
  *
@@ -285,9 +287,5 @@ class AutoSwitch {
     }
 }
 
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { AutoSwitch };
-    module.exports.default = AutoSwitch;
-} else if (typeof window !== 'undefined') {
-    window['AutoSwitch'] = AutoSwitch;
-}
+export {AutoSwitch};
+export default AutoSwitch;

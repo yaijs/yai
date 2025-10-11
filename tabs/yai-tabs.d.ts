@@ -84,7 +84,6 @@ export type NavigationPosition =
  *   data-behavior="fade"
  *   data-nav="top"
  *   data-theme="default"
- *   data-functionality="default"
  *   data-history-mode="replace"
  *   data-ref-path="main-tabs">
  * ```
@@ -98,8 +97,6 @@ export interface TabContainerAttributes {
   'data-nav'?: NavigationPosition;
   /** Visual theme identifier */
   'data-theme'?: string;
-  /** Functional behavior theme */
-  'data-functionality'?: string;
   /** Browser history handling mode */
   'data-history-mode'?: 'replace' | 'push';
   /** URL hash parameter key for routing */
@@ -202,8 +199,6 @@ export interface YaiTabsConfig extends YaiCoreConfig {
   autoDisambiguate?: boolean;
   /** Allow closing active tab by clicking it again */
   closable?: boolean;
-  /** Default tab index to open if no data-default specified */
-  openDefault?: number | null;
 }
 
 /**

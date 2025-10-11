@@ -1,7 +1,7 @@
 /**
  * 🏗️ **YaiCore - Foundation Architecture for YaiJS Components**
  *
- * Advanced base class built on YpsilonEventHandler's O(1) event delegation system.
+ * Advanced base class built on YEH's O(1) event delegation system.
  * Provides unified component initialization, dynamic content loading, and extensible
  * hook system for building high-performance web components with mathematical scalability.
  *
@@ -13,7 +13,7 @@
  * - **DOM Caching**: High-performance query caching system reduces DOM traversal
  * - **Accessibility**: WCAG 2.1 AA compliance with dynamic ARIA management
  * - **Framework Agnostic**: Works with React, Vue, Angular, or Vanilla JS
- * - **Zero Dependencies**: Only requires YpsilonEventHandler foundation
+ * - **Zero Dependencies**: Only requires YEH foundation
  *
  * **📊 Performance Benefits:**
  * - **Query Optimization**: DOM caching reduces repeated querySelector calls
@@ -32,15 +32,15 @@
  * @version 1.0.0-beta.1
  * @author YaiJS Team - Advanced component architecture
  * @license MIT
- * @see https://github.com/yaijs/Yai/tree/main/YaiTabs
+ * @see https://github.com/yaijs/Yai/tree/main/tabs
  */
 
-import { EventMapping, HandlerConfig, YpsilonEventHandler } from './ypsilon-event-handler.js';
+import { EventMapping, HandlerConfig, YEH } from '../../yeh/yeh.js';
 
 /**
  * ⚙️ **Base Configuration Interface**
  *
- * Comprehensive configuration system extending YpsilonEventHandler with
+ * Comprehensive configuration system extending YEH with
  * component-specific functionality and intelligent defaults.
  *
  * @example
@@ -78,7 +78,7 @@ export interface YaiCoreConfig extends HandlerConfig {
     isLoading?: string;
   };
 
-  /** Event system configuration (inherits from YpsilonEventHandler) */
+  /** Event system configuration (inherits from YEH) */
   events?: {
     /** Automatically resolve event targets (default: true) */
     autoTargetResolution?: boolean;
@@ -206,11 +206,11 @@ export interface LifecycleCallbacks {
  * 🏗️ **YaiCore - Advanced Component Foundation**
  *
  * Base class for all YaiJS components providing unified architecture, dynamic content
- * loading, lifecycle management, and extensible hook system built on YpsilonEventHandler's
+ * loading, lifecycle management, and extensible hook system built on YEH's
  * advanced O(1) event delegation.
  *
  * **🎯 Core Architecture:**
- * - **Event Factory**: Creates YpsilonEventHandler instances with component integration
+ * - **Event Factory**: Creates YEH instances with component integration
  * - **DOM Caching**: High-performance query system with automatic cache management
  * - **Dynamic Loading**: Comprehensive fetch system with delay controls
  * - **Hook System**: Lifecycle callbacks for extensible behavior
@@ -371,7 +371,7 @@ export interface LifecycleCallbacks {
  * - **Keyboard Navigation**: Full keyboard accessibility support
  * - **WCAG Compliance**: Built-in 2.1 AA compliance utilities
  */
-export declare class YaiCore extends YpsilonEventHandler {
+export declare class YaiCore extends YEH {
   /** Component configuration with intelligent defaults */
   protected config: Required<YaiCoreConfig>;
 
@@ -390,7 +390,7 @@ export declare class YaiCore extends YpsilonEventHandler {
   /** DOM cache performance statistics */
   protected _cacheStats: { hits: number; misses: number; totalQueries: number };
 
-  /** YpsilonEventHandler instance created by factory */
+  /** YEH instance created by factory */
   protected events: any;
 
   /**
@@ -448,13 +448,13 @@ export declare class YaiCore extends YpsilonEventHandler {
   /**
    * 🏭 **Create Event Handler Factory**
    *
-   * Factory method to create YpsilonEventHandler instances with component-specific
+   * Factory method to create YEH instances with component-specific
    * configuration. Provides method binding and event system integration for O(1) performance.
    *
    * @param selectors - Event listener selectors mapping
    * @param aliases - Event method aliases for cleaner handler names
    * @param options - Additional event handler options
-   * @returns Configured YpsilonEventHandler instance
+   * @returns Configured YEH instance
    *
    * @example
    * ```typescript
@@ -489,7 +489,7 @@ export declare class YaiCore extends YpsilonEventHandler {
     selectors: EventMapping,
     aliases?: Record<string, any>,
     options?: any
-  ): YpsilonEventHandler;
+  ): YEH;
 
   /**
    * 🧬 **Deep Object Merging Utility**
@@ -728,7 +728,7 @@ export declare class YaiCore extends YpsilonEventHandler {
    * 📡 **Dispatch Component Events**
    *
    * Dispatch standardized component events with rich payload data.
-   * Integrates with YpsilonEventHandler's event system for consistent communication.
+   * Integrates with YEH's event system for consistent communication.
    *
    * @param eventName - Name of the event to dispatch
    * @param data - Event payload data
@@ -1267,7 +1267,7 @@ export default YaiCore;
  * ```
  *
  * **🔧 Advanced Features:**
- * - **Event Factory**: Create YpsilonEventHandler instances with component integration
+ * - **Event Factory**: Create YEH instances with component integration
  * - **DOM Caching**: High-performance query system with automatic management
  * - **Hook System**: Extensible lifecycle callbacks for custom behavior
  * - **Memory Management**: Automatic cleanup with AbortController integration

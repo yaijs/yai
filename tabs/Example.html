@@ -1,9 +1,10 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YaiTabs - Advance Tab Browser Component</title>
+    <title>YaiTabs - Advanced Tab Browser Component</title>
     <meta name="description" content="Advance Tab Browser Component with 9 animations, Dynamic content support, DeepLinks & implements WCAG 2.1 AA compliant tab navigation with full screen reader support">
     <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAYNJREFUOI2lkz9S20AYxX+7ttOgGDOjQKMZmMEt8lapdQQdISlInRJTcQ5ofAPgBOgG2citMrEnNBpnAgFBgdBuCs8a2TEMjF+1/97b7739VhwWllUgV2I/J1Cu0THWaDc31uhyjc6rBEqLahQmmQzTnlubDNPe46/furSoFwVKiypG2RzZ4ebycrsYZQmS6DmBuBhlycNtsQ6wuafO3YYbP9wW67nWF0A8J2Aln/JUnzqyH6q+EE+HhCD2Q9UH+LAXfi8luoIDAHF4b49zrfcB3r33/nZ2u1+FYfB/XFOLAA3MYDJMe1tKnTRNZT4CtINg3Nzw48cKWmIZHVoNOlc/sjNXKYCsPBn5oeo3fT9qwtGfof7myqujgoNc6wtH3lLqBMMXUevEOE/1aT24WQ6SmU2ATaU+O5tioZXjq5/ZYHZLqARAnmrrMtrY7cYYkrlXqOHM2+lG7SAYL1poB8HY2+lGdfKyCoBpKzcKk0ghFUxbufJk1LrjevHsUoG3YOXf+A/28K0/S+gHCgAAAABJRU5ErkJggg==" />
     <!-- Example page styles -->
@@ -18,24 +19,79 @@
         --yai-timeout-remove-parent: .6s;
         --yai-scroll-behavior: smooth;
         --yai-font-weight: 500;
-        --yai-light-bg: #edededbb;
-        --yai-color: #414549;
-        --yai-color-link: #082da7;
+        --primary-color: var(--yai-tabs-color-primary);
+        --secondary-color: var(--yai-tabs-color-secondary);
+        --accent-color: var(--yai-tabs-color-accent);
+        --dark-color: #2c3e50;
+        --light-color: #ecf0f1;
+        --text-color: var(--yai-tabs-color-text);;
+        --text-light: #fff;
+        --yai-light-bg: var(--light-color);
+        --yai-color: var(--text-color);
+        --yai-color-link: var(--primary-color);
         --yai-box-shadow: 0 2px 4px 1px rgba(0, 0, 0, .2);
         --yai-font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     }
     *, ::after, ::before {
         box-sizing: border-box;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    html, body, div, span, applet, object, iframe,
+    h1, h2, h3, h4, h5, h6, blockquote, pre,
+    a, abbr, acronym, address, big, cite, code,
+    del, dfn, em, img, ins, kbd, q, s, samp,
+    small, strike, strong, sub, sup, tt, var,
+    b, u, i, center,
+    dl, dt, dd, li,
+    fieldset, form, label, legend,
+    table, caption, tbody, tfoot, thead, tr, th, td,
+    article, aside, canvas, details, embed,
+    figure, figcaption, footer, header, hgroup,
+    menu, nav, output, ruby, section, summary,
+    time, mark, audio, video {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        font-size: 100%;
+        font: inherit;
+        vertical-align: baseline;
+    }
+    /* HTML5 display-role reset for older browsers */
+    article, aside, details, figcaption, figure,
+    footer, header, hgroup, menu, nav, section {
+        display: block;
+    }
+    body {
+        line-height: 1;
+    }
+    ol, ul {
+        list-style: none;
+    }
+    blockquote, q {
+        quotes: none;
+    }
+    blockquote:before, blockquote:after,
+    q:before, q:after {
+        content: '';
+        content: none;
+    }
+    small {
+        font-size: smaller;
+    }
+    table {
+        border-collapse: collapse;
+        border-spacing: 0;
     }
     html {
         scroll-behavior: var(--yai-scroll-behavior);
-        background: linear-gradient(272deg, #30303d 0%, #29292b 50%);
+        background: linear-gradient(272deg, #394547 0%, #26262e 50%);
     }
     body {
         margin: 0 auto;
         padding: 30px 20px;
-        max-width: 1040px;
-        line-height: 1;
+        max-width: 1240px;
+        line-height: 1.6;
         overflow-y: scroll;
         font-family: var(--yai-font-family);
         font-size: 1rem;
@@ -65,12 +121,12 @@
         box-sizing: border-box;
         text-indent: initial;
         border: 0 solid #f5f5f5;
-        border-width: 8px 14px;
+        border-width: 4px 14px;
         background: #fff;
         color: #333;
     }
     table thead {
-        background: #f5f5f5;
+        background: #f3f2f1;
     }
     tbody tr:last-of-type {
         background: #fff3cd;
@@ -109,7 +165,7 @@
         margin-right: 6px;
     }
     h1 a {
-        color: #0597ee;
+        color: #408fbd;
         display: inline-flex;
         align-items: center;
         width: 100%;
@@ -132,10 +188,6 @@
         font-size: 1.15rem;
         font-weight: normal;
     }
-    p {
-        margin: 0;
-        font-size: 1rem;
-    }
     button {
         padding: 8px 12px;
         cursor: pointer;
@@ -151,6 +203,9 @@
         color: var(--yai-color-link);
         font-weight: 500;
     }
+    ul, ol {
+        list-style: initial;
+    }
     header, .box, .section {
         margin-bottom: 30px;
         padding: 2rem;
@@ -159,6 +214,20 @@
     }
     header, .box, .option-switch {
         box-shadow: var(--yai-box-shadow);
+    }
+    header {
+        background: linear-gradient(44deg, #e5f4ffc4, #1d57729e) !important;
+        color: #e1c8c8;
+        padding: 30px;
+        text-align: center;
+    }
+    header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+    }
+    header p {
+        font-size: 1.2rem;
+        opacity: 0.9;
     }
     .btn-link {
         padding: 0;
@@ -188,6 +257,7 @@
         line-height: 1.5;
     }
     .box h2, .box h3, .box h4, .box h5, .box h6, .box p, .box ul, .box ol, .box hr {
+        margin-top: 0;
         margin-bottom: 16px;
     }
     .box h2 {
@@ -198,15 +268,22 @@
         font-weight: var(--yai-font-weight);
     }
     .box ul, .box ol {
-        padding-left: 24px;
+        margin-left: 16px;
+        padding: 0 0 0 24px;
     }
     .box p, .box ul, .box ol {
+        margin-top: 0;
         font-size: 1rem;
         color: #111;
     }
-    .box .mb-0 {
+    .box hr {
+        margin: 16px 0;
+        opacity: .7;
+    }
+    .box .ymb-0 {
         margin-bottom: 0;
     }
+    .section .y-remove-parent,
     .box .y-remove-parent {
         padding: 0;
         width: 20px;
@@ -219,13 +296,16 @@
         opacity: .2;
         transition: all var(--yai-timeout-remove-parent) ease-in-out var(--yai-delay-remove-parent);
     }
+    .section:hover .y-remove-parent,
     .box:hover .y-remove-parent {
         opacity: .4;
     }
+    .section .y-remove-parent:hover,
     .box .y-remove-parent:hover {
         opacity: .9;
         transform: scale(1.2);
     }
+    .section .y-remove-parent::after,
     .box .y-remove-parent::after {
         content: "\2715";
         font-size: 20px;
@@ -278,7 +358,7 @@
         margin: 0.5rem 1.5rem 0.5rem 0;
         padding: 0.5rem 1rem;
         border-left: 3px solid #3b75d8;
-        color: #121519;
+        color: var(--text-color);
     }
     blockquote small {
         margin-top: 0.5rem;
@@ -306,10 +386,6 @@
         margin-bottom: 0;
         padding-bottom: 0;
     }
-    .mb-0 { margin-bottom: 0; }
-    .yp-1 { padding: .5rem; }
-    .yp-2 { padding: .75rem; }
-    .yp-3 { padding: 1.25rem; }
     .d-none {
         display: none;
     }
@@ -318,11 +394,20 @@
     }
     .y-flex-items {
         flex-direction: row;
+        gap: 10px;
     }
-    .y-flex-item {
-        flex: 1;
+    .y-flex-itemy {
+        /* flex: 2; */
+        flex-grow: 1;
+        flex-shrink: 0;
+        flex-basis: 25%;
+    }
+    .y-flex-wrap {
         flex-wrap: wrap;
     }
+    /* .y-flex-itemy {
+        flex: 1 30%;
+    } */
     .space-between {
         justify-content: space-between;
     }
@@ -463,20 +548,6 @@
         border: 2px solid rgba(165, 163, 163, 0.5);
         cursor: pointer;
     }
-    [data-yai-tabs]:not([data-nesting="0"])::after {
-        content: attr(data-nesting);
-        position: absolute;
-        bottom: 2px;
-        left: 2px;
-        z-index: 5;
-        opacity: 0;
-        font-size: 10px;
-        transition: opacity var(--yai-fade-in) ease-in-out;
-    }
-    [data-yai-tabs]:hover::after {
-        opacity: .2;
-        font-size: 12px;
-    }
     .y-fade-in {
         opacity: 0;
         animation: yFadeIn var(--yai-fade-in) ease-in-out both;
@@ -488,25 +559,73 @@
     .text-muted {
         color: #676e9f;
     }
-    .good-to-know > nav::after {
-        content: 'Ynception Unlocked';
-        padding: 2px 20px;
-        margin-inline-start: auto;
-        min-height: 42px;
-        color: #888444;
-        display: inline-flex;
-        align-items: center;
+
+    .scroll-to-top-container {
+        padding: 0;
+        position: fixed;
+        bottom: 8px;
+        right: 8px;
+        z-index: 1005;
+        opacity: 1;
+        outline: 0;
+    }
+    .scroll-to-top {
+        font-size: 20px;
+        margin: 0;
+        padding: 6px 10px;
         line-height: 1;
-        font-size: .9rem;
-        color: #432124;
+        opacity: .0;
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        color: #222526;
+        background: #bababc;
+        border: 1px solid #9a8f8f;
+        transform: translate(68px, 0);
+        transition: opacity .6s ease-in-out, transform .3s ease-in-out;
     }
-    .yvp-is-visible {
-        box-shadow: 0 0 8px 1px #2c304b;
-        transition: all .6s ease-in;
+    body.yvp-is-scrolled .scroll-to-top {
+        transform: translate(-1px, 0);
+        opacity: .85;
     }
-    .yvp-is-visible.yvp-is-leaving {
-        box-shadow: 0 0 4px 0 #9998fc;
-        transition: all .4s ease-out;
+    .lazy-chunk { padding: 1rem 1.25rem; border: 1px dashed currentColor; margin: .75rem 0; }
+    .lazy-title { font: inherit; font-weight: 600; margin: 0 0 .25rem; }
+    .lazy-note  { font-size: .9rem; opacity: .8; margin: .25rem 0 0; }
+    .lazy-gap   { min-height: 13vh; display: grid; place-items: center; opacity:.75; }
+    [data-tab] > hr {
+        opacity: .3;
+    }
+    /**
+     * Event bus styles
+     */
+    [data-ref-path="event-bus"] .yai-response-area {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+    }
+    [data-ref-path="event-bus"] .yai-response-log .muted {
+        opacity: .9;
+    }
+    [data-ref-path="event-bus"] .yai-response-log {
+        white-space: pre-wrap;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        background: var(--yai-tabs-color-surface);
+        padding: .75rem;
+        border-radius: var(--yai-tabs-form-input-elemets-border-radius);
+        border: 1px dashed #cfd6dd;
+        line-height: 1;
+        font-weight: 600;
+    }
+    /** Highlight */
+    [data-ref-path="event-bus"].tab-active > [data-content] [data-tab].active {
+        transition: all .2s ease-in-out;
+    }
+    .latest-event-container.tab-active > [data-content] > [data-tab].active {
+        background-color: #9dfdd770;
+        box-shadow: inset 0 0 8px 1px var(--yai-tabs-color-danger);
+    }
+    .ref-link-active {
+        color: var(--yai-tabs-color-danger);
     }
 
     /* Ycons */
@@ -564,7 +683,9 @@
     .ycon-white-exclamation-mark::before { content: "\2755"; }          /* ❕ */
     .ycon-print-screen::before { content: "\2398"; }                    /* ⎘  */
     .ycon-link::before { content: "\1F517"; }                           /* 🔗 */
-    .ycon-katakana-letter::before { content: "\FF90"; }                  /* ﾐ */
+    .ycon-katakana-letter::before { content: "\FF90"; }                 /* ﾐ */
+    .ycon-yawning-face::before { content: "\1F971"; }                   /* 🥱 */
+    .ycon-eyes::before { content: "\1F440"; }                           /* 👀 */
 
     /** Animation keyframes */
     @keyframes yFadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -574,9 +695,13 @@
     @keyframes gentlePulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(0.98); opacity: 0.9; } }
 
     /** Handhelds */
-    @media (max-width: 640px) {
+    @media (max-width: 740px) {
         body {
-            padding: 30px 10px 0;
+            padding: 30px 10px;
+            background-color: #314145;
+        }
+        footer {
+            background-color: #fff;
         }
         header,
         .control-center,
@@ -585,7 +710,7 @@
             margin: 0 0 50px 0;
         }
         .control-center {
-            max-height: 620px;
+            max-height: 480px;
             overflow: auto;
         }
         .set-group,
@@ -602,6 +727,13 @@
         .config-block input[type="text"],
         .config-block input[type="number"] {
             min-height: 40px;
+        }
+        .y-flex-wrap {
+            flex-direction: column;
+            gap: 10px;
+        }
+        .y-flex-itemy {
+            flex: 1 100%;
         }
     }
 
@@ -679,6 +811,18 @@
     </style>
 
     <style>
+    .ynfiniti-wrapper [data-yai-tabs][data-nesting="1"] .ynfiniti-wrapper {
+        padding: 8px;
+    }
+    .ynfiniti-wrapper [data-yai-tabs][data-nesting="5"] .ynfiniti-wrapper {
+        padding: 6px;
+    }
+    .ynfiniti-wrapper [data-yai-tabs][data-nesting="10"] .ynfiniti-wrapper {
+        padding: 4px;
+    }
+    .ynfiniti-wrapper [data-yai-tabs][data-nesting="15"] .ynfiniti-wrapper {
+        padding: 0;
+    }
     .ynfiniti-wrapper .architecture-visual,
     .ynfiniti-wrapper .architecture-note {
         margin: 1.5rem 0;
@@ -687,8 +831,7 @@
         border-radius: 8px;
         border: 1px solid #eaeaea;
     }
-    .ynfiniti-wrapper [data-tab] [data-yai-tabs] .architecture-visual,
-    .ynfiniti-wrapper [data-tab] [data-yai-tabs] .architecture-note {
+    .ynfiniti-wrapper [data-yai-tabs] .architecture-visual {
         display: none;
     }
     [data-yai-tabs]#demo-tabs .ynfiniti-wrapper [data-tab]:not([data-spaceless]) {
@@ -717,7 +860,7 @@
         color: #333;
         padding: 1.5rem;
         border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 2px 10px #0000000d;
         border: 1px solid #eaeaea;
     }
     .ynfiniti-wrapper .performance-comparison {
@@ -731,7 +874,7 @@
         border-radius: 8px;
         background: white;
         color: #333;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 2px 8px #b6e6fcdd;
     }
     .ynfiniti-wrapper .comparison-item.highlight {
         background: linear-gradient(135deg, #e1f5fe 0%, #b3e5fc 100%);
@@ -739,8 +882,8 @@
         color: #333;
     }
     .ynfiniti-wrapper .benchmark {
-        margin: 2rem 0 0;
-        padding: 1.5rem;
+        margin: 0;
+        padding: 0;
         background: white;
         color: #333;
         border-radius: 8px;
@@ -794,10 +937,10 @@
     }
     .ynfiniti-wrapper .config-options {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(45%, 1fr));
         gap: 1.5rem;
-        margin: 1rem 0 0;
-        padding: 1rem;
+        margin: 0;
+        padding: 0;
     }
     .ynfiniti-wrapper .option-group {
         padding: 0;
@@ -931,7 +1074,7 @@
 
     <!-- Highlight.JS CSS -->
     <style>
-        .hljs{white-space:pre-wrap;line-height: 1.2}.hljs{display:block;overflow-x:auto;padding:.75em;color:#ffffff;background:#1c1b1b}.hljs-subst{color:#ffffff}.hljs-comment{color:#999999}.hljs-keyword,.hljs-selector-tag,.hljs-meta .hljs-keyword,.hljs-doctag,.hljs-section,.hljs-attr,.hljs-meta,.hljs-selector-pseudo,.hljs-selector-class{color:#88aece}.hljs-attribute{color:#c59bc1}.hljs-name,.hljs-type,.hljs-number,.hljs-selector-id,.hljs-quote,.hljs-template-tag,.hljs-built_in,.hljs-title,.hljs-literal{color:#f08d49}.hljs-string,.hljs-regexp,.hljs-symbol,.hljs-variable,.hljs-template-variable,.hljs-link,.hljs-selector-attr,.hljs-meta .hljs-string{color:#b5bd68}.hljs-bullet,.hljs-code{color:#cccccc}.hljs-deletion{color:#de7176}.hljs-addition{color:#76c490}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:bold}
+        pre, .hljs{white-space:pre-wrap;line-height: 1.2}.hljs{display:block;overflow-x:auto;padding:.75em;color:#ffffff;background:#0c1528}.hljs-subst{color:#ffffff}.hljs-comment{color:#999999}.hljs-keyword,.hljs-selector-tag,.hljs-meta .hljs-keyword,.hljs-doctag,.hljs-section,.hljs-attr,.hljs-meta,.hljs-selector-pseudo,.hljs-selector-class{color:#88aece}.hljs-attribute{color:#c59bc1}.hljs-name,.hljs-type,.hljs-number,.hljs-selector-id,.hljs-quote,.hljs-template-tag,.hljs-built_in,.hljs-title,.hljs-literal{color:#f08d49}.hljs-string,.hljs-regexp,.hljs-symbol,.hljs-variable,.hljs-template-variable,.hljs-link,.hljs-selector-attr,.hljs-meta .hljs-string{color:#b5bd68}.hljs-bullet,.hljs-code{color:#cccccc}.hljs-deletion{color:#de7176}.hljs-addition{color:#76c490}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:bold}
     </style>
 
     <!-- No script, shows all content (except dynamically loaded of course) -->
@@ -978,39 +1121,201 @@
     <h2>VanillaJS Lightweight Tabs Component</h2>
 </header>
 
-<main>
+<main class="yai-fly-in">
+
+    <!-- Main Yntro -->
     <div class="box short-note removable">
         <h2>
-            <span class="ycon ycon-sparkles ycon-sm ycon-is-left ycon-fix-top-2" aria-hidden="true"></span>
-            YaiTabs Demo Page
+            <b><span class="ycon ycon-sparkles ycon-sm ycon-is-left ycon-fix-top-2" aria-hidden="true"></span>
+            YaiTabs Demo Page</b>
         </h2>
-        <ul>
-            <li>Ynfiniti Achieved</li>
-            <li>Ultra lightweight: ~2,200 LOC JS & ~500 LOC CSS</li>
+        <ul class="ymb-0">
+            <li><strong>Event bus & hooks:</strong> add tab lifecycle listeners via YEH</li>
+            <li><strong>Lighthouse 100/100:</strong> perfect scores for Accessibility, Best Practices & SEO</li>
             <li>
-                Fully automated ARIA attribute generator for
+                <strong>WCAG 2.1 AA compliant:</strong> follows
                 <a href="https://www.w3.org/WAI/ARIA/apg/patterns/tabs/" target="_blank" rel="nofollow">
-                    Tabbed Interfaces
-                    <span class="ycon ycon-print-screen ycon-xxs flip ycon-is-right ycon-fix-top-1" aria-hidden="true"></span>
+                  WAI-ARIA Tabbed Interfaces
+                  <span class="ycon ycon-print-screen ycon-xxs flip ycon-is-right ycon-fix-top-1" aria-hidden="true"></span>
                 </a>
-            </li>
-            <li>9 animations • Keyboard navigation • Dynamic content • DeepLinks</li>
+              </li>
+            <li><strong>Rich features:</strong> 9 animations • Full keyboard navigation • Dynamic content • Deep links</li>
+            <li><strong>Highly flexible:</strong> built-in themes, color accents, semantic utilities • Works with any CSS framework</li>
+            <li><strong>Unlimited nesting:</strong> nested tabs inherit parent event listeners (O(1) scaling)</li>
+            <li><strong>Demo bonus:</strong> lazy in-view tabs that auto-open on visibility using YaiViewport</li>
         </ul>
-        <hr>
-        <div>
-            <h3 style="margin-top:1.5rem">
-                <span class="ycon ycon-clapper-board ycon-xs ycon-is-left ycon-fix-top-2" aria-hidden="true"></span>
-                AutoSwitch Demo
-            </h3>
-            <p>Click <strong>"Run"</strong> below for automated tab cycling.</p>
-            <p>
-                Checkmark <strong>"Cycle Behaviors"</strong> to test all available animation behaviors without
-                lifting an additional finger! Perfect for enjoying the show while preventing posture problems. Welcome to the future!
-            </p>
-            <p class="mb-0"><small>* Selected behavior applies to all tab components on the page.</small></p>
-        </div>
         <button class="y-remove-parent" data-action="removeParent" title="Got it, remove the box"></button>
     </div>
+
+
+    <!-- Event bus
+      Handle events live. -->
+    <div class="section yvent-driven yai-showcase">
+        <div data-yai-tabs class="tab-active" data-theme="default" data-color-accent="dark" data-nav="top" data-behavior="blur" data-ref-path="event-bus">
+            <nav data-controller data-grow class="yai-nav">
+                <button data-tab-action="open" data-open="home" class="yai-tab-btn" data-default>
+                    <span class="yai-icon ycon-is-left">🏠</span> Event Bus
+                </button>
+                <button data-tab-action="open" data-open="clicks" class="yai-tab-btn">
+                    <span class="yai-icon ycon-is-left">🖱️</span> Click Events
+                </button>
+                <button data-tab-action="open" data-open="inputs" class="yai-tab-btn">
+                    <span class="yai-icon ycon-is-left">⌨️</span> Input/Change
+                </button>
+                <button data-tab-action="open" data-open="forms" class="yai-tab-btn">
+                    <span class="yai-icon ycon-is-left">📝</span> Forms
+                </button>
+            </nav>
+            <div data-content class="yai-content">
+                <!-- Home Tab -->
+                <div data-tab="home" class="active yai-tab-panel" data-spaceless>
+                    <div class="yp-3 yai-grid yai-gap-l">
+                        <div class="yai-hero">
+                            <h2><b>🎯 YaiTabs Event Bus</b></h2>
+                            <p class="yai-subtitle ymb-0">Powerful event-driven UI components powered by YEH</p>
+                        </div>
+                        <hr class="ym-0">
+                        <div class="yai-hero-2">
+                            <h3>Event Delegation Architecture</h3>
+                            <p>This
+                                <i data-click="highlight-conainer" class="yai-btn-link" title="Click to highlight the Tab Component">entire tab component</i>
+                                uses <b>only 5 root listeners</b> to handle all interactions. No matter how many buttons, inputs, or forms you add—even in nested tabs—they all use the same delegated listeners. Copy & paste any element and it works immediately without re-initialization.</p>
+                            <h4>Active Listeners:</h4>
+                            <ul class="ymb-0">
+                                <li><code>click</code> — 1 listener (tab navigation + all button clicks, <b>required</b>)</li>
+                                <li><code>keydown</code> — 1 listener (keyboard shortcuts + tab navigation, <b>required</b>)</li>
+                                <li><code>change</code> — 1 listener (selects, checkboxes, radios, <i>optional</i>)</li>
+                                <li><code>input</code> — 1 listener (text inputs, live search, debounced, <i>optional</i>)</li>
+                                <li><code>submit</code> — 1 listener (all form submissions, <i>optional</i>)</li>
+                                <li><b>Total: 5 listeners for unlimited interactions</b></li>
+                            </ul>
+                        </div>
+                        <hr class="ym-0">
+                        <div class="yai-demo-preview">
+                            <button data-click="quick-demo" class="yai-btn yai-btn-primary">🎮 Try Quick Demo</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Click Events Tab -->
+                <div data-tab="clicks" class="yai-tab-panel">
+                    <h2><b>🖱️ Click Event Playground</b></h2>
+                    <p>Click any button to see the event bus in action:</p>
+                    <hr>
+                    <div class="yai-grid yai-gap-l">
+                        <div class="yai-button-grid yai-flex yai-flex-wrap yai-gap-s">
+                            <button data-click="primary" class="yai-btn yai-btn-primary">Primary Action</button>
+                            <button data-click="secondary" class="yai-btn yai-btn-secondary">Secondary Action</button>
+                            <button data-click="success" class="yai-btn yai-btn-success">Success Action</button>
+                            <button data-click="warning" class="yai-btn yai-btn-warning">Warning Action</button>
+                            <button data-click="danger"  class="yai-btn yai-btn-danger">Danger Action</button>
+                        </div>
+                        <div class="yai-response-area">
+                            <h3 class="ymb-0">Live Responses:</h3>
+                            <div id="click-responses" class="yai-response-log"><span class="muted">pending…</span></div>
+                        </div>
+                        <!-- Nested Tabs Example -->
+                        <div data-yai-tabs data-nav="left" data-color-accent="primary" data-ref-path="nested-clicks" class="yai-nested">
+                            <nav data-controller class="yai-nav-vertical">
+                                <button data-tab-action="open" data-open="nested-1">Nested Demo</button>
+                                <button data-tab-action="open" data-open="nested-2">More Examples</button>
+                            </nav>
+                            <div data-content>
+                                <div data-tab="nested-1">
+                                    <div class="yai-grid yai-gap-l">
+                                        <h4 class="ymb-0">Nested Component Demo</h4>
+                                        <p class="ymb-0">This is a nested tab component! Try these:</p>
+                                        <div class="yai-flex yai-gap-l">
+                                            <button data-click="nested-action" class="yai-btn">Nested Button 1</button>
+                                            <button data-click="nested-action" class="yai-btn">Nested Button 2</button>
+                                        </div>
+                                        <div id="click-nested-1-responses" class="yai-response-log"><span class="muted">pending…</span></div>
+                                    </div>
+                                </div>
+                                <div data-tab="nested-2">
+                                    <div class="yai-grid yai-gap-l">
+                                        <h4 class="ymb-0">Copy & Paste Magic</h4>
+                                        <p class="ymb-0">These components were copied & pasted:</p>
+                                        <div class="yai-flex yai-gap-l">
+                                            <button data-click="dark" class="yai-btn yai-btn-dark">Copied Button 1</button>
+                                            <button data-click="funky" class="yai-btn yai-btn-funky">Copied Button 2</button>
+                                        </div>
+                                        <div id="click-nested-2-responses" class="yai-response-log"><span class="muted">pending…</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Input/Change Tab -->
+                <div data-tab="inputs" class="yai-tab-panel">
+                    <h2><b>⌨️ Input & Change Events</b></h2>
+                    <p>In this example, all unputs are throttled, set in the constructor.</p>
+                    <hr>
+                    <div class="yai-grid yai-gap-l">
+                        <div class="yai-grid yai-gap-s">
+                            <label for="text-demo-y">Text Input:</label>
+                            <input id="text-demo-y" data-input="text-demo" type="text" placeholder="Start typing..." class="yai-input" aria-label="Text input demo">
+                        </div>
+                        <div class="yai-grid yai-gap-s">
+                            <label for="yai-select">Select Menu:</label>
+                            <select id="yai-select" data-change="select-demo" class="yai-select" aria-label="Select demo">
+                                <option value="">Choose an option</option>
+                                <option value="option1">Option 1</option>
+                                <option value="option2">Option 2</option>
+                                <option value="option3">Option 3</option>
+                            </select>
+                        </div>
+                        <div class="yai-grid yai-gap-s">
+                            <label for="checko-demo-yey" class="yai-checkbox">
+                                <input id="checko-demo-yey" data-change="danger" type="checkbox">
+                                <span class="yai-checkbox-title">Toggle this checkbox</span>
+                            </label>
+                        </div>
+                        <hr class="ym-0">
+                        <div class="yai-response-area">
+                            <h3 class="ymb-0">Input Responses:</h3>
+                            <div id="input-responses" class="yai-response-log"><span class="muted">pending…</span></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Forms Tab -->
+                <div data-tab="forms" class="yai-tab-panel">
+                    <h2><b>📝 Form Evolution</b></h2>
+                    <hr>
+                    <form data-yai-form class="yai-form yai-grid yai-gap-l">
+                        <div class="yai-grid yai-gap-s">
+                            <label for="user-name">Name:</label>
+                            <input id="user-name" name="user-name" data-input="user-name" type="text" class="yai-input" placeholder="Your name">
+                        </div>
+                        <div class="yai-grid yai-gap-s">
+                            <label for="user-email">Email:</label>
+                            <input name="user-email" id="user-email" data-input="user-email" type="email" class="yai-input" placeholder="your@email.com">
+                        </div>
+                        <div class="yai-grid yai-gap-s">
+                            <label for="user-plan" class="yai-label">Plan:</label>
+                            <select id="user-plan" name="user-plan" data-change="user-plan" class="yai-select">
+                                <option value="basic">Basic</option>
+                                <option value="pro">Pro</option>
+                                <option value="enterprise">Enterprise</option>
+                            </select>
+                        </div>
+                        <div class="yai-form-group">
+                            <label for="checkboxNewsletter" class="yai-checkbox">
+                                <input id="checkboxNewsletter" name="checkboxNewsletter" data-change="newsletter" type="checkbox">
+                                <span class="yai-checkbox-title">Subscribe to newsletter</span>
+                            </label>
+                        </div>
+                        <div class="yai-form-group">
+                            <button type="submit" class="yai-btn yai-btn-primary">Submit Form</button>
+                        </div>
+                    </form>
+                    <hr>
+                    <div id="form-responses" class="yai-response-log"><span class="muted">pending…</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Control center -->
     <div class="controls">
@@ -1053,7 +1358,7 @@
                     <!-- Nav Position -->
                     <div class="config-position">
                         <div class="set-group" title="Position navigation buttons relative to content area">
-                            <label for="nav-position">Nav Position</label>
+                            <label for="nav-position">Nav Pos.</label>
                             <select
                                 id="nav-position"
                                 class="switch-nav-position"
@@ -1081,12 +1386,61 @@
                             </select>
                         </div>
                     </div>
-                    <!-- Expand nav buttons -->
-                    <div class="config-grow set-group" title="Expand navigation buttons to fill all available horizontal space" style="max-width: fit-content;">
-                        <label for="setButtonGrow" class="checker space-between">
-                            <input type="checkbox" id="setButtonGrow" data-grow="true" data-action="handleConfigs" checked>
-                            <span>Expand Nav</span>
-                        </label>
+                    <!-- Color scheme -->
+                    <div class="config-alignment">
+                        <div class="set-group" title="Check colors">
+                            <label for="nav-switchColorScheme">Layout</label>
+                            <select
+                                id="nav-switchColorScheme"
+                                data-apply-fn="scheme"
+                                class="switch-switchColorScheme"
+                                data-action="switchColorScheme">
+                                <option value="light" selected>Light</option>
+                                <option value="dark">Dark</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- Color accent -->
+                    <div class="config-alignment">
+                        <div class="set-group" title="Check more colors">
+                            <label for="nav-switchColorScheme-accents">Accents</label>
+                            <select
+                                id="nav-switchColorScheme-accents"
+                                class="switch-switchColorScheme-accents"
+                                data-apply-fn="accent"
+                                data-accent="true"
+                                data-action="switchColorScheme"
+                                data-color-apply="danger">
+                                <option value="reset" data-color-apply="dark">Reset</option>
+                                <option value="primary" data-color-apply="primary">Primary</option>
+                                <option value="secondary" data-color-apply="secondary">Secondary</option>
+                                <option value="success" data-color-apply="success">Success</option>
+                                <option value="warning" data-color-apply="warning">Warning</option>
+                                <option value="danger" data-color-apply="danger" selected>Danger (default)</option>
+                                <option value="funky" data-color-apply="funky">Funky</option>
+                                <option value="dark" data-color-apply="dark">Dark</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- Color variant -->
+                    <div class="config-alignment">
+                        <div class="set-group" title="Check more colors">
+                            <label for="nav-switchColorScheme-variant">Variant</label>
+                            <select
+                                id="nav-switchColorScheme-variant"
+                                class="switch-switchColorScheme-variant"
+                                data-apply-fn="variant"
+                                data-action="switchColorScheme">
+                                <option value="reset">Reset</option>
+                                <option value="primary" data-color-apply="primary">Primary</option>
+                                <option value="secondary" data-color-apply="secondary">Secondary</option>
+                                <option value="success" data-color-apply="success">Success</option>
+                                <option value="warning" data-color-apply="warning">Warning</option>
+                                <option value="danger" data-color-apply="danger">Danger</option>
+                                <option value="funky" data-color-apply="funky">Funky</option>
+                                <option value="dark" data-color-apply="dark">Dark</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
                 <!-- Switching through all buttons -->
@@ -1111,6 +1465,13 @@
                             <input id="autoswitchTimeout" type="number" min="500" max="15000" step="50" value="1250">
                         </div>
                     </div>
+                    <!-- Expand nav buttons -->
+                    <div class="config-grow set-group" title="Expand navigation buttons to fill all available horizontal space" style="max-width: fit-content;">
+                        <label for="setButtonGrow" class="checker space-between">
+                            <input type="checkbox" id="setButtonGrow" data-grow="true" data-action="handleConfigs">
+                            <span>Expand Nav</span>
+                        </label>
+                    </div>
                     <!-- Body extend max-width -->
                     <div class="config-body-max-width set-group" title="Toggle max-width of body" style="max-width: fit-content;">
                         <label for="toggleBodyMaxWiddth" class="checker space-between">
@@ -1130,16 +1491,18 @@
         </div>
     </div>
 
-    <!-- First Example
+
+    <!-- Controlable
         Standard Tabs markup -->
     <div class="section section-tabs">
         <div id="demo-tabs"
             data-yai-tabs
             data-nav="top"
+            class="yai-nested"
             data-behavior="blur"
             data-theme="default">
-            <nav data-controller data-align="start" data-grow aria-label="Special Demo Tabs">
-                <button data-tab-action="open" data-open="1" data-default>Home</button>
+            <nav data-controller data-align="start" aria-label="Special Demo Tabs">
+                <button data-tab-action="open" data-open="1" data-inview-default>Home</button>
                 <button data-tab-action="open" data-open="2">ARIA</button>
                 <button data-tab-action="open" data-open="3">FAQ</button>
                 <!-- Dynamic content -->
@@ -1163,15 +1526,15 @@
                     data-trigger-ynfiniti
                     data-url="dynamic/dynamic-content-3.html">Dynamic Tabs</button>
             </nav>
-            <div data-content>
+            <div data-content class="yai-content">
                 <div data-tab="1" data-spaceless>
                     <div
                         data-yai-tabs
                         class="good-to-know"
                         data-behavior="blur"
                         data-nav="bottom"
-                        data-color-scheme="blue">
-                        <nav data-controller>
+                        data-color-accent="primary">
+                        <nav data-controller data-variant="primary">
                             <button data-tab-action="open" data-open="1" data-default>Good to know</button>
                             <button data-tab-action="open" data-open="2">Tell me more</button>
                             <button data-tab-action="open" data-open="3">LCP?</button>
@@ -1179,10 +1542,11 @@
                         </nav>
                         <div data-content>
                             <div data-tab="1">
-                                <div class="yp-1">
+                                <div class="yp-2">
                                     <p>Open <button
-                                            class="btn-link"
-                                            data-action="remoteClick"
+                                            type="button"
+                                            class="btn-link yai-action"
+                                            data-handler="remoteClick"
                                             data-target-selector="nav[data-controller] [data-trigger-ynfiniti]"
                                             data-open="3"
                                             data-url="dynamic/dynamic-content-3.html"
@@ -1193,20 +1557,22 @@
                                         "<b>Load More Tabs →</b>"
                                         repeatedly while you climb up the resulting DOM tree to experience <b>Ynfiniti</b>.
                                         Most frameworks allegedly crash after 4-5 levels. YaiTabs in any case keeps going: 4 levels, 40 levels, presumably 400,000 levels...</p>
-                                    <p class="mb-0"><strong>Instructions:</strong> Keep clicking "Load More Tabs →" inside each newly loaded tab to create infinite nesting. Watch the performance stay green!</p>
+                                    <p class="ymb-0"><strong>Instructions:</strong> Keep clicking "Load More Tabs →" inside each newly loaded tab to create infinite nesting. Watch the performance stay green!</p>
                                 </div>
                             </div>
                             <div data-tab="2">
-                                <p>Our only limitation is the browser's capacity to render nested elements recursively injected. The registered listener doesn't mind - it just waits for events triggered from within its assigned element, while the browser has to keep the whole world together in a div!</p>
-                                <p>That's not even a challenge for YEH. It's impossible to overwhelm a single listener that basically does nothing but look in one direction, waiting for smoke signals from the almost lost, to finally guide them to their intended handler.</p>
-                                <hr>
-                                <p class="mb-0"><strong>Technical reality:</strong> One listener handles infinite nesting with O(1) performance. No listener proliferation, no memory leaks, no performance degradation, full scope awareness. Not even 4,000,000 levels should matter - for the listener, nothing changes because it doesn't look for levels or elements, but for events triggered in their territory.</p>
+                                <div class="yp-2">
+                                    <p>Our only limitation is the browser's capacity to render nested elements recursively injected. The registered listener doesn't mind - it just waits for events triggered from within its assigned element, while the browser has to keep the whole world together in a div!</p>
+                                    <p>That's not even a challenge for YEH. It's impossible to overwhelm a single listener that basically does nothing but look in one direction, waiting for smoke signals from the almost lost, to finally guide them to their intended handler.</p>
+                                    <hr>
+                                    <p class="ymb-0"><strong>Technical reality:</strong> One listener handles infinite nesting with O(1) performance. No listener proliferation, no memory leaks, no performance degradation, full scope awareness. Not even 4,000,000 levels should matter - for the listener, nothing changes because it doesn't look for levels or elements, but for events triggered in their territory.</p>
+                                </div>
                             </div>
                             <div data-tab="3" data-spaceless>
                                 <div class="yp-3">
                                     <h2>What is the world record for nested tab components any way?</h2>
                                     <hr>
-                                    <p class="mb-0">Stress tested the component with up to 70 dynamically loaded and hierarchically nested <a href="./dynamic/dynamic-content-3.html" target="_blank">tab components</a> with two event listeners added to the root component handling all interactions. LCP remains constant at 0.10 s – the browser DOM rendering becomes the bottleneck for our O(1) event system.</p>
+                                    <p class="ymb-0">Stress tested the component with up to 70 dynamically loaded and hierarchically nested <a href="./dynamic/dynamic-content-3.html" target="_blank">tab components</a> with two event listeners added to the root component handling all interactions. LCP remains constant at 0.10 s – the browser DOM rendering becomes the bottleneck for our O(1) event system.</p>
                                 </div>
                                 <div class="benchmark-table">
                                     <div class="table-container">
@@ -1227,9 +1593,7 @@
                                             <tfoot>
                                                 <tr>
                                                     <td colspan="5">
-                                                        <div class="yp-2">
-                                                            <small><b>Conclusion:</b> LCP stays constant (O(1) scaling proven) while INP degrades due to browser DOM complexity, not event handling.</small>
-                                                        </div>
+                                                        <small><b>Conclusion:</b> LCP stays constant (O(1) scaling proven) while INP degrades due to browser DOM complexity, not event handling.</small>
                                                     </td>
                                                 </tr>
                                             </tfoot>
@@ -1240,7 +1604,7 @@
                             <div data-tab="4">
                                 <h2>And what?</h2>
                                 <hr>
-                                <p class="mb-0">This section is 100%, but there are still more delegation secrets waiting to be discovered.</p>
+                                <p class="ymb-0">This section is 100%, but there are still more delegation secrets waiting to be discovered.</p>
                             </div>
                         </div>
                     </div>
@@ -1248,75 +1612,110 @@
                 <div data-tab="2">
                     <h2>Follows WAI-ARIA Authoring Practices <a href="#aria-summary">#</a></h2>
                     <hr>
-                    <p class="mb-0"><a href="https://www.w3.org/WAI/ARIA/apg/" target="_blank" rel="nofollow">https://www.w3.org/WAI/ARIA/apg/</a></p>
+                    <div>
+                        <label>
+                            Autofocus test
+                            <input data-input="handler" name="autofocus-test" autofocus>
+                        </label>
+                    </div>
+                    <hr>
+                    <p class="ymb-0"><a href="https://www.w3.org/WAI/ARIA/apg/" target="_blank" rel="nofollow">https://www.w3.org/WAI/ARIA/apg/</a></p>
                 </div>
                 <div data-tab="3">
                     <h2>Lorem ipsum FAQ?</h2>
                     <hr>
-                    <p class="mb-0">All FAQs are <a href="#faq-container">here</a>, more FAQs incoming.</p>
+                    <p class="ymb-0">All FAQs are <a href="#faq-container">here</a>, more FAQs incoming.</p>
                 </div>
                 <!-- Dynamic content -->
-                <div data-tab="4"></div>
-                <div data-tab="5"></div>
-                <div data-tab="6"></div>
+                <div data-tab="4" data-spaceless class="yai-content"></div>
+                <div data-tab="5" data-spaceless class="yai-content"></div>
+                <div data-tab="6" data-spaceless class="yai-content"></div>
             </div>
         </div>
     </div>
 
-    <!-- Quick Event delegation reminder -->
-    <div class="box short-note info-2 removable">
-        <h2>
-            <span class="ycon ycon-satellite-antenna ycon-sm ycon-fix-top-1 ycon-is-left" aria-hidden="true"></span>
-             Event Delegation Architecture
-        </h2>
-        <p>Each YaiTabs root component uses exactly <strong>2 event listeners</strong> <small>(click &amp; keydown)</small> regardless of tab count. Auto scoped container isolation prevents conflicts.</p>
-        <p class="mb-0">Sidenote: This demo's <a data-action="refPathProcess" data-yai-ref-path="lvl-1-tabs=5">ExampleHandler</a> class uses a single <code>&lt;body&gt;</code> click listener via <a href="https://github.com/yaijs/yeh" target="_blank">YEH <span class="ycon ycon-print-screen ycon-xxs flip ycon-is-right ycon-fix-top-1" aria-hidden="true"></span></a> (required and included for YaiTabs anyway) to manage additional page interactions needed. They even work within Tab components.</p>
-        <hr>
-        <!-- DeepLinks -->
-        <div id="deeplink-container">
-            <h2 class="y-flex-between-center mb-0">
-                <span title="Exclusive for Example page">
-                    <small class="ycon ycon-link ycon-xs ycon-fix-top-1 ycon-is-left" aria-hidden="true"></small>
-                    DeepLinks <small class="text-muted">beta</small>
-                </span>
-                <span><small><a href="?scrollto=deeplink-container">reset</a></small></span>
-            </h2>
-            <nav class="y-flex y-flex-items">
-<pre class="y-flex-item mb-0">
-<a href="#" data-yai-ref-path="main-tabs=3">Access & Nest</a>
-  <a href="#" data-yai-ref-path="lvl-1-tabs=4">…/Deep Nesting Dark</a>
-    <a href="#" data-yai-ref-path="lvl-2-tabs-repeat=2">…/URL State</a>
-      <a href="#" data-yai-ref-path="lvl-3-tabs-repeat=3">…/Troubleshooting</a>
-        <a href="#" data-yai-ref-path="lvl-4-tabs-repeat=2">…/Design Notes</a>
-</pre>
-<pre class="y-flex-item mb-0">
-<a data-yai-ref-path="styles=1">Colors</a>
-  <a data-yai-ref-path="s-red=2|s-blue=3">…/Def & Blue</a>
-  <a data-yai-ref-path="s-red=3|s-blue=2|s-dark=4">…/Def & Blue & Dark</a>
-    <a data-yai-ref-path="y-s-light=1" data-scroll-to>…/Mixed</a>
-</pre>
-<pre class="y-flex-item mb-0">
-<a data-yai-ref-path="lvl-1-tabs=1|styles=1">Mixed Light</a>
-  <a data-yai-ref-path="lvl-2-tabs=2|s-red=2">Mixed Medium</a>
-    <a data-yai-ref-path="lvl-3-tabs-repeat=1|styles=1|s-red=1|s-dark=1">Mixed Extreme</a>
-      <a data-yai-ref-path="lvl-4-tabs-repeat=1|y-s-light=1|s-red=3|s-blue=2|s-dark=4">YEH & YAI</a>
-</pre>
+
+    <!-- Event Delegation Note
+        Next level -->
+    <div class="section linking-section">
+        <div
+            data-yai-tabs
+            data-behavior="blur"
+            data-theme="default"
+            data-color-accent="neutral"
+            data-nav="top"
+            class="yai-nested"
+            data-ref-path="linking">
+            <nav data-controller>
+                <button data-tab-action="open" data-open="1">Event Delegation</button>
+                <button data-tab-action="open" data-open="2">Deeplinks</button>
             </nav>
-        </div>
-        <hr>
-        <div class="component-counter-container">
-            <div class="component-counter-action">
-                <button data-action="countComponents">Count components</button>
-                <b class="total-components-result">0</b>
+            <div data-content>
+                <div data-tab="1">
+                    <h2>
+                        <span class="ycon ycon-satellite-antenna ycon-sm ycon-fix-top-1 ycon-is-left" aria-hidden="true"></span>
+                        Event Delegation Architecture
+                    </h2>
+                    <hr>
+                    <p>Each YaiTabs root component generally uses <strong>two event listeners</strong> <small>(1*click and 1*keystroke)</small>, regardless of the number of tabs and nesting depth. However, you can also configure YaiTabs to add more eventListeners, which you can ovserve via hooks to handle events in that component. All listeners will be added once and shared between observers till session end.</p>
+                    <p class="ymb-0">Sidenote: This demo's <a data-action="refPathProcess" data-yai-ref-path="lvl-1-tabs=5|linking=1">ExampleHandler</a> class uses a single <code>&lt;body&gt;</code> click listener via <a href="https://github.com/yaijs/yeh" target="_blank">YEH <span class="ycon ycon-print-screen ycon-xxs flip ycon-is-right ycon-fix-top-1" aria-hidden="true"></span></a> (required and included for YaiTabs anyway) to manage additional page interactions needed. They even work within Tab components.</p>
+                </div>
+                <div data-tab="2">
+                    <!-- DeepLinks -->
+                    <div id="deeplink-container">
+                        <h2 class="y-flex-between-center">
+                            <span title="Exclusive for Example page">
+                                <small class="ycon ycon-link ycon-xs ycon-fix-top-1 ycon-is-left" aria-hidden="true"></small>
+                                DeepLinks <small class="text-muted">beta</small>
+                            </span>
+                            <span><small><a href="?scrollto=deeplink-container&setlinking=2">reset</a></small></span>
+                        </h2>
+                        <hr>
+                        <p>The function, that updates existing links on this page with the correct URL is current state Example only.</p>
+                        <p>Create full URLs by just using the data-ref-path (key) of the tab you're targeting. The "Accessibility & Nesting" tab below has data-ref-path = "main-tabs". In it, there is another tabs component with data-ref-path = "lvl-1-tabs". This values are custom set. When you have the key for the targeted path, call the static getter:
+                        --  `tabs.reconstructUrlFromRef('lvl-1-tabs', 4, container)`, which will return the hash needed to open that tab.
+                        -- `#main-tabs=3&lvl-1-tabs=2`
+                        Replace it in the URL bar and let YEH open that tab. Since data-ref-path is a static, not calculated key, this can be considereed links. The following Link <a data-yai-ref-path="linking=2|lvl-4-tabs-repeat=1|y-s-light=1|s-red=3|s-blue=2|s-dark=4">Opens multiple tab components (inclusive the one in which you actually do read.)</a>
+                        </p>
+                        <nav class="y-flex y-flex-items y-flex-wrap ">
+<pre class="y-flex-itemy ymb-0">
+<a href="#" data-yai-ref-path="linking=2|lvl-1-tabs=4">Deep Nesting Dark</a>
+  <a href="#" data-yai-ref-path="linking=2|lvl-2-tabs-repeat=2">…/URL State</a>
+    <a href="#" data-yai-ref-path="linking=2|lvl-3-tabs-repeat=3">…/Troubleshooting</a>
+      <a href="#" data-yai-ref-path="linking=2|lvl-4-tabs-repeat=2">…/Design Notes</a>
+</pre>
+<pre class="y-flex-itemy ymb-0">
+<a data-yai-ref-path="linking=2|styles=1">Colors</a>
+  <a data-yai-ref-path="linking=2|s-red=2|s-blue=3">…/Def & Blue</a>
+    <a data-yai-ref-path="linking=2|s-red=3|s-blue=2|s-dark=4">…/Def & Blue & Dark</a>
+      <a data-yai-ref-path="linking=2|y-s-light=1" data-scroll-to>…/Mixed</a>
+</pre>
+<pre class="y-flex-itemy ymb-0">
+<a data-yai-ref-path="linking=2|styles=1|lvl-1-tabs=1">Mixed Light</a>
+  <a data-yai-ref-path="linking=2|lvl-2-tabs=2|s-red=2">Mixed Medium</a>
+    <a data-yai-ref-path="linking=2|styles=1|s-red=1|s-dark=1|lvl-3-tabs-repeat=1">Mixed Extreme</a>
+      <a data-yai-ref-path="linking=2|lvl-4-tabs-repeat=1|s-red=3|s-blue=2|s-dark=4|y-s-light=1">YEH & YAI</a></pre>
+                        </nav>
+
+                    </div>
+                </div>
             </div>
-            <div class="component-counter-extras">
-                <label>console.log <input type="checkbox" name="listComponentsInConsole"></label>
+            <hr class="ym-0">
+            <!-- Quick Event delegation reminder -->
+            <div class="component-counter-container yp-1">
+                <div class="component-counter-action">
+                    <button data-action="countComponents">Count components</button>
+                    <b class="total-components-result">0</b>
+                </div>
+                <div class="component-counter-extras" title="If checked, extensive data will be output to the console">
+                    <label>console.log <input type="checkbox" name="listComponentsInConsole"></label>
+                </div>
             </div>
         </div>
-        <button class="y-remove-parent" data-action="removeParent" title="Got it, remove the box"></button>
     </div>
 
-    <!-- Second Example
+
+    <!-- Deep Nested
         Extended Tabs markup -->
     <div class="section section-tabs">
         <div
@@ -1361,7 +1760,7 @@
     <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
 <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
 </pre>
-                        <p class="mb-0"><small>Tip: Use unique <b>data-ref-path</b> attributes per component to enable <b>location.hash</b> handler.</small></p>
+                        <p class="ymb-0"><small>Tip: Use unique <b>data-ref-path</b> attributes per component to enable <b>location.hash</b> handler.</small></p>
                     </div>
                 </div>
                 <!-- MAIN TAB 2 -->
@@ -1371,15 +1770,15 @@
                     <hr>
                     <h3>Why it’s fast</h3>
                     <ol>
-                    <li><strong>Delegated Events:</strong> 2 listener per component; no N×M explosion with nesting.</li>
-                    <li><strong>DOM Distance Cache:</strong> Resolves closest targets efficiently inside component.</li>
-                    <li><strong>Idempotent Init:</strong> Prevents re-binding and duplicate listeners.</li>
+                        <li><strong>Delegated Events:</strong> 2 listener per component; no N×M explosion with nesting.</li>
+                        <li><strong>DOM Distance Cache:</strong> Resolves closest targets efficiently inside component.</li>
+                        <li><strong>Idempotent Init:</strong> Prevents re-binding and duplicate listeners.</li>
                     </ol>
                     <h3>Practical Tips</h3>
                     <ul>
-                    <li>Prefer <code>data-history-mode="replace"</code> to avoid bloating browser history on rapid tabbing.</li>
-                    <li>For async loads, enable content cache if your UX benefits from instant back-navigation.</li>
-                    <li>Use <code>prefers-reduced-motion</code> CSS gate for transitions on low-motion users.</li>
+                        <li>Prefer <code>data-history-mode="replace"</code> to avoid bloating browser history on rapid tabbing.</li>
+                        <li>For async loads, enable content cache if your UX benefits from instant back-navigation.</li>
+                        <li>Use <code>prefers-reduced-motion</code> CSS gate for transitions on low-motion users.</li>
                     </ul>
                     <blockquote>
                         “One listener per container keeps memory flat and GC friendly—even with O(n)+ levels of nested tabs.”
@@ -1437,7 +1836,7 @@
                                         <div data-tab="1">
                                             <h4>Animations</h4>
                                             <p>Switch between <code>fade</code>, <code>slide-*</code>, <code>zoom</code>, or <code>flip</code> via <code>data-behavior</code>. Keep transitions short (150–300ms) for snappy feel.</p>
-                                            <p class="mb-0"><small>For content that shifts layout, consider overflow gating to avoid jank.</small></p>
+                                            <p class="ymb-0"><small>For content that shifts layout, consider overflow gating to avoid jank.</small></p>
                                         </div>
 
                                         <!-- L2 TAB 2 -->
@@ -1473,7 +1872,7 @@
                                                             <li><code>data-open</code> sets the target panel ID.</li>
                                                             <li><code>data-nav</code> controls nav position: <em>top/bottom/left/right</em>.</li>
                                                         </ul>
-                                                        <p class="mb-0"><small>Initialize only once per container; the component is idempotent by design.</small></p>
+                                                        <p class="ymb-0"><small>Initialize only once per container; the component is idempotent by design.</small></p>
                                                     </div>
 
                                                     <!-- L3 TAB 2 -->
@@ -1485,7 +1884,7 @@
                                                             <li>Optionally set <code>aria-live="polite"</code> for subtle SR announcements.</li>
                                                             <li>Re-run accessibility setup on nested content if it includes new tab containers.</li>
                                                         </ul>
-                                                        <p class="mb-0"><small>Consider caching for quick back-navigation.</small></p>
+                                                        <p class="ymb-0"><small>Consider caching for quick back-navigation.</small></p>
                                                     </div>
 
                                                     <!-- L3 TAB 3 -->
@@ -1512,7 +1911,7 @@
                                                             <div data-content>
                                                                 <div data-tab="1">
                                                                     <h6>Pre-Ship Checklist</h6>
-                                                                    <ul class="mb-0">
+                                                                    <ul class="ymb-0">
                                                                         <li>Unique <code>data-ref-path</code> per container</li>
                                                                         <li>Visible <code>:focus-visible</code> ring for all interactive elements</li>
                                                                         <li><code>aria-orientation</code> consistent with computed layout</li>
@@ -1521,14 +1920,14 @@
                                                                 </div>
                                                                 <div data-tab="2">
                                                                     <h6>Design Notes</h6>
-                                                                    <ul class="mb-0">
+                                                                    <ul class="ymb-0">
                                                                         <li>Prefer subtle elevation for active tabs and maintain a consistent hit-area (min-height ~40px).</li>
                                                                         <li>Use semantic color tokens for easy theming.</li>
                                                                     </ul>
                                                                 </div>
                                                                 <div data-tab="3">
                                                                     <h6>Changelog (Excerpt)</h6>
-                                                                    <ul class="mb-0">
+                                                                    <ul class="ymb-0">
                                                                         <li><strong>3.1:</strong> URL state for nested tabs; orientation via computed layout.</li>
                                                                         <li><strong>3.0:</strong> Single-listener event model; idempotent accessibility setup.</li>
                                                                         <li><strong>2.x:</strong> Roving tabindex + APG keyboard model.</li>
@@ -1548,7 +1947,7 @@
 --&gt;
 &lt;div data-yai-tabs data-nesting=<span class="hljs-string">&quot;55&quot;</span> /&gt;</pre>
 
-<pre class="hljs">Local metrics
+<pre class="hljs ymb-0">Local metrics
 
 Largest Contentful Paint (LCP) <span class="hljs-number">0.16</span> s
 Your local LCP value of <span class="hljs-number">0.16</span> s is good. LCP elem. p
@@ -1576,7 +1975,7 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
         <span class="hljs-attribute">animation</span>: none;
     }
 }</pre>
-                                            <p class="mb-0"><small>Keep parity in UX by retaining visual state changes without movement.</small></p>
+                                            <p class="ymb-0"><small>Keep parity in UX by retaining visual state changes without movement.</small></p>
                                         </div>
                                     </div>
                                 </div>
@@ -1592,7 +1991,7 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
                                     <li><strong>Enter/Space</strong> activates and may move focus into the panel (configurable).</li>
                                     <li><strong>Home/End</strong> go to first/last tab; <strong>Esc</strong> bubbles to parent container.</li>
                                 </ul>
-                                <p class="mb-0"><small>Set <code>aria-orientation</code> based on computed layout for robustness.</small></p>
+                                <p class="ymb-0"><small>Set <code>aria-orientation</code> based on computed layout for robustness.</small></p>
                             </div>
 
                             <!-- L1 TAB 4 -->
@@ -1619,7 +2018,7 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
                                         <div data-tab="1">
                                             <h4>Animations</h4>
                                             <p>Switch between <code>fade</code>, <code>slide-*</code>, <code>zoom</code>, or <code>flip</code> via <code>data-behavior</code>. Keep transitions short (150–300ms) for snappy feel.</p>
-                                            <p class="mb-0"><small>For content that shifts layout, consider overflow gating to avoid jank.</small></p>
+                                            <p class="ymb-0"><small>For content that shifts layout, consider overflow gating to avoid jank.</small></p>
                                         </div>
 
                                         <!-- L2 TAB 2 -->
@@ -1655,7 +2054,7 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
                                                             <li><code>data-open</code> sets the target panel ID.</li>
                                                             <li><code>data-nav</code> controls nav position: <em>top/bottom/left/right</em>.</li>
                                                         </ul>
-                                                        <p class="mb-0"><small>Initialize only once per container; the component is idempotent by design.</small></p>
+                                                        <p class="ymb-0"><small>Initialize only once per container; the component is idempotent by design.</small></p>
                                                     </div>
 
                                                     <!-- L3 TAB 2 -->
@@ -1667,7 +2066,7 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
                                                             <li>Optionally set <code>aria-live="polite"</code> for subtle SR announcements.</li>
                                                             <li>Re-run accessibility setup on nested content if it includes new tab containers.</li>
                                                         </ul>
-                                                        <p class="mb-0"><small>Consider caching for quick back-navigation.</small></p>
+                                                        <p class="ymb-0"><small>Consider caching for quick back-navigation.</small></p>
                                                     </div>
 
                                                     <!-- L3 TAB 3 -->
@@ -1694,7 +2093,7 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
                                                             <div data-content>
                                                                 <div data-tab="1">
                                                                     <h6>Pre-Ship Checklist</h6>
-                                                                    <ul class="mb-0">
+                                                                    <ul class="ymb-0">
                                                                         <li>Unique <code>data-ref-path</code> per container</li>
                                                                         <li>Visible <code>:focus-visible</code> ring for all interactive elements</li>
                                                                         <li><code>aria-orientation</code> consistent with computed layout</li>
@@ -1703,18 +2102,21 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
                                                                 </div>
                                                                 <div data-tab="2">
                                                                     <h6>Design Notes</h6>
-                                                                    <ul class="mb-0">
+                                                                    <ul class="ymb-0">
                                                                         <li>Prefer subtle elevation for active tabs and maintain a consistent hit-area (min-height ~40px).</li>
                                                                         <li>Use semantic color tokens for easy theming.</li>
                                                                     </ul>
                                                                 </div>
                                                                 <div data-tab="3">
                                                                     <h6>Changelog (Excerpt)</h6>
-                                                                    <ul class="mb-0">
+                                                                    <ul>
                                                                         <li><strong>3.1:</strong> URL state for nested tabs; orientation via computed layout.</li>
                                                                         <li><strong>3.0:</strong> Single-listener event model; idempotent accessibility setup.</li>
                                                                         <li><strong>2.x:</strong> Roving tabindex + APG keyboard model.</li>
                                                                     </ul>
+                                                                    <p class="ymb-0">
+                                                                        <button data-click="primary" class="yai-btn yai-btn-primary">Random click test</button>
+                                                                    </p>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -1736,7 +2138,7 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
         <span class="hljs-attribute">animation</span>: none;
     }
 }</pre>
-                                            <p class="mb-0"><small>Keep parity in UX by retaining visual state changes without movement.</small></p>
+                                            <p class="ymb-0"><small>Keep parity in UX by retaining visual state changes without movement.</small></p>
                                         </div>
                                     </div>
                                 </div>
@@ -1745,16 +2147,19 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
 
                             <!-- L1 TAB 5 -->
                             <div data-tab="5">
-                                <h3>Need a click handler for some VooDoo?</h3>
-                                <p>YaiTabs requires YEH to handle all events in a self-contained manner. It's an ES6 Class focused on event handling and delegation (~800 LOC).</p>
-                                <p>Since YEH is already loaded for YaiTabs, you can leverage it for any additional event handling needs. This gives you the same O(1) performance benefits for any custom interactions. BTW, this example page uses YEH under the hood, too.</p>
-                                <p>Here's a simple example showing how to create your own event handler using the same architecture:</p>
+                                <div class="yp-1">
+
+                                    <h3>Need a click handler for some VooDoo?</h3>
+                                    <p>YaiTabs requires YEH to handle all events in a self-contained manner. It's an ES6 Class focused on event handling and delegation (~800 LOC).</p>
+                                    <p>Since YEH is already loaded for YaiTabs, you can leverage it for any additional event handling needs. This gives you the same O(1) performance benefits for any custom interactions. BTW, this example page uses YEH under the hood, too.</p>
+                                    <p>Here's a simple example showing how to create your own event handler using the same architecture:</p>
 
 <pre class="hljs">
 <span class="hljs-comment">&lt;!--
-  Use &quot;#app&quot; or &quot;body&quot; as selector; with this setup, you won&#x27;t need any
-  additional click listeners after init. One listener on a parent element
-  will handle all click events in that parent practically forever.
+  Use &quot;#app&quot; or &quot;body&quot; as selector; with this
+  setup, you won&#x27;t need any additional listeners for any added
+  listener after init. One listener on a parent element will handle
+  all triggered events in that parent practically forever.
   For more details see: https://github.com/yaijs/yeh
 --&gt;</span>
 <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;app&quot;</span>&gt;</span>
@@ -1767,9 +2172,9 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
 <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
 </pre>
 
-<p>The handler class.</p>
+<h4>The handler class</h4>
 
-<pre class="hljs">
+<pre class="hljs ymb-0">
 <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;module&quot;</span>&gt;</span><span class="language-javascript"><span class="hljs-comment">// If class is not already in window.YEH</span>
 <span class="hljs-keyword">import</span> {<span class="hljs-title class_">YEH</span>} <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;https://cdn.jsdelivr.net/npm/@yaijs/yeh@1.0/+esm&#x27;</span>
 
@@ -1804,6 +2209,8 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
 <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(handler); <span class="hljs-comment">// Inspect the handler instance</span>
 </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
 </pre>
+
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1813,28 +2220,20 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
         </div>
     </div>
 
-    <!-- Third Example
+
+    <!-- Theming showcase
         Styles / Theming examples -->
     <div class="section section-styles">
-        <div
-            data-yai-tabs
-            data-theme="default"
-            data-nav="top"
-            data-behavior="fade"
-            data-ref-path="styles">
+        <div data-yai-tabs data-theme="default" data-nav="top" data-behavior="fade" data-ref-path="styles">
             <nav data-controller>
-                <button data-tab-action="open" data-open="1">Colors</button>
-                <button data-tab-action="open" data-open="2">Theming</button>
+                <button data-tab-action="open" data-open="1"><span>Colors</span></button>
+                <button data-tab-action="open" data-open="2"><span>Theming</span></button>
             </nav>
             <div data-content>
                 <div data-tab="1">
+
                     <!-- Styles 1 -->
-                    <div
-                        data-yai-tabs
-                        data-behavior="slide-up"
-                        data-nav="top"
-                        data-color-scheme="red"
-                        data-ref-path="s-red">
+                    <div data-yai-tabs data-behavior="slide-up" data-nav="top" data-ref-path="s-red">
                         <nav data-controller data-grow>
                             <button data-tab-action="open" data-open="1">Default</button>
                             <button data-tab-action="open" data-open="2">Default 2</button>
@@ -1842,47 +2241,54 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
                         </nav>
                         <div data-content>
                             <div data-tab="1">
-                                <h2 class="mb-0">DEFAULT content</h2>
+                                <h2>DEFAULT content</h2>
                                 <hr>
-                                <p class="mb-0">
-                                    <code>data-color-scheme="light"</code>
-                                    <br>
-                                    <code>data-color-scheme="red"</code>
-                                </p>
+                                <p><strong>YaiTabs</strong> supports <em>unlimited nesting</em>, <em>dynamic content loading</em>, and <em>URL-based routing</em> — all handled by just <strong>2 listeners on each root</strong>, with nested components inheriting the same delegation. Built on YEH (YpsilonEventHandler) Foundation - O(1) Performance: Single listener per container regardless of complexity. Perfect Isolation: Container-scoped event handling using `:scope >` selectors.</p>
+                                <pre class="ymb-0"><code>data-color-scheme="light"</code><br><code>data-color-scheme="red"</code></pre>
                             </div>
-                            <div data-tab="2"><h2 class="yp-2 mb-0">Default content 2</h2></div>
-                            <div data-tab="3"><h2 class="yp-2 mb-0">Default content 3</h2></div>
+                            <div data-tab="2">
+                                <h2>Default content 2</h2>
+                                <hr>
+                                <p class="ymb-0">Try dynamic panels with <code>data-url</code>, <code>data-delay</code>, and <code>data-min-loading</code> for flicker-free fetches. Buttons can restore their label via <code>data-restore-text</code> after loading completes. Zero Memory Leaks: Automatic cleanup with no listener proliferation. Framework Agnostic: Works with React, Vue, Angular, or Vanilla JS.</p>
+                            </div>
+                            <div data-tab="3">
+                                <h2>Default content 3</h2>
+                                <hr>
+                                <p class="ymb-0">Customize UX with lifecycle hooks: <code>setLoading</code>, <code>contentReady</code>, and <code>afterLoad</code> — perfect for spinners or analytics. 9 Animation Behaviors - 8 smooth effects (fade, slide-up, zoom, flip, swing, spiral, slice, blur, glitch, warp, elastic) + instant. 4 Navigation Positions - Top, left, right, bottom placement.</p>
+                            </div>
                         </div>
                     </div>
 
                     <hr>
                     <!-- Styles 2 Blue -->
-                    <div
-                        data-yai-tabs
-                        data-behavior="slide-right"
-                        data-nav="top"
-                        data-color-scheme="blue"
-                        data-ref-path="s-blue">
+                    <div data-yai-tabs data-behavior="slide-right" data-nav="top" data-color-accent="primary" data-ref-path="s-blue">
                         <nav data-controller data-grow>
                             <button data-tab-action="open" data-open="1">Blue</button>
                             <button data-tab-action="open" data-open="2">Blue 2</button>
                             <button data-tab-action="open" data-open="3">Blue 3</button>
                         </nav>
                         <div data-content>
-                            <div data-tab="1"><h2 class="mb-0">Blue content</h2><hr><p class="mb-0"><code>data-color-scheme="blue"</code></p></div>
-                            <div data-tab="2"><h2 class="yp-2 mb-0">Blue content 2</h2></div>
-                            <div data-tab="3"><h2 class="yp-2 mb-0">Blue content 3</h2></div>
+                            <div data-tab="1">
+                                <h2>Blue content</h2>
+                                <hr>
+                                <p class="ymb-0"><code>data-color-scheme="blue"</code> maps to CSS tokens like <code>--yai-accent</code> and <code>--yai-shadow-accent</code>. Theme via custom properties; structure and layout are inherited automatically. WCAG 2.1 AA Compliance - Full ARIA implementation with screen reader support. Keyboard Navigation - Arrow keys, Home/End, Enter/Space support.</p>
+                            </div>
+                            <div data-tab="2">
+                                <h2>Blue content 2</h2>
+                                <hr>
+                                <p class="ymb-0">Choose from multiple behaviors (e.g. <code>fade</code>, <code>slide-*</code>, <code>blur</code>, <code>instant</code>) and place navigation <code>top</code>, <code>left</code>, <code>right</code>, or <code>bottom</code>. Dynamic Content Loading - Fetch remote content with abort controllers. Container Isolation - Unique IDs prevent cross-contamination.</p>
+                            </div>
+                            <div data-tab="3">
+                                <h2>Blue content 3</h2>
+                                <hr>
+                                <p class="ymb-0">Accessibility: ARIA roles, roving <code>tabindex</code>, and full keyboard support (arrows, Home/End, Enter/Space). Auto-disambiguation - Optional feature to ensure unique IDs across nested components.</p>
+                            </div>
                         </div>
                     </div>
 
                     <hr>
                     <!-- Styles 3 Dark -->
-                    <div
-                        data-yai-tabs
-                        data-behavior="slide-left"
-                        data-nav="top"
-                        data-color-scheme="dark"
-                        data-ref-path="s-dark">
+                    <div data-yai-tabs data-behavior="slide-left" data-nav="top" data-color-accent="warning" data-color-scheme="dark" data-ref-path="s-dark">
                         <nav data-controller data-grow>
                             <button data-tab-action="open" data-open="1">Dark</button>
                             <button data-tab-action="open" data-open="2">Dark 2</button>
@@ -1890,98 +2296,133 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
                             <button data-tab-action="open" data-open="4">Dark Unique</button>
                         </nav>
                         <div data-content>
-                            <div data-tab="1"><h2 class="mb-0">Dark content</h2><hr><p class="mb-0"><code>data-color-scheme="dark"</code></p></div>
-                            <div data-tab="2"><h2 class="yp-2 mb-0">Dark content 2</h2></div>
-                            <div data-tab="3"><h2 class="yp-2 mb-0">Dark content 3</h2></div>
-                            <div data-tab="4"><h2 class="yp-2 mb-0">Unique dark content</h2></div>
+                            <div data-tab="1">
+                                <h2>Dark content</h2>
+                                <hr>
+                                <p><code>data-color-scheme="dark"</code> swaps semantic colors (e.g. <code>--yai-text</code>, <code>--yai-bg</code>, <code>--yai-loader-color</code>) for high-contrast UI while preserving component structure.</p>
+                                <p class="ymb-0">Event Delegation Hierarchy: YaiTabs (Root) → 2 event listeners, nested components → 0 listeners (inherits).</p>
+                            </div>
+                            <div data-tab="2">
+                                <h2>Dark content 2</h2>
+                                <hr>
+                                <p class="ymb-0">Event delegation scales in O(1): nested tabs add <em>zero</em> new listeners and inherit the root’s two. All nested and dynamically added components utilize the root component's event listeners.</p>
+                            </div>
+                            <div data-tab="3">
+                                <h2>Dark content 3</h2>
+                                <hr>
+                                <p class="ymb-0">Control history via <code>data-history-mode="replace|push"</code> and deep-link any level with <code>data-ref-path</code> for shareable URLs. Components with [data-yai-tabs] are detected on page load, root components initialize with event listeners.</p>
+                            </div>
+                            <div data-tab="4">
+                                <h2>Unique dark content</h2>
+                                <hr>
+                                <p class="ymb-0">Build analytics on top: subscribe to emitted events like <code>tabReady</code>, <code>stateChange</code>, or even “super-subscribe” to all events. Nested components are processed as lightweight delegates, dynamic content integrates with existing event structure.</p>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Styles 4 -->
                     <h3 style="margin-top:1.5rem"><b>Example 4: Nested Color Scheme Inheritance</b></h3>
-                    <p>This demonstrates how color schemes cascade through nested tabs while allowing individual overrides at any level. Each nested component inherits from its parent but can define its own color scheme when needed.</p>
-                    <div
-                        data-yai-tabs
-                        data-behavior="slide-down"
-                        data-nav="top"
-                        data-ref-path="s-mixed">
+                    <p>Schemes cascade through nested tabs; override any level via <code>data-color-scheme</code> or switch themes with <code>data-theme</code> (e.g. <code>minimal</code>, <code>pills</code>). Multi-Panel Dashboards - Open specific widget combinations across panels. Design Systems - Coordinate color schemes, components, and layouts simultaneously.</p>
+
+                    <div data-yai-tabs data-behavior="slide-down" data-nav="top" data-ref-path="s-mixed">
                         <nav data-controller>
-                            <button data-tab-action="open" data-open="1">Mixed</button>
+                            <button data-tab-action="open" data-open="1">Level 2: Mixed</button>
+                            <button data-tab-action="open" data-open="2">Mixed more</button>
                         </nav>
                         <div data-content>
                             <div data-tab="1">
-                                <div
-                                    data-yai-tabs
-                                    data-behavior="slide-down"
-                                    data-nav="top"
-                                    data-color-scheme="blue"
-                                    data-ref-path="s-m-blue">
+                                <div data-yai-tabs data-behavior="slide-down" data-nav="top" data-color-accent="primary" data-ref-path="s-m-blue">
                                     <nav data-controller>
-                                        <button data-tab-action="open" data-open="1">Level 2: Blue Scheme</button>
+                                        <button data-tab-action="open" data-open="1">Level 3: Blue Scheme</button>
+                                        <button data-tab-action="open" data-open="2">More Blue</button>
                                     </nav>
                                     <div data-content>
                                         <div data-tab="1">
-                                            <div
-                                                data-yai-tabs
-                                                data-behavior="slide-down"
-                                                data-nav="top"
-                                                data-color-scheme="dark"
-                                                data-ref-path="s-m-dark">
+                                            <div data-yai-tabs data-behavior="slide-down" data-nav="top" data-color-scheme="dark" data-ref-path="s-m-dark">
                                                 <nav data-controller>
-                                                    <button data-tab-action="open" data-open="1">Level 3: Dark Scheme</button>
+                                                    <button data-tab-action="open" data-open="1">Level 4: Dark Scheme</button>
+                                                    <button data-tab-action="open" data-open="2">Level 4.1</button>
                                                 </nav>
                                                 <div data-content>
                                                     <div data-tab="1">
-                                                        <p>Lorem ipsum dolor text dark?</p>
-                                                        <div
-                                                            data-yai-tabs
-                                                            data-behavior="slide-down"
-                                                            data-nav="top"
-                                                            data-color-scheme="blue"
-                                                            data-ref-path="sub-s-blue">
+
+                                                        <p>Panels use <code>data-content</code> + <code>data-tab</code>, navigation uses <code>data-controller</code>. Hidden panels become inert/ARIA-hidden for WCAG-friendly behavior. Complex Forms - Navigate between form sections with preserved field states. E-commerce - Show product variants, reviews, and recommendations in sync.</p>
+
+                                                        <div data-yai-tabs data-behavior="slide-down" data-nav="top" data-color-accent="primary" data-ref-path="sub-s-blue">
                                                             <nav data-controller>
-                                                                <button data-tab-action="open" data-open="1">Level 4: Blue Scheme</button>
+                                                                <button data-tab-action="open" data-open="1">Level 5: Blue Scheme</button>
                                                                 <button data-tab-action="open" data-open="2">Spaceless</button>
                                                             </nav>
                                                             <div data-content>
                                                                 <div data-tab="1">
-                                                                    <p>Per default, all data-tab container get the default padding set via CSS property <code>--yai-content-padding: 20px;</code>.</p>
-                                                                    <div
-                                                                        data-yai-tabs
-                                                                        data-behavior="slide-down"
-                                                                        data-nav="top"
-                                                                        data-color-scheme="light"
-                                                                        data-ref-path="y-s-light">
-                                                                        <nav data-controller>
-                                                                            <button data-tab-action="open" data-open="1">Level 5: Light Scheme</button>
+
+                                                                    <p>Per default, all data-tab container get the default padding set via CSS property <code>--yai-content-padding: 20px;</code>. Documentation - Link to specific topics across multiple navigation levels. Deterministic URLs - Same state always generates same URL. Minimal Payload - Only stores essential tab identifiers.</p>
+
+                                                                    <div data-yai-tabs data-behavior="slide-left" data-nav="top" data-color-accent="danger" data-ref-path="s-2-r">
+                                                                        <nav data-controller data-grow>
+                                                                            <button data-tab-action="open" data-open="1">Level 6: Danger</button>
+                                                                            <button data-tab-action="open" data-open="2">Dangerous</button>
+                                                                            <button data-tab-action="open" data-open="3">Equals Red</button>
                                                                         </nav>
                                                                         <div data-content>
                                                                             <div data-tab="1">
-                                                                                <h4 class="mb-0">Final nested content</h4>
+
+                                                                                <h2>More red, but danger</h2>
+
+                                                                                <div data-yai-tabs data-behavior="slide-down" data-nav="left" data-color-accent="success" data-color-scheme="light" data-ref-path="y-s-light">
+                                                                                    <nav data-controller data-nav-button="center">
+                                                                                        <button data-tab-action="open" data-open="1">Level 7: Scheme</button>
+                                                                                        <button data-tab-action="open" data-open="2">Next</button>
+                                                                                    </nav>
+                                                                                    <div data-content>
+                                                                                        <div data-tab="1">
+                                                                                            <h3>Final nested content</h3>
+                                                                                            <hr>
+                                                                                            <p>Deep-link any combination of tabs using <code>data-ref-path</code> (hash parameters). Programmatically build links with <code>YaiTabs.reconstructUrlFromRef()</code>                                                                                            for shareable states. Instant Navigation - No page reloads, smooth tab transitions. Scalable - Handles 5+ levels of nesting effortlessly.</p>
+                                                                                            <hr>
+                                                                                            <p>The live demo showcases 20+ components (root + nested) with constant listener count and smooth transitions. Performance Metrics:</p>
+                                                                                            <pre class="ymb-0">Basic (3 tabs) - 1 component, 2 listeners, ~0.10s LCP, ~50KB memory.<br>Nested (20 tabs) - 20 components, 2 listeners, ~0.10s LCP, ~120KB memory.<br>Deep (70+ tabs) - 70+ components, 2 listeners, ~0.10s LCP, ~350KB memory.</pre>
+                                                                                        </div>
+                                                                                        <div data-tab="2">
+                                                                                            <h3>Lorem ipsum dolor holding place.</h3>
+                                                                                            <hr>
+                                                                                            <p class="ymb-0">Use <code>AutoSwitch</code> to auto-cycle buttons for demonstrations and testing (configurable timeouts, abort, lifecycle hooks). This architecture enables truly infinite nesting without performance degradation, making YaiTabs ideal for complex applications with deep navigation hierarchies.</p>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div data-tab="2">
+                                                                                <h2>Red content 2</h2>
                                                                                 <hr>
-                                                                                <p class="mb-0">Each level demonstrates independent color scheme assignment while maintaining structural consistency.</p>
+                                                                                <p class="ymb-0">Prefer the Event Hook System to route <code>click</code>, <code>input</code>, <code>change</code>, <code>submit</code>, <code>focus</code>, <code>blur</code> through a single listener per root. YaiJS Utilities: AutoSwitch Testing Utility - Automated cycling through interactive elements. Configurable timing and behavior patterns. Event-driven architecture with lifecycle hooks.</p>
+                                                                            </div>
+                                                                            <div data-tab="3">
+                                                                                <h2>Red content 3</h2>
                                                                                 <hr>
-                                                                                <p class="mb-0">What are you waiting for, lazy bones, reload the page to check if hash parameters are working!</p>
+                                                                                <p class="ymb-0">Tip: give unique IDs to <code>data-open</code>/<code>data-tab</code> pairs, set meaningful <code>data-ref-path</code>s, and use <code>data-url-refresh</code> for fast-changing content. YaiViewport: Advanced viewport tracking utility for lazy loading, visibility detection, and scroll-based events. Supports custom thresholds and lifecycle hooks.</p>
                                                                             </div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
                                                                 <div data-tab="2" data-spaceless>
-                                                                    <p class="yp-3 mb-0">Spaceless content container.</p>
-                                                                    <div
-                                                                        data-yai-tabs
-                                                                        data-behavior="slide-down"
-                                                                        data-nav="top"
-                                                                        data-color-scheme="light"
-                                                                        data-ref-path="sub-s-light">
+                                                                    <div class="yp-3">
+                                                                        <p class="ymb-0">Spaceless content container.</p>
+                                                                    </div>
+                                                                    <div data-yai-tabs data-nav="top" data-color-accent="funky" data-color-scheme="light" data-ref-path="sub-nested-s">
                                                                         <nav data-controller>
-                                                                            <button data-tab-action="open" data-open="1">Level 5: Light Scheme</button>
+                                                                            <button data-tab-action="open" data-open="3">Level 6: Light Scheme</button>
+                                                                            <button data-tab-action="open" data-open="4">Level: Second</button>
                                                                         </nav>
                                                                         <div data-content>
-                                                                            <div data-tab="1">
-                                                                                <h4 class="mb-0">Final nested content</h4>
+                                                                            <div data-tab="3">
+                                                                                <h4>Final nested content</h4>
                                                                                 <hr>
-                                                                                <p class="mb-0">Each level demonstrates independent color scheme assignment while maintaining structural consistency.</p>
+                                                                                <p class="ymb-0">Every event knows its container context — scalable apps with deep hierarchies, zero listener proliferation. Development Philosophy: "Mathematical Elegance Meets Developer Experience" - Each component proves that enterprise-grade functionality can be achieved with minimal code through revolutionary O(1) event handling architecture.</p>
+                                                                            </div>
+                                                                            <div data-tab="4">
+                                                                                <div class="yp-3">
+                                                                                    <h4 class="ymb-0">Lorem ipsum dolor holding place.</h4>
+                                                                                </div>
                                                                             </div>
                                                                         </div>
                                                                     </div>
@@ -1989,10 +2430,25 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
                                                             </div>
                                                         </div>
                                                     </div>
+                                                    <div data-tab="2">
+                                                        <div class="yp-3">
+                                                            <p class="ymb-0">Other…</p>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
+                                        <div data-tab="2">
+                                            <div class="yp-3">
+                                                <p class="ymb-0">Just more blue…</p>
+                                            </div>
+                                        </div>
                                     </div>
+                                </div>
+                            </div>
+                            <div data-tab="2">
+                                <div class="yp-3">
+                                    <p class="ymb-0">Placeholdings Inc.</p>
                                 </div>
                             </div>
                         </div>
@@ -2002,51 +2458,416 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
                 </div>
                 <div data-tab="2">
                     <h3>Custom Properties Theming</h3>
-                    <p>Override CSS variables using <code>data-color-scheme</code> attributes to create consistent color themes across your tabs.</p>
+                    <hr>
+                    <p>Override CSS variables using <code>data-color-scheme</code> to switch design tokens like <code>--yai-accent</code>, <code>--yai-text</code>, and <code>--yai-bg</code> while keeping structure/layout intact. Built-in schemes include <code>red</code>, <code>blue</code>, <code>light</code>, and <code>dark</code>.</p>
+
                     <div class="code-container">
-<pre class="hljs"><span class="hljs-comment">/* Define color schemes with minimal CSS */</span>
 
-<span class="hljs-selector-attr">[data-color-scheme=<span class="hljs-string">&quot;red&quot;</span>]</span> {
-    <span class="hljs-attr">--yai-accent</span>: <span class="hljs-number">#dc2812</span>;
-    <span class="hljs-attr">--yai-danger</span>: <span class="hljs-number">#dc2812</span>;
-    <span class="hljs-attr">--yai-shadow-accent</span>: <span class="hljs-number">#801a1a99</span>;
+<pre class="hljs"><span class="hljs-comment">/**
+ * Write / override specific properties or color schemes. The
+ * following properties are the actual defaults for YaiTabs. It
+ * contains all you need to change the appearance entirely.
+ */</span>
+<span class="hljs-selector-pseudo">:root</span>,
+<span class="hljs-selector-attr">[data-color-scheme=<span class="hljs-string">&quot;light&quot;</span>]</span> {
+<span class="hljs-comment">/* =========================
+    SEMANTIC COLOR SYSTEM
+    ========================= */</span>
+
+    <span class="hljs-comment">/* Core Colors - Used for text, backgrounds, and states */</span>
+    <span class="hljs-attr">--yai-tabs-color-text</span>: <span class="hljs-number">#49565b</span>;
+    <span class="hljs-attr">--yai-tabs-color-text-muted</span>: <span class="hljs-number">#4a5568</span>;
+    <span class="hljs-attr">--yai-tabs-color-background</span>: <span class="hljs-number">#ffffff</span>;
+    <span class="hljs-attr">--yai-tabs-color-surface</span>: <span class="hljs-number">#f8fafc</span>;
+    <span class="hljs-attr">--yai-tabs-color-surface-alt</span>: <span class="hljs-number">#f1f5f9</span>;
+    <span class="hljs-attr">--yai-tabs-nav-button-hover-background</span>: <span class="hljs-number">#e2e2e2dd</span>;
+    <span class="hljs-attr">--yai-tabs-content-inactive-background</span>: <span class="hljs-number">#e3e5e777</span>;
+    <span class="hljs-attr">--yai-tabs-content-inactive-color-muted</span>: <span class="hljs-number">#555555bb</span>;
+
+    <span class="hljs-comment">/* Brand Colors - Semantic color palette */</span>
+    <span class="hljs-attr">--yai-tabs-color-primary</span>: <span class="hljs-number">#3a59ae</span>;
+    <span class="hljs-attr">--yai-tabs-color-primary-contrast</span>: <span class="hljs-number">#ffffff</span>;
+
+    <span class="hljs-attr">--yai-tabs-color-secondary</span>: <span class="hljs-number">#7c3aed</span>;
+    <span class="hljs-attr">--yai-tabs-color-secondary-contrast</span>: <span class="hljs-number">#ffffff</span>;
+
+    <span class="hljs-attr">--yai-tabs-color-accent</span>: <span class="hljs-number">#dc2626</span>;
+    <span class="hljs-attr">--yai-tabs-color-accent-contrast</span>: <span class="hljs-number">#ffffff</span>;
+
+    <span class="hljs-attr">--yai-tabs-color-success</span>: <span class="hljs-number">#059669</span>;
+    <span class="hljs-attr">--yai-tabs-color-success-contrast</span>: <span class="hljs-number">#ffffff</span>;
+
+    <span class="hljs-attr">--yai-tabs-color-warning</span>: <span class="hljs-number">#b45309</span>;
+    <span class="hljs-attr">--yai-tabs-color-warning-contrast</span>: <span class="hljs-number">#ffffff</span>;
+
+    <span class="hljs-attr">--yai-tabs-color-danger</span>: <span class="hljs-number">#dc2626</span>;
+    <span class="hljs-attr">--yai-tabs-color-danger-contrast</span>: <span class="hljs-number">#ffffff</span>;
+
+    <span class="hljs-attr">--yai-tabs-color-funky</span>: <span class="hljs-number">#c026d3</span>;
+    <span class="hljs-attr">--yai-tabs-color-funky-contrast</span>: <span class="hljs-number">#ffffff</span>;
+
+    <span class="hljs-comment">/* Interactive States */</span>
+    <span class="hljs-attr">--yai-tabs-color-focus</span>: <span class="hljs-number">#2563eb</span>;
+    <span class="hljs-attr">--yai-tabs-color-focus-ring</span>: <span class="hljs-built_in">rgba</span>(<span class="hljs-number">37</span>, <span class="hljs-number">99</span>, <span class="hljs-number">235</span>, <span class="hljs-number">0.2</span>);
+    <span class="hljs-attr">--yai-loader-color</span>: <span class="hljs-built_in">var</span>(--yai-tabs-color-accent);
+
+    <span class="hljs-comment">/* Component-specific variables */</span>
+    <span class="hljs-attr">--yai-tabs-nav-background</span>: <span class="hljs-number">#e6e6e6</span>;
+    <span class="hljs-attr">--yai-tabs-nav-button-background</span>: <span class="hljs-built_in">var</span>(--yai-tabs-color-background);
+    <span class="hljs-attr">--yai-tabs-nav-button-active-background</span>: <span class="hljs-built_in">var</span>(--yai-tabs-color-background);
+    <span class="hljs-attr">--yai-tabs-content-background</span>: <span class="hljs-built_in">var</span>(--yai-tabs-color-background);
+
+    <span class="hljs-comment">/* Closed tab state */</span>
+    <span class="hljs-attr">--yai-tabs-closed-text</span>: <span class="hljs-string">&quot;YaiTabs&quot;</span>;
+    <span class="hljs-attr">--yai-tabs-closed-align</span>: center;
+    <span class="hljs-attr">--yai-tabs-closed-timeout</span>: .<span class="hljs-number">5s</span>;
+
+    <span class="hljs-comment">/* Layout &amp; spacing , including fallback for: h2, h3, h4, h5, h6, p, pre, ul, ol */</span>
+    <span class="hljs-attr">--yai-tabs-padding-1</span>: .<span class="hljs-number">75rem</span>;
+    <span class="hljs-attr">--yai-tabs-padding-2</span>: <span class="hljs-number">1rem</span>;
+    <span class="hljs-attr">--yai-tabs-padding-3</span>: <span class="hljs-number">1.5rem</span>;
+    <span class="hljs-attr">--yai-tabs-content-padding</span>: <span class="hljs-number">22px</span>;
+    <span class="hljs-attr">--yai-tabs-content-elements-margin</span>: <span class="hljs-number">0</span> <span class="hljs-number">0</span> <span class="hljs-number">16px</span>;
+    <span class="hljs-attr">--yai-tabs-content-line-height</span>: <span class="hljs-number">1.6</span>;
+    <span class="hljs-attr">--yai-tabs-content-min-height</span>: <span class="hljs-number">100px</span>;
+
+    <span class="hljs-comment">/* Nav buttons */</span>
+    <span class="hljs-attr">--yai-tabs-button-padding</span>: <span class="hljs-number">2px</span> <span class="hljs-number">20px</span>;
+    <span class="hljs-attr">--yai-tabs-button-min-height</span>: <span class="hljs-number">42px</span>;
+    <span class="hljs-attr">--yai-tabs-button-font-size</span>: <span class="hljs-number">95%</span>;
+
+    <span class="hljs-comment">/* Loader */</span>
+    <span class="hljs-attr">--yai-tabs-loader-speed</span>: <span class="hljs-number">1.1s</span>;
+    <span class="hljs-attr">--yai-tabs-loader-button-size</span>: <span class="hljs-number">12px</span>;
+    <span class="hljs-attr">--yai-tabs-loader-content-size</span>: <span class="hljs-number">32px</span>;
 }
-
-<span class="hljs-selector-attr">[data-color-scheme=<span class="hljs-string">&quot;blue&quot;</span>]</span> {
-    <span class="hljs-attr">--yai-accent</span>: <span class="hljs-number">#0333d0</span>;
-    <span class="hljs-attr">--yai-shadow</span>: <span class="hljs-number">#1a408099</span>;
-    <span class="hljs-attr">--yai-shadow-accent</span>: <span class="hljs-number">#1a408099</span>;
-}
-
-<span class="hljs-selector-attr">[data-color-scheme=<span class="hljs-string">&quot;dark&quot;</span>]</span> {
-    <span class="hljs-attr">--yai-primary-dark</span>: <span class="hljs-number">#eeeeee</span>;
-    <span class="hljs-attr">--yai-secondary</span>: <span class="hljs-number">#d6d6ff</span>;
-    <span class="hljs-attr">--yai-accent</span>: <span class="hljs-number">#f9442c</span>;
-    <span class="hljs-attr">--yai-text</span>: <span class="hljs-number">#ffffff</span>;
-    <span class="hljs-attr">--yai-text-muted</span>: <span class="hljs-number">#cec6c6</span>;
-    <span class="hljs-attr">--yai-bg</span>: <span class="hljs-number">#252525</span>;
-    <span class="hljs-attr">--yai-bg-surface</span>: <span class="hljs-number">#2d2d2d</span>;
-    <span class="hljs-attr">--yai-bg-surface-alt</span>: <span class="hljs-number">#3d3d3d</span>;
-    <span class="hljs-attr">--yai-bg-overlay</span>: <span class="hljs-number">#353535</span>;
-    <span class="hljs-attr">--yai-shadow</span>: <span class="hljs-number">#99999971</span>;
-    <span class="hljs-attr">--yai-shadow-accent</span>: <span class="hljs-number">#71626299</span>;
-    <span class="hljs-attr">--yai-tabs-nav-bg</span>: <span class="hljs-built_in">var</span>(--yai-bg);
-    <span class="hljs-attr">--yai-tabs-content-bg</span>: <span class="hljs-built_in">var</span>(--yai-bg-overlay);
-    <span class="hljs-attr">--yai-tabs-active-bg</span>: <span class="hljs-built_in">var</span>(--yai-bg);
-    <span class="hljs-attr">--yai-loader-color</span>: <span class="hljs-built_in">var</span>(--yai-secondary);
-}</pre>
+</pre>
                     </div>
-                    <p class="mb-0"><strong>How it works:</strong> Each color scheme selectively overrides the core design tokens, while inheriting all structural styles and layouts automatically.</p>
+
+                    <p><strong>How it works:</strong> Each color scheme selectively overrides the core design tokens, while inheriting all structural styles and layouts automatically. Authors & Contributors: Engin Ypsilon - Original YpsilonEventHandler architecture and YaiTabs concept. Claude-3.5-Sonnet - Implementation, optimization, and hook system architecture. DeepSeek-V3 - Comprehensive documentation and interactive demo examples. Grok-2 - Performance analysis and architectural insights. ChatGPT - Color scheme and design tokens.</p>
+
+                    <div class="code-container">
+
+<pre class="hljs ymb-0"><span class="hljs-comment">/**
+ * Create custom color accents; replace &quot;primary&quot; with your accent name
+ */</span>
+
+<span class="hljs-comment">/* Nav button color (only applied to active tab buttons) */</span>
+<span class="hljs-selector-attr">[data-color-accent=<span class="hljs-string">&quot;primary&quot;</span>]</span> {
+    <span class="hljs-attr">--yai-tabs-color-accent</span>: <span class="hljs-built_in">var</span>(--yai-tabs-color-primary);
+    <span class="hljs-attr">--yai-tabs-shadow-accent</span>: <span class="hljs-built_in">rgba</span>(<span class="hljs-number">49</span>, <span class="hljs-number">96</span>, <span class="hljs-number">199</span>, <span class="hljs-number">0.6</span>);
+}
+
+<span class="hljs-comment">/* Reverse color/background mode */</span>
+<span class="hljs-selector-tag">nav</span><span class="hljs-selector-attr">[data-controller]</span><span class="hljs-selector-attr">[data-variant=<span class="hljs-string">&quot;primary&quot;</span>]</span> <span class="hljs-selector-tag">button</span><span class="hljs-selector-class">.active</span> {
+    <span class="hljs-attribute">color</span>: <span class="hljs-built_in">var</span>(--yai-tabs-color-primary-contrast);
+    <span class="hljs-attribute">background-color</span>: <span class="hljs-built_in">var</span>(--yai-tabs-color-primary);
+}</pre>
+
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
+
+    <!-- Lazy content awareness -->
+    <div class="box short-note info-2 removable">
+        <h2>
+            <span class="ycon ycon-yawning-face ycon-sm ycon-fix-top-1 ycon-is-left" aria-hidden="true"></span>
+            <b>Lazy Content Incoming</b>
+        </h2>
+        <p class="ymb-0">How lazy, you ask? <b>Ultra lazy!</b></p>
+        <hr>
+        <h3>YaiViewport</h3>
+        <p class="ymb-0">Unleash the laze in you! YaiJS has already reached unprecedented levels of laze, and we are just getting started.</p>
+        <button class="y-remove-parent" data-action="removeParent" title="Got it, remove the box"></button>
+    </div>
+
+
+    <!-- YaiViewport demo
+        Lazy content made easy -->
+    <div class="section lazy-tabs-section">
+        <div data-yai-tabs id="lazy-tabs-demo" data-nav="top" data-color-accent="danger" data-theme="default">
+            <nav data-controller>
+                <button data-tab-action="open" data-open="1">Tab A 1</button>
+                <button data-tab-action="open" data-open="2" data-inview-default>Tab B 1</button>
+            </nav>
+            <div data-content>
+                <!-- ROOT / TAB 1 (manual) -->
+                <div data-tab="1">
+                    <div class="lazy-chunky ymb-0">
+                        <p class="lazy-title">Chunk 1 — Intro</p>
+                        <p>This first panel is opened manually. Scroll down to let the next panel wake up on its own.</p>
+                        <ul>
+                            <li>Each section is a “lazy chunk”.</li>
+                            <li>Auto-open only happens when the chunk becomes visible.</li>
+                        </ul>
+                    </div>
+                    <div class="lazy-notey ymb-0">
+                        Tip: use this tab to compare manual vs. auto behavior.
+                    </div>
+                </div>
+                <!-- ROOT / TAB 2 (auto via data-inview-default on its button) -->
+                <div data-tab="2" data-spaceless-->
+                    <div class="lazy-chunk ymb-0">
+                        <p class="lazy-title">Chunk 2 — Lazy content starts</p>
+                        <p>As soon as this area enters the viewport, <strong>Tab B 1</strong> opens. Keep scrolling to let nested chunks take over one by one.</p>
+                        <p class="lazy-notey ymb-0">Threshold is low, so slow scrolling makes the sequence obvious.</p>
+                    </div>
+                    <!-- NESTED LEVEL 2 -->
+                    <div class="lazy-gap">
+                        Next nested chunk ahead…
+                    </div>
+                    <div data-yai-tabs data-color-accent="danger">
+                        <nav data-controller>
+                            <button data-tab-action="open" data-open="1">Tab A 2</button>
+                            <button data-tab-action="open" data-open="2">Tab B 2</button>
+                            <button data-tab-action="open" data-open="3" data-inview-default>Tab 3 2</button>
+                        </nav>
+                        <div data-content>
+                            <!-- L2 / A (manual) -->
+                            <div data-tab="1">
+                                <div class="lazy-chunk ymb-0">
+                                    <p class="lazy-title">Chunk 2A — Manual branch</p>
+                                    <p class="ymb-0">Switch here any time to compare with the auto-opening flow.</p>
+                                </div>
+                                <div class="lazy-gap">
+                                    Scroll or switch to other tabs…
+                                </div>
+                            </div>
+                            <!-- L2 / B (contains level 3 tabs) -->
+                            <div data-tab="2">
+                                <div class="lazy-chunk ymb-0">
+                                    <p class="lazy-title">Chunk 2B — Nested tabs inside</p>
+                                    <p class="ymb-0">This panel contains another tab group. It won’t auto-open by itself; keep scrolling to reach the next lazy chunk.</p>
+                                </div>
+                                <!-- NESTED LEVEL 3 -->
+                                <div class="lazy-gap">
+                                    Level 3 demo coming into view…
+                                </div>
+                                <div data-yai-tabs>
+                                    <nav data-controller>
+                                        <button data-tab-action="open" data-open="1">Tab A 3</button>
+                                        <button data-tab-action="open" data-open="2">Tab B 3</button>
+                                        <button data-tab-action="open" data-open="3">Tab 3 3</button>
+                                    </nav>
+                                    <div data-content>
+                                        <div data-tab="1">
+                                            <div class="lazy-chunk">
+                                                <p class="lazy-title">Chunk 3A — Static panel</p>
+                                                <p class="ymb-0">Use arrow keys inside the tablist to navigate this level.</p>
+                                            </div>
+                                        </div>
+                                        <div data-tab="2">
+                                            <div class="lazy-chunk">
+                                                <p class="lazy-title">Chunk 3B — Static panel</p>
+                                                <p class="ymb-0">Just more content to click through; no auto-open here.</p>
+                                            </div>
+                                        </div>
+                                        <div data-tab="3">
+                                            <div class="lazy-chunk">
+                                                <p class="lazy-title">Chunk 3C — End of this branch</p>
+                                                <p class="ymb-0">Nothing else to see here.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- L2 / 3 (auto via data-inview-default on its button) -->
+                            <div data-tab="3">
+                                <div class="lazy-chunk ymb-0">
+                                    <p class="lazy-title">Chunk 2C — Auto-open example</p>
+                                    <p class="ymb-0">This panel opens itself when it becomes visible. Below is one more nested set using a dark color scheme.</p>
+                                </div>
+                                <div class="lazy-gap">
+                                    Scroll a bit more to trigger the dark set…
+                                </div>
+                                <div data-yai-tabs data-color-scheme="dark">
+                                    <nav data-controller>
+                                        <button data-tab-action="open" data-open="1">Tab A 4</button>
+                                        <button data-tab-action="open" data-open="2" data-inview-default>Tab B 4</button>
+                                        <button data-tab-action="open" data-open="3">Check Markup</button>
+                                    </nav>
+                                    <div data-content>
+                                        <div data-tab="1" data-spaceless>
+                                            <div class="yp-3">
+                                                <div class="lazy-chunk">
+                                                    <p class="lazy-title">Chunk 4A — Dark / Manual</p>
+                                                    <p class="ymb-0">Open this one yourself to compare with the auto panel next to it.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Dark / auto -->
+                                        <div data-tab="2" data-spaceless>
+                                            <div class="yp-3">
+                                                <div class="lazy-chunk">
+                                                    <p class="lazy-title">Chunk 4B — Dark / Auto</p>
+                                                    <p>Opens the moment this tablist comes into view. That’s the lazy content behavior in a nutshell.</p>
+                                                    <p class="lazy-notey ymb-0">You can still switch manually; auto triggers only fire when the button is actually in view.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Dark / checklist -->
+                                        <div data-tab="3" data-spaceless>
+                                            <div class="yp-3">
+                                                <div class="lazy-chunk">
+                                                    <h2 class="lazy-title">YaiViewport - Advanced Viewport Tracking System</h2>
+                                                    <p>High-performance viewport visibility tracking with spatial optimization for elements.</p>
+                                                    <p><b>No Observer involved.</b></p>
+                                                    <p class="lazy-notey ymb-0">Implementing a lazy tab activator, when components become visible. The auto-open functionality on this page is for demonstration only.</p>
+                                                </div>
+                                                <div class="lazy-chunk">
+
+<pre class="hljs"><span class="hljs-comment">// Requires peer-dependency YEH</span>
+<span class="hljs-keyword">const</span> { <span class="hljs-title class_">YaiViewport</span> } = <span class="hljs-variable language_">window</span>.<span class="hljs-property">YaiJS</span>;
+
+<span class="hljs-keyword">const</span> defaultRegisteredEvents= {
+    <span class="hljs-attr">window</span>: [
+    { <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;load&#x27;</span>,       <span class="hljs-attr">options</span>: { <span class="hljs-attr">once</span>: <span class="hljs-literal">true</span> } },
+    { <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;resize&#x27;</span>,     <span class="hljs-attr">throttle</span>: throttle?.<span class="hljs-property">resize</span> || <span class="hljs-number">500</span> },
+    { <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;scroll&#x27;</span>,      <span class="hljs-attr">throttle</span>: throttle?.<span class="hljs-property">scroll</span> || <span class="hljs-number">250</span> },
+    { <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;scrollend&#x27;</span>, <span class="hljs-attr">throttle</span>: throttle?.<span class="hljs-property">scrollend</span> || <span class="hljs-number">250</span> },
+    ]
+};
+
+<span class="hljs-comment">/* Init Viewport Tracker */</span>
+<span class="hljs-keyword">const</span> yViewport = <span class="hljs-keyword">new</span> <span class="hljs-title class_">YaiViewport</span>({
+    <span class="hljs-attr">throttle</span>:  {
+    <span class="hljs-attr">esize</span>: <span class="hljs-number">500</span>,
+    <span class="hljs-attr">scroll</span>: <span class="hljs-number">150</span>,
+    <span class="hljs-attr">scrollend</span>: <span class="hljs-number">150</span>
+    },
+    <span class="hljs-attr">set</span>: {
+        <span class="hljs-comment">// CSS classes and data attributes for automatic state management</span>
+        <span class="hljs-attr">selector</span>: {
+            <span class="hljs-comment">// Set null to disable specific marker</span>
+            <span class="hljs-attr">pageTop</span>: <span class="hljs-string">&#x27;yvp-is-page-top&#x27;</span>,          <span class="hljs-comment">// CSS class added to body when at page top</span>
+            <span class="hljs-attr">pageEnd</span>: <span class="hljs-string">&#x27;yvp-is-page-end&#x27;</span>,          <span class="hljs-comment">// CSS class added to body when at page bottom</span>
+            <span class="hljs-attr">pageScrolled</span>: <span class="hljs-string">&#x27;yvp-is-scrolled&#x27;</span>,         <span class="hljs-comment">// CSS class added to body when scrolled past threshold</span>
+
+            <span class="hljs-attr">trackDistance</span>: <span class="hljs-string">&#x27;data-yvp-position&#x27;</span>,      <span class="hljs-comment">// Attribute for element&#x27;s viewport position</span>
+            <span class="hljs-attr">isVisibleAttr</span>: <span class="hljs-string">&#x27;data-yvp-is-visible&#x27;</span>,      <span class="hljs-comment">// Boolean attribute for visibility state</span>
+            <span class="hljs-attr">isVisibleClass</span>: <span class="hljs-string">&#x27;yvp-is-visible&#x27;</span>,        <span class="hljs-comment">// CSS class when element is visible</span>
+            <span class="hljs-attr">hasBeenVisibleClass</span>: <span class="hljs-string">&#x27;yvp-was-visible&#x27;</span>,    <span class="hljs-comment">// CSS class added once element has been visible</span>
+
+            <span class="hljs-attr">isLeavingClass</span>: <span class="hljs-string">&#x27;yvp-is-leaving&#x27;</span>,        <span class="hljs-comment">// CSS class when element starts leaving viewport</span>
+            <span class="hljs-attr">isLeavingTopClass</span>: <span class="hljs-string">&#x27;yvp-is-leaving-top&#x27;</span>,     <span class="hljs-comment">// CSS class when element starts leaving from top</span>
+            <span class="hljs-attr">isLeavingBottomClass</span>: <span class="hljs-string">&#x27;yvp-is-leaving-bottom&#x27;</span>, <span class="hljs-comment">// CSS class when element starts leaving from bottom</span>
+
+            <span class="hljs-attr">hasLeftClass</span>: <span class="hljs-string">&#x27;yvp-has-left&#x27;</span>,          <span class="hljs-comment">// CSS class when element left viewport</span>
+            <span class="hljs-attr">hasLeftTopClass</span>: <span class="hljs-string">&#x27;yvp-has-left-top&#x27;</span>,       <span class="hljs-comment">// CSS class when element left from top</span>
+            <span class="hljs-attr">hasLeftBottomClass</span>: <span class="hljs-string">&#x27;yvp-has-left-bottom&#x27;</span>,   <span class="hljs-comment">// CSS class when element left from bottom</span>
+        }
+    },
+    <span class="hljs-comment">// Threshold configuration - pixel offsets for detection</span>
+    <span class="hljs-attr">threshold</span>: {
+    <span class="hljs-attr">pageTop</span>: <span class="hljs-number">0</span>,           <span class="hljs-comment">// Trigger pageTop when scrollY &lt;= this value</span>
+    <span class="hljs-attr">pageEnd</span>: <span class="hljs-number">50</span>,          <span class="hljs-comment">// Trigger pageEnd when near bottom (viewport height - this value)</span>
+    <span class="hljs-attr">pageScrolled</span>: <span class="hljs-number">0</span>,        <span class="hljs-comment">// Trigger pageScrolled when scrollY &gt; this value</span>
+
+    <span class="hljs-comment">// Global fallbacks</span>
+    <span class="hljs-attr">elementVisible</span>: <span class="hljs-number">0</span>,        <span class="hljs-comment">// Element considered visible when within viewport + this buffer</span>
+    <span class="hljs-attr">elementHidden</span>: <span class="hljs-number">0</span>,         <span class="hljs-comment">// Element considered hidden when outside viewport - this buffer</span>
+    <span class="hljs-attr">elementLeaving</span>: <span class="hljs-number">0</span>,        <span class="hljs-comment">// Element starts leaving when beyond viewport + this buffer</span>
+    <span class="hljs-attr">elementLeft</span>: <span class="hljs-number">0</span>,         <span class="hljs-comment">// Element completely left when beyond viewport + this buffer</span>
+
+    <span class="hljs-comment">// Direction-specific thresholds</span>
+    <span class="hljs-attr">elementVisibleTop</span>: <span class="hljs-literal">null</span>,    <span class="hljs-comment">// Top visibility buffer</span>
+    <span class="hljs-attr">elementVisibleBottom</span>: <span class="hljs-literal">null</span>,   <span class="hljs-comment">// Bottom visibility buffer</span>
+    <span class="hljs-attr">elementLeavingTop</span>: <span class="hljs-literal">null</span>,    <span class="hljs-comment">// Top leaving threshold</span>
+    <span class="hljs-attr">elementLeavingBottom</span>: <span class="hljs-literal">null</span>,   <span class="hljs-comment">// Bottom leaving threshold</span>
+    <span class="hljs-attr">elementLeftTop</span>: <span class="hljs-literal">null</span>,       <span class="hljs-comment">// Top left threshold</span>
+    <span class="hljs-attr">elementLeftBottom</span>: <span class="hljs-literal">null</span>,    <span class="hljs-comment">// Bottom left threshold</span>
+    },
+});
+
+<span class="hljs-comment">/**
+    * Track viewport
+    * Use our hook system to react to changes live
+    *
+    * Set any css selector for elements to &quot;watch&quot; and
+    * chain the hooks you want to react.
+    */</span>
+yViewport.<span class="hljs-title function_">track</span>(<span class="hljs-string">`
+    body main &gt; .box,
+    body main &gt; .section,
+    .lazy-tabs-section [data-yai-tabs]
+`</span>)
+<span class="hljs-comment">// After load hook, fires when the page is loaded.</span>
+.<span class="hljs-title function_">hook</span>(<span class="hljs-string">&#x27;afterLoad&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ event, trackedElementsSize, trackedElements }</span>) =&gt;</span> {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Yai Viewport Tracker!&#x27;</span>, trackedElements);
+})
+<span class="hljs-comment">// If any of the selected elements becomed visible. Can be used for all kinds of lazy stuff.</span>
+.<span class="hljs-title function_">hook</span>(<span class="hljs-string">&#x27;elementVisibleCheck&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ element, rect, state, isLeaving }</span>) =&gt;</span> {
+    <span class="hljs-keyword">const</span> button = element.<span class="hljs-title function_">querySelector</span>(<span class="hljs-string">`.yvp-is-visible nav [data-inview-default]`</span>);
+    <span class="hljs-keyword">if</span> (button &amp;&amp; !button.<span class="hljs-property">classList</span>.<span class="hljs-title function_">contains</span>(<span class="hljs-string">&#x27;default-active&#x27;</span>)) {
+    button.<span class="hljs-property">classList</span>.<span class="hljs-title function_">add</span>(<span class="hljs-string">&#x27;default-active&#x27;</span>);
+    <span class="hljs-title function_">requestAnimationFrame</span>(<span class="hljs-function">() =&gt;</span> {
+        button.<span class="hljs-title function_">click</span>();
+    });
+    }
+})
+<span class="hljs-comment">// React on special events</span>
+.<span class="hljs-title function_">hook</span>(<span class="hljs-string">&#x27;elementLeavingBottom&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ element, rect, state }</span>) =&gt;</span> {
+    <span class="hljs-keyword">const</span> button = element.<span class="hljs-title function_">querySelector</span>(<span class="hljs-string">`.yvp-was-visible nav [data-inview-default]`</span>);
+    <span class="hljs-keyword">if</span> (button &amp;&amp; button.<span class="hljs-property">classList</span>.<span class="hljs-title function_">contains</span>(<span class="hljs-string">&#x27;active&#x27;</span>)) {
+    <span class="hljs-title function_">requestAnimationFrame</span>(<span class="hljs-function">() =&gt;</span> {
+        button.<span class="hljs-property">classList</span>.<span class="hljs-title function_">add</span>(<span class="hljs-string">&#x27;default-active&#x27;</span>);
+        button.<span class="hljs-title function_">click</span>();
+    });
+    }
+})
+<span class="hljs-comment">// Element is out of view, left from bottom</span>
+.<span class="hljs-title function_">hook</span>(<span class="hljs-string">&#x27;elementLeftBottom&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ element, rect, state }</span>) =&gt;</span> {
+    <span class="hljs-keyword">const</span> button = element.<span class="hljs-title function_">querySelector</span>(<span class="hljs-string">`.yvp-was-visible &gt; nav .default-active`</span>);
+    <span class="hljs-keyword">if</span> (button) {
+    <span class="hljs-title function_">requestAnimationFrame</span>(<span class="hljs-function">() =&gt;</span> {
+        button.<span class="hljs-property">classList</span>.<span class="hljs-title function_">remove</span>(<span class="hljs-string">&#x27;default-active&#x27;</span>);
+        <span class="hljs-keyword">if</span> (button.<span class="hljs-property">classList</span>.<span class="hljs-title function_">contains</span>(<span class="hljs-string">&#x27;active&#x27;</span>)) button.<span class="hljs-title function_">click</span>();
+    });
+    }
+});
+
+<span class="hljs-comment">/**
+    * Available hooks, lifecycle events
+    */</span>
+<span class="hljs-keyword">const</span> callbacks = {
+    <span class="hljs-attr">pageTop</span>: <span class="hljs-literal">null</span>,        <span class="hljs-comment">// Called when page reaches top</span>
+    <span class="hljs-attr">pageEnd</span>: <span class="hljs-literal">null</span>,        <span class="hljs-comment">// Called when page reaches bottom</span>
+    <span class="hljs-attr">pageScrolled</span>: <span class="hljs-literal">null</span>,     <span class="hljs-comment">// Called when page is scrolled past threshold</span>
+    <span class="hljs-attr">afterLoad</span>: <span class="hljs-literal">null</span>,      <span class="hljs-comment">// Called once when page finishes loading</span>
+    <span class="hljs-attr">afterResize</span>: <span class="hljs-literal">null</span>,      <span class="hljs-comment">// Called after viewport resize</span>
+    <span class="hljs-attr">afterScroll</span>: <span class="hljs-literal">null</span>,      <span class="hljs-comment">// Called after scrolling</span>
+    <span class="hljs-attr">elementVisible</span>: <span class="hljs-literal">null</span>,     <span class="hljs-comment">// Called when tracked element becomes visible</span>
+    <span class="hljs-attr">elementHidden</span>: <span class="hljs-literal">null</span>,    <span class="hljs-comment">// Called when tracked element becomes hidden</span>
+    <span class="hljs-attr">elementVisibleCheck</span>: <span class="hljs-literal">null</span>,  <span class="hljs-comment">// Permanent call to check visibility</span>
+    <span class="hljs-attr">elementLeaving</span>: <span class="hljs-literal">null</span>,     <span class="hljs-comment">// Called when tracked element starts leaving viewport</span>
+    <span class="hljs-attr">elementLeavingTop</span>: <span class="hljs-literal">null</span>,  <span class="hljs-comment">// Called when tracked element starts leaving viewport from top</span>
+    <span class="hljs-attr">elementLeavingBottom</span>: <span class="hljs-literal">null</span>, <span class="hljs-comment">// Called when tracked element starts leaving viewport from bottom</span>
+    <span class="hljs-attr">elementLeft</span>: <span class="hljs-literal">null</span>,      <span class="hljs-comment">// Called when tracked element completely leaves viewport</span>
+    <span class="hljs-attr">elementLeftTop</span>: <span class="hljs-literal">null</span>,     <span class="hljs-comment">// Called when tracked element completely leaves viewport from top</span>
+    <span class="hljs-attr">elementLeftBottom</span>: <span class="hljs-literal">null</span>,  <span class="hljs-comment">// Called when tracked element completely leaves viewport from bottom</span>
+};</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div> <!-- /dark nested -->
+                            </div>
+                        </div>
+                    </div> <!-- /level 2 tabs -->
+                </div> <!-- /root tab 2 -->
+            </div> <!-- /content -->
+        </div>
+    </div>
+
+
     <!-- Aria notes -->
     <div id="aria-summary" class="box removable">
         <h2>
             <span class="ycon ycon-bullseye ycon-sm ycon-is-left" aria-hidden="true"></span>
-            ARIA Accessibility Summary
+            <b>ARIA Accessibility Summary</b>
         </h2>
         <hr>
         <p><strong>YaiTabs</strong> implements <strong>WCAG 2.1 AA compliant</strong> tab navigation with full screen reader support.</p>
@@ -2062,23 +2883,24 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
             <li><strong>Auto-labeling:</strong> <code>aria-label="Tab navigation"</code> on tablists</li>
         </ul>
         <hr>
-        <p class="mb-0"><strong>DeepSeek:</strong> <em>"100% correct and follows WAI-ARIA Authoring Practices perfectly. This is exactly how ARIA should be implemented for tab interfaces.
+        <p class="ymb-0"><strong>DeepSeek:</strong> <em>"100% correct and follows WAI-ARIA Authoring Practices perfectly. This is exactly how ARIA should be implemented for tab interfaces.
         <span class="ycon ycon-clapping-hands ycon-xxs" aria-hidden="true"></span>"</em></p>
         <button class="y-remove-parent" data-action="removeParent" title="Got it, remove the box"></button>
     </div>
+
 
     <!-- FAQ Section with ARIA roles -->
     <div id="faq-container" class="box full-faq removable">
         <button class="y-remove-parent" data-action="removeParent" title="Got it, remove the box"></button>
         <h2>
             <span class="ycon ycon-exclamation-question-mark ycon-sm pulse ycon-is-left" aria-hidden="true"></span>
-            Keyboard Navigation FAQ
+            <b>Keyboard Navigation FAQ</b>
         </h2>
         <hr>
         <div class="faq-item" role="article">
             <h3>Why does TAB skip some tab buttons?</h3>
             <div role="contentinfo">
-                <p class="mb-0">This is the <strong>correct WAI-ARIA behavior</strong>! Only the <em>active</em>
+                <p class="ymb-0">This is the <strong>correct WAI-ARIA behavior</strong>! Only the <em>active</em>
                 tab button is in the TAB order. Use <strong>Arrow keys</strong> to navigate
                 between tabs within a container.</p>
             </div>
@@ -2087,7 +2909,7 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
             <h3>What's the proper keyboard navigation pattern?</h3>
             <div role="contentinfo">
                 <p>Follow the <strong>WAI-ARIA Authoring Practices</strong>:</p>
-                <ul class="mb-0">
+                <ul class="ymb-0">
                     <li><strong>TAB</strong> - Move between tab containers and content areas</li>
                     <li>
                         <span>
@@ -2106,7 +2928,7 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
             <h3>How do I navigate nested tabs?</h3>
             <div role="contentinfo">
                 <p>Each tab container is independent:</p>
-                <ol class="mb-0">
+                <ol class="ymb-0">
                     <li><strong>TAB</strong> to focus the main tab container</li>
                     <li><strong>Arrow keys</strong> to select different main tabs</li>
                     <li><strong>TAB</strong> again to enter the tab content</li>
@@ -2118,7 +2940,7 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
         <div class="faq-item" role="article">
             <h3>Why can't I TAB into hidden tab content?</h3>
             <div role="contentinfo">
-                <p class="mb-0">Hidden tab panels have <code>aria-hidden="true"</code> and <code>tabindex="-1"</code>
+                <p class="ymb-0">Hidden tab panels have <code>aria-hidden="true"</code> and <code>tabindex="-1"</code>
                 to prevent focus on inaccessible content. This ensures screen reader users
                 don't get trapped in hidden content.</p>
             </div>
@@ -2136,63 +2958,240 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
     <p><b>© <span title="DOM pun intended">Claude Van DOM</span> &amp; Engin Ypsilon</b></p>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/@yaijs/yeh"></script>
-<script src="../utils/yai-viewport.js"></script>
-<script src="../utils/auto-switch.js"></script>
-<script src="../yai-core.js"></script>
-<script src="yai-tabs.js"></script>
+<div class="scroll-to-top-container">
+    <button type="button" class="scroll-to-top" data-action="scrollToTop">▲</button>
+</div>
 
-<script>
-    /**
-     * Viewport tracker
-     */
+
+<!-- YaiJS -->
+<script src="https://cdn.jsdelivr.net/npm/@yaijs/yeh"></script>
+<script type="module" src="../dist/yai-bundle.js"></script>
+
+<script type="module">
+    import AutoSwitch from "../utils/auto-switch.js";
+
+    const { YaiCore, YaiTabs, YaiViewport } = window.YaiJS;
+
+    /* Init Viewport Tracker */
     const yViewport = new YaiViewport({
-        throttle: {
-            resize: 1000,
-            scroll: 150,
-        },
+        throttle:  { resize: 500, scroll: 150, scrollend: 150 },
         threshold: {
-            pageTop: 50,
-            pageEnd: 150,
-            pageScrolled: 50,
-            elementVisible: -100,
-            elementHidden: 50,
-            elementLeaving: -150,
-            elementLeft: 50,
+            pageTop: 50, pageEnd: 50, pageScrolled: 50, elementLeft: -100, elementLeaving: -150, elementVisible: -200,
         },
         set: {
             selector: {
-                trackDistance: null,
-                isVisibleAttr: null,
-                isVisibleClass: 'yvp-is-visible',
-                pageTop: 'yvp-is-top',
-                pageEnd: 'yvp-is-page-end',
-                pageScrolled: 'yvp-is-scrolled',
-                isLeavingClass: 'yvp-is-leaving',
-                hasBeenVisibleClass: 'yvp-was-visible'
+                // isLeavingTopClass: null, isLeavingBottomClass: null,
+                hasLeftClass: null, hasLeftTopClass: null, hasLeftBottomClass: null,
+                trackDistance: null, isVisibleAttr: null,
             }
         },
-    }).track('.box, .section');
+    });
 
-    /**
-     * Init YaiTabs
-     */
-    const tabs = new YaiTabs({
-        closable: true,
-        openDefault: null,
-        autoAccessibility: true,
-        autoFocus: false,
-        autoDisambiguate: true,
-        lazyNestedComponents: true,
-        events: {
-            enableStats: false,
-            autoTargetResolution: true,
-            actionableAttributes: ['data-tab-action'],
-            actionableTags: [],
+    // Track viewport
+    yViewport.track(`
+        body main > .box,
+        body main > .section,
+        .lazy-tabs-section [data-yai-tabs]
+    `)
+    .hook('elementVisibleCheck', ({ element, rect, state, isLeaving }) => {
+        const button = element.querySelector(`.yvp-is-visible nav [data-inview-default]`);
+        if (button && !button.classList.contains('default-active')) {
+            button.classList.add('default-active');
+            requestAnimationFrame(() => {
+                button.click();
+            });
         }
     });
 
     /**
+     * Enhanced YaiTabs Configuration */
+    const tabs = new YaiTabs({
+        autoAccessibility: true,
+        autoDisambiguate: true,
+        lazyNestedComponents: true,
+        autoFocusNested: false,
+        // EventHandler config
+        events: {
+            setListener: {
+                window: [
+                    // Required for hash routing
+                    { type: 'hashchange', debounce: 500 }
+                ],
+                '[data-yai-tabs]': [
+                    'click',
+                    'keydown',
+                    { type: 'change', debounce: 300 },
+                    { type: 'input',  debounce: 500 },
+                    { type: 'submit' }
+                ]
+            },
+            actionableAttributes: [
+                'data-tab-action',
+                'data-click',
+                'data-input',
+                'data-change',
+                'data-submit',
+                'data-focus',
+                'data-blur',
+            ],
+            // Custom methods
+            methods: {
+                submit: {
+                    handleSubmit(event, target, container) {
+                        tabs._executeHook(`eventSubmit`, { event, target, container });
+                    },
+                },
+            }
+        },
+    });
+
+    /**
+     * Highlights the container the event is fired from.
+     * The accurate parent element.
+     *
+     * @param container relieabl parent element
+     */
+    const highlightContainer = (container) => {
+        // Cleanup first
+        const getHighlighted = document.body.querySelectorAll('.latest-event-container');
+        getHighlighted.forEach(function (highlighted) {
+            highlighted.classList.remove('latest-event-container');
+        });
+        // Mark component
+        if (container?.id) {
+            container.classList.add('latest-event-container');
+            setTimeout(() => { container.classList.remove('latest-event-container') }, 600);
+        }
+    };
+
+    const showStatsForDemo = (target, container) => {
+        // Cleanup first
+        let getHighlighted = document.body.querySelector('#load-stats-for-demo .inject-stats');
+        if (!getHighlighted) {
+            const startsTemplate = `
+                <div id="load-stats-for-demo" class="removable" style="position:relative">
+                    <pre class="inject-stats ymb-0"></pre>
+                    <b>Check console for more details</b>
+                    <button class="y-remove-parent" data-action="removeParent" title="Got it, remove the box"></button>
+                </div>`;
+            target.parentNode.insertAdjacentHTML('afterend', startsTemplate);
+            getHighlighted = container.querySelector('#load-stats-for-demo .inject-stats');
+        }
+        if (typeof exampleHandler === 'object' && getHighlighted) {
+            const getStats = exampleHandler.countComponents(false);
+            const countStats = getStats?.count ? JSON.stringify(getStats?.count, null, 2) : null;
+            if (countStats) {
+                getHighlighted.textContent = `Some stats: ${countStats}`;
+                console.log(getStats);
+            }
+        }
+    };
+
+    /**
+     * Click events. Just making visual clues for the user, so one can
+     * see, each click leads to something different, something fresh.
+     */
+    tabs.hook('eventClick', ({ event, target, action, container }) => {
+        const scopedContainer = target.closest('[data-tab]');
+        if (!scopedContainer) return;
+
+        highlightContainer(container);
+        if (action === 'quick-demo') {
+            showStatsForDemo(target, container)
+        }
+
+        let getResponse = scopedContainer.querySelector('#click-responses, #click-nested-1-responses, #click-nested-2-responses');
+        if (!getResponse || !action) return;
+
+        const label = (target?.textContent || '').trim() || target?.value || '(no label)';
+        const response = `${action}( '${label}' )`;
+
+        getResponse.dataset.colorApply = action;
+        getResponse.textContent = response;
+    })
+    /**
+     * Input events (debounced via setListener). Fires only for elements
+     * with a matching [data-input] attribute so we don't spam on every keystroke.
+     */
+    .hook('eventInput', ({ event, target, action, container }) => {
+        const scopedContainer = target.closest('[data-tab]');
+        if (!scopedContainer) return;
+
+        highlightContainer(container);
+
+        const log = scopedContainer.querySelector('#input-responses');
+        if (!log) return;
+
+        const value = (target.value ?? '').toString();
+        const name = target.name || target.id || 'input';
+        log.textContent = `input:${action} → ${name}='${value}'`;
+    })
+    /**
+     * Change events for selects, checkboxes, radios, etc.
+     */
+    .hook('eventChange', ({ event, target, action, container }) => {
+        const scopedContainer = target.closest('[data-tab]');
+        if (!scopedContainer) return;
+
+        highlightContainer(container);
+
+        const log = scopedContainer.querySelector('#input-responses');
+        if (!log) return;
+        const isCheckbox = target.type === 'checkbox';
+        const name = target.name || target.id || 'field';
+        const val = isCheckbox
+            ? target.checked
+                ? 'checked'
+                : 'unchecked'
+            : target.value || '';
+        log.textContent = `change:${action} → ${name}=${val}`;
+    })
+    /**
+     * Submit events. Prevent default, serialize the form, do a tiny
+     * validation demo, and log the result into the Forms tab.
+     */
+    .hook('eventSubmit', ({ event, target, container }, context) => {
+        const form = target.closest('form');
+        if (!form) return;
+        event.preventDefault();
+        event.stopPropagation();
+
+        console.log(event, target, container, context);
+
+        // Visual loading on the submit button
+        const submitBtn = form.querySelector('[type="submit"]');
+        if (submitBtn) submitBtn.classList.add('yai-loading');
+
+        // Serialize data
+        const data = Object.fromEntries(new FormData(form).entries());
+
+        // Tiny validation example
+        const issues = [];
+        if (!data['user-name'] || data['user-name'].trim().length < 2)
+            issues.push('Name is too short.');
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data['user-email'] || ''))
+            issues.push('Email looks invalid.');
+
+        highlightContainer(container);
+
+        const out = document.getElementById('form-responses');
+        if (out) {
+            // Simulate async and clear loading
+            setTimeout(() => {
+                if (submitBtn) submitBtn.classList.remove('yai-loading');
+                const result = {
+                    valid: issues.length === 0,
+                    issues,
+                    data,
+                };
+                out.textContent = JSON.stringify(result, null, 2);
+            }, 600);
+        }
+    });
+
+    /**
+     * Example Page Extras
+     *
      * Navigation Link System for YaiTabs
      *
      * Supports:
@@ -2202,7 +3201,7 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
      */
 
     // Helper function to combine multiple URLs into one hash
-    function combineUrlHashes(urls) {
+    const combineUrlHashes = (urls) => {
         const allParams = new URLSearchParams();
 
         urls.forEach(url => {
@@ -2217,6 +3216,15 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
         const combined = allParams.toString();
         return combined ? '#' + combined : '';
     }
+
+    const highlightActiveHash = (target) => {
+        if (!target) return;
+        const getAllActivLinks = document.querySelectorAll('[data-yai-tabs] .ref-link-active');
+        getAllActivLinks.forEach(activeLink => {
+            activeLink.classList.remove('ref-link-active');
+        });
+        target.classList.add('ref-link-active');
+    };
 
     // Process all navigation links with data-yai-ref-path
     const getAllRouteLinks = document.querySelectorAll('[data-yai-ref-path]');
@@ -2266,7 +3274,7 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
     /**
      * EventHandler for this Example
      */
-    class ExampleHandler extends YEH {
+    const exampleHandler = new class extends YEH {
         constructor() {
             super({
                 body: ['click', 'change'],
@@ -2274,6 +3282,7 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
                 autoTargetResolution: true,
                 enableConfigValidation:  false,
                 enableHandlerValidation: false,
+                actionableClasses: ['yai-action'],
             });
 
             // Init elements / vars
@@ -2284,39 +3293,35 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
             this.getControlCenter = document.querySelector('.control-center');
             this.cycleAll =  document.querySelector('[name="switchBehaviorTriggerAll"]');
             this.loopAll = document.querySelector('[name="switchBehaviorLoopAll"]');
+            this.toConsoleLog = document.querySelector('[name="listComponentsInConsole"]');
+            this.enableAriaValidator = true;
 
             this.initBehavior = this.demoContainer?.dataset ? this.demoContainer.dataset.behavior : 'fade';
             if (this.initBehavior && this.behaviorSelect) {
-                this.behaviorSelect.value = this.initBehavior
+                this.behaviorSelect.value = this.initBehavior;
             }
-
-            this.on(`${tabs.config.dispatchName}.tabReady`, 'onTabReady');
 
             this.countComponents();
             this.watchUrl();
-        }
-
-        onTabReady(event) {
-            const eventDetail = event.detail;
+            this.toConsoleLog.checked = true;
         }
 
         /**
          * Super subscriber, subscribe all emitables at once.
-         *
          * this.superSubscriber();
          */
-        onTabs() { console.log(...arguments) }
+        onAnyEvent() { console.log(...arguments) }
         superSubscriber() {
             for (var key in tabs.config.emitable) {
-                this.on(`${tabs.config.dispatchName}.${key}`, 'onTabs');
+                this.on(`${tabs.config.dispatchName}.${key}`, 'onAnyEvent');
             }
         }
 
         handleClick(event, target, container) {
-            const action = target.dataset.action;
+            const action = target.dataset.action || target.dataset.handler;
             if (action) {
                 if (typeof this[action] === 'function') {
-                    return this[action](target, event, container);
+                    this[action](target, event, container);
                 }
             }
         }
@@ -2332,7 +3337,7 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
                     this.cycleAll.checked = true;
                 }
             }
-            // Check if handler exists and call it
+            // Check if handler exists and exec
             const action = target.dataset.action;
             if (action && this[action]) {
                 this[action](target, event);
@@ -2342,20 +3347,30 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
         watchUrl() {
             const url = new URL(location.href);
             const scrollto = url.searchParams.get('scrollto');
+            const setLinking = url.searchParams.get('setlinking');
             if (scrollto) {
+                // console.log( scrollto, setLinking )
                 const getTarget = document.getElementById(scrollto);
                 if (getTarget) {
-                    window.history.replaceState({}, document.title, `${location.origin}${location.pathname}`);
-                    getTarget.scrollIntoView({ behavior: 'auto', block: 'nearest' });
+                    let historyUrl = `${location.origin}${location.pathname}`
+                    if (setLinking) {
+                        location.hash = `linking=${setLinking}`;
+                        historyUrl = location.hash;
+                    }
+                    window.history.replaceState({}, document.title, `${historyUrl} `);
+                    setTimeout(() => {
+                        getTarget.scrollIntoView({ behavior: 'instant', block: 'start', inline: 'start' });
+                    }, 200);
                 }
             }
         }
 
         refPathProcess(target, event, parentContainer) {
-            event.preventDefault();
-
             const getFirstRefPath = target.dataset.refPathFirst;
             const newHash = target.href.split('#')?.[1];
+            if (!newHash) return;
+            event.preventDefault();
+
             const params = new URLSearchParams(newHash);
             const parsedParams = Object.fromEntries(params);
 
@@ -2367,25 +3382,59 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
                 allActiveTabs.forEach(activeTab => { activeTab.click() });
             }
 
+            const openTabIdAttr = tabs.config.autoDisambiguate ? 'data-original-id' : 'data-open';
+
             Object.keys(parsedParams).forEach((key, index) => {
                 const value = parsedParams[key];
-                const targetTab = parentContainer.querySelector(`[data-ref-path="${key}"]>[data-controller] [data-original-id="${value}"]`);
-                if (targetTab) {
-                    targetTab.click();
+                const targetTab = parentContainer.querySelector(`[data-ref-path="${key}"]>[data-controller] [${openTabIdAttr}="${value}"]`);
+
+                const timeout = 50 + (10 * index);
+                setTimeout(() => {
+                    if (targetTab && !targetTab.classList.contains('active')) {
+                        targetTab.click()
+                    }
+                }, timeout);
+            });
+
+            highlightActiveHash(target);
+        }
+
+        validateTabStates() {
+            if (!this.enableAriaValidator) return;
+
+            const issues = [];
+
+            // Check ALL buttons
+            document.querySelectorAll('nav[data-controller] [data-open]').forEach(button => {
+                const isActive = button.classList.contains('active');
+                const ariaSelected = button.getAttribute('aria-selected');
+
+                if (isActive && ariaSelected !== 'true') {
+                    console.log(button);
+                    issues.push(`Active button ${button.id} has aria-selected="${ariaSelected}" (should be "true")`);
+                }
+                if (!isActive && ariaSelected !== 'false') {
+                    console.log(button);
+                    issues.push(`Inactive button ${button.id} has aria-selected="${ariaSelected}" (should be "false")`);
                 }
             });
 
-            if (typeof target.dataset.scrollTo !== 'undefined') {
-                // Scroll to first ref after tabs open
-                if (getFirstRefPath) {
-                    setTimeout(() => {
-                        const getFirstRef = parentContainer.querySelector(`[data-ref-path="${getFirstRefPath}"]`);
-                        if (getFirstRef) {
-                            getFirstRef.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'center' });
-                        }
-                    }, 50);
+            // Check ALL panels
+            document.querySelectorAll('div[data-content] [data-tab]').forEach(panel => {
+                const isActive = panel.classList.contains('active');
+                const ariaHidden = panel.getAttribute('aria-hidden');
+
+                if (isActive && ariaHidden === 'true') {
+                    console.log(panel);
+                    issues.push(`Active panel ${panel.id} has aria-hidden="true" (should be removed or "false")`);
                 }
-            }
+                if (!isActive && ariaHidden !== 'true') {
+                    console.log(panel);
+                    issues.push(`Inactive panel ${panel.id} missing aria-hidden="true"`);
+                }
+            });
+
+            return issues;
         }
 
         remoteClick(target, event, container) {
@@ -2437,14 +3486,18 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
 
                 if (target.dataset.replaceTarget) {
                     // Create temp button
+                    const blacklistAttributes = [
+                        'class', 'data-trigger-ynfiniti', 'data-action', 'data-replace-target', 'data-target-selector', 'data-remote-click'
+                    ];
+                    const attrsToObject = el => Object.fromEntries([...el.attributes].map(a => [a.name, a.value]));
+                    const merged = { ...attrsToObject(target), ...attrsToObject(tabButton) };
                     const newButton = document.createElement('button');
-                    const copyAll = { ...target.dataset, ...tabButton.dataset };
                     newButton.textContent = target.dataset.textContent || target.textContent || 'No text content';
                     newButton.style.minWidth = `${tabButton.offsetWidth}px`;
 
-                    for(var d in copyAll) {
-                        if (!['triggerYnfiniti', 'action', 'replaceTarget', 'targetSelector', 'remoteClick'].includes(d)) {
-                            newButton.dataset[d] = copyAll[d];
+                    for (const [name, value] of Object.entries(merged)) {
+                        if (!blacklistAttributes.includes(name)) {
+                            newButton.setAttribute(name, value)
                         }
                     }
 
@@ -2457,7 +3510,9 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
 
                 requestAnimationFrame(() => {
                     tabButton.focus({ preventScroll: true });
-                    setTimeout(() => { YaiCore.simulateClickEvent(tabButton) }, 10);
+                    setTimeout(() => {
+                        YaiCore.simulateClickEvent(tabButton);
+                    }, 10);
                 });
 
                 return true;
@@ -2467,42 +3522,70 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
             }
         }
 
-        countComponents() {
+        countComponents(allowConsole = true) {
+            if (typeof allowConsole === 'object') {
+                allowConsole = true;
+            }
+
             const getResultElements = document.querySelectorAll('.total-components-result');
+            let collect;
             if (getResultElements.length) {
-                const consoleLog = document.querySelector('[name="listComponentsInConsole"]');
+                const params = new URLSearchParams(location.hash.substring(1));
                 const components = document.querySelectorAll('[data-yai-tabs]');
+                const selectors = {
+                    inert:                  '[data-yai-tabs] [inert]',
+                    ariaHiddenButtons:      '[data-yai-tabs] button[aria-hidden="true"]',
+                    ariaHiddenContent:      '[data-yai-tabs] div[aria-hidden="true"]',
+                    buttonsActive:          '[data-yai-tabs] [data-controller] button[data-open].active',
+                    buttonsDefault:         '[data-yai-tabs] [data-controller] button[data-default]',
+                    buttonsDefaultIfInView: '[data-yai-tabs] [data-controller] button[data-inview-default]',
+                    componentsRoots:        '[data-yai-tabs][data-root]',
+                    componentsInRoots:      '[data-yai-tabs][data-in-root]',
+                    componentsActive:       '[data-yai-tabs].tab-active',
+                    contentsActive:         '[data-yai-tabs] [data-content] [data-tab].active',
+                    tabButtons:             '[data-yai-tabs] [data-controller] button[data-open]',
+                    tabContents:            '[data-yai-tabs] [data-content] [data-tab]',
+                }
+                collect = {
+                    elements: { components, },
+                    count: {
+                        hash: params.size,
+                        components: components.length,
+                    },
+                    misc: {
+                        hashParams: Object.fromEntries(params),
+                        hashStringified: JSON.stringify(Object.fromEntries(params), null, 2),
+                        locationHash: location.hash,
+                    }
+                }
+
+                for (const key in selectors) {
+                    const selector = selectors[key];
+                    const getElements = document.querySelectorAll(selector);
+                    collect.elements[key] = getElements;
+                    collect.count[key] = getElements.length;
+                }
+
                 getResultElements.forEach(targetEl => {
                     targetEl.classList.remove('y-fade-in');
                     targetEl.textContent = components.length;
                     setTimeout(() => { targetEl.classList.add('y-fade-in') }, 10);
-                    if (consoleLog.checked) {
-                        const params = new URLSearchParams(location.hash.substring(1));
-                        const elements = {
-                            components,
-                            tabButtons: document.querySelectorAll('[data-yai-tabs] [data-controller] button[data-open]'),
-                            tabContents: document.querySelectorAll('[data-yai-tabs] [data-content] [data-tab]'),
-                            activeComponents: document.querySelectorAll('[data-yai-tabs].tab-active'),
-                            activeButtons: document.querySelectorAll('[data-yai-tabs] [data-controller] button[data-open].active'),
-                            activeContents: document.querySelectorAll('[data-yai-tabs] [data-content] [data-tab].active'),
-                        }
-                        console.log({
-                            elements,
-                            count: {
-                                components: elements.components.length,
-                                tabButtons: elements.tabButtons.length,
-                                tabContents: elements.tabContents.length,
-                                activeComponents: elements.activeComponents.length,
-                                activeButtons: elements.activeButtons.length,
-                                activeContents: elements.activeContents.length,
-                            },
-                            misc: {
-                                hash: Object.fromEntries(params),
-                            }
-                        })
-                    }
                 });
+
+                if (allowConsole === true && this.toConsoleLog.checked) {
+                    collect.instance = { this: this, tabs };
+                    console.log(collect, { this: this, tabs });
+
+                    if (this.enableAriaValidator) {
+                        setTimeout(() => { console.log('Tab validation issues:', this.validateTabStates()) }, 1500);
+                    }
+                }
             }
+            return collect;
+        }
+
+        scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         toggleBodyMaxWidth(target, event) {
@@ -2514,6 +3597,68 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
         toggleFallbackMode(target, event) {
             const toggleFn = target.checked ? 'add' : 'remove';
             document.body.classList[toggleFn]('yai-fallback-mode');
+        }
+
+        switchColorScheme(target, event) {
+            // Validate input parameters
+            if (!target || !event) {
+                console.warn('SwitchColorScheme: Invalid parameters');
+                return;
+            }
+
+            if (event.type !== 'change') return;
+
+            // Validate target element
+            if (!(target instanceof HTMLInputElement) && !(target instanceof HTMLSelectElement)) {
+                console.warn('SwitchColorScheme: Invalid target element');
+                return;
+            }
+
+            // Define allowed color schemes (whitelist approach)
+            const ALLOWED_SCHEMES = ['light', 'dark', 'auto', 'high-contrast'];
+            const selectedScheme = target.value;
+            const setAccent = target.dataset.accent || false;
+            const applyFn = target.dataset.applyFn;
+
+            // Sanitize input (remove any potential malicious content)
+            const sanitizedScheme = selectedScheme.replace(/[^a-zA-Z0-9-]/g, '');
+
+            // Proceed with safe value
+            this.applyColorScheme(target, sanitizedScheme, applyFn);
+        }
+
+        applyColorScheme(target, scheme, applyFn) {
+            let elements = document.querySelectorAll('div[data-yai-tabs]');
+            if (!elements.length) return;
+
+            let dataFn,
+                keepLastKey,
+                reset = target.value === 'reset';
+
+            switch(applyFn) {
+                case 'scheme':
+                    dataFn = 'data-color-scheme';
+                    break;
+                case 'accent':
+                    target.dataset.colorApply = scheme;
+                    dataFn = 'data-color-accent';
+                    break;
+                case 'variant':
+                    elements = document.querySelectorAll('div[data-yai-tabs] nav[data-controller]');
+                    dataFn = 'data-variant';
+                    break;
+            }
+
+            // Use requestAnimationFrame for better performance and security
+            requestAnimationFrame(() => {
+                [...elements].forEach((element) => {
+                    if (reset) {
+                        element.removeAttribute(dataFn);
+                    } else {
+                        element.setAttribute(dataFn, scheme);
+                    }
+                });
+            });
         }
 
         removeParent(target, event, parentNode) {
@@ -2689,10 +3834,12 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
                 behaviorSelect.dispatchEvent(new Event('change', { bubbles: true, cancelable: true }));
             }
         }
-    }
-
-    // Example page handler
-    const exampleHandler = new ExampleHandler();
+    }();
+    /**
+     *
+     * YEH & YAI
+     *
+     */
 </script>
 </body>
 </html>

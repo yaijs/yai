@@ -1,21 +1,23 @@
 {
   "name": "@yaijs/core",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.1",
   "description": "Advanced web components built on YpsilonEventHandler - the world's first DOM Event Scoping System",
-  "main": "yai-core.js",
   "type": "module",
+  "main": "dist/yai-bundle.js",
+  "types": "yai-core.d.ts",
   "exports": {
-    ".": "./yai-core.js",
+    ".": "./dist/yai-bundle.js",
     "./core": "./yai-core.js",
     "./tabs": "./tabs/yai-tabs.js",
     "./autoswitch": "./utils/auto-switch.js",
     "./viewport": "./utils/yai-viewport.js"
   },
   "files": [
-    "yai-core.js",
-    "yai-core.d.ts",
+    "dist/",
     "tabs/",
-    "utils/"
+    "utils/",
+    "yai-core.js",
+    "yai-core.d.ts"
   ],
   "scripts": {
     "test": "echo \"No build pipeline required - use browser-based validation with Example.html files\"",
@@ -28,6 +30,9 @@
     "ypsilon-event-handler",
     "y-e-h",
     "yeh",
+    "tab-interface",
+    "tab-browser",
+    "tabbed-interface",
     "performance",
     "o1-scaling",
     "accessibility",
