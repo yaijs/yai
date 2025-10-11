@@ -211,6 +211,8 @@ YaiViewport is a lightweight, IntersectionObserver-free viewport tracker that ru
 - ✅ Hook system: Subscribe to page and element lifecycle events with hook(name, fn).
 - ✅ YEH integration: Throttled load/resize/scroll/scrollend handling via a single container listener.
 
+[Live Demo on JSFiddle](https://jsfiddle.net/w6je4ck1/)
+
 #### ES Module
 
 ```html
@@ -220,6 +222,7 @@ YaiViewport is a lightweight, IntersectionObserver-free viewport tracker that ru
 
 ```js
 import YaiViewport from '@yaijs/core/viewport';
+// import YaiViewport from 'https://yaijs.github.io/yai/utils/yai-viewport.js';
 
 const viewport = new YaiViewport({
   // optional throttles (ms)
@@ -273,6 +276,7 @@ const viewport = new YaiViewport({
 
 <script type="module">
   import YaiViewport from '@yaijs/core/viewport';
+  // import YaiViewport from 'https://yaijs.github.io/yai/utils/yai-viewport.js';
 
   const yvp = new YaiViewport();
 

@@ -38,7 +38,7 @@ YaiTabs doubles as a powerful application event bus. Add listeners for ANY event
 <!DOCTYPE html>
 <html>
 <head>
-    <link rel="stylesheet" href="https://unpkg.com/@yaijs/core@1.0.0-beta.1/tabs/yai-tabs.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@yaijs/core@1.0.1/tabs/yai-tabs.min.css">
 </head>
 <body>
     <div data-yai-tabs>
@@ -54,7 +54,7 @@ YaiTabs doubles as a powerful application event bus. Add listeners for ANY event
 
     <!-- YaiJS -->
     <script src="https://cdn.jsdelivr.net/npm/@yaijs/yeh"></script>
-    <script type="module" src="https://unpkg.com/@yaijs/core@1.0.0-beta.1/dist/yai-bundle.js"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@yaijs/core@1.0.1/dist/yai-bundle.js"></script>
 
     <script type="module">
         const { YaiTabs } = window.YaiJS;

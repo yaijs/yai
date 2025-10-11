@@ -14,6 +14,32 @@ Advanced patterns, real-world examples, and architectural deep-dives for YaiTabs
 
 ---
 
+## CDN
+
+```html
+<!-- Required Event Handler, accessible using `window.YEH` -->
+<script src="https://cdn.jsdelivr.net/npm/@yaijs/yeh@1.0.2/yeh.min.js"></script>
+<!-- Recommended: Bundles 'yai-core.js', 'yai-tabs.js' & 'yai-viewport.js' and stores them in `window.YaiJS` -->
+<script type="module" src="https://cdn.jsdelivr.net/npm/@yaijs/core@1.0.1/dist/yai-bundle.js"></script>
+
+<!--
+    Individual Components
+-->
+<!-- Core Class -->
+<script type="module" src="https://cdn.jsdelivr.net/npm/@yaijs/core@1.0.1/yai-core.min.js"></script>
+<!-- YaiTabs Class -->
+<script type="module" src="https://cdn.jsdelivr.net/npm/@yaijs/core@1.0.1/tabs/yai-tabs.min.js"></script>
+<!-- YaiViewport Class -->
+<script type="module" src="https://cdn.jsdelivr.net/npm/@yaijs/core@1.0.1/utils/yai-viewport.min.js"></script>
+<!-- AutoSwitch Class -->
+<script type="module" src="https://cdn.jsdelivr.net/npm/@yaijs/core@1.0.1/utils/auto-switch.min.js"></script>
+<!-- Default styles -->
+<link rel="stylesheet" href="https://unpkg.com/@yaijs/core@1.0.0-beta.1/tabs/yai-tabs.css">
+```
+
+
+---
+
 ## Single-Tab Applications
 
 Build complete SPAs within a single tab component using event delegation:

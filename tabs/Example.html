@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YaiTabs - Advanced Tab Browser Component</title>
     <meta name="description" content="Advance Tab Browser Component with 9 animations, Dynamic content support, DeepLinks & implements WCAG 2.1 AA compliant tab navigation with full screen reader support">
-    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAYNJREFUOI2lkz9S20AYxX+7ttOgGDOjQKMZmMEt8lapdQQdISlInRJTcQ5ofAPgBOgG2citMrEnNBpnAgFBgdBuCs8a2TEMjF+1/97b7739VhwWllUgV2I/J1Cu0THWaDc31uhyjc6rBEqLahQmmQzTnlubDNPe46/furSoFwVKiypG2RzZ4ebycrsYZQmS6DmBuBhlycNtsQ6wuafO3YYbP9wW67nWF0A8J2Aln/JUnzqyH6q+EE+HhCD2Q9UH+LAXfi8luoIDAHF4b49zrfcB3r33/nZ2u1+FYfB/XFOLAA3MYDJMe1tKnTRNZT4CtINg3Nzw48cKWmIZHVoNOlc/sjNXKYCsPBn5oeo3fT9qwtGfof7myqujgoNc6wtH3lLqBMMXUevEOE/1aT24WQ6SmU2ATaU+O5tioZXjq5/ZYHZLqARAnmrrMtrY7cYYkrlXqOHM2+lG7SAYL1poB8HY2+lGdfKyCoBpKzcKk0ghFUxbufJk1LrjevHsUoG3YOXf+A/28K0/S+gHCgAAAABJRU5ErkJggg==" />
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAYNJREFUOI2lkz9S20AYxX+7ttOgGDOjQKMZmMEt8lapdQQdISlInRJTcQ5ofAPgBOgG2citMrEnNBpnAgFBgdBuCs8a2TEMjF+1/97b7739VhwWllUgV2I/J1Cu0THWaDc31uhyjc6rBEqLahQmmQzTnlubDNPe46/furSoFwVKiypG2RzZ4ebycrsYZQmS6DmBuBhlycNtsQ6wuafO3YYbP9wW67nWF0A8J2Aln/JUnzqyH6q+EE+HhCD2Q9UH+LAXfi8luoIDAHF4b49zrfcB3r33/nZ2u1+FYfB/XFOLAA3MYDJMe1tKnTRNZT4CtINg3Nzw48cKWmIZHVoNOlc/sjNXKYCsPBn5oeo3fT9qwtGfof7myqujgoNc6wtH3lLqBMMXUevEOE/1aT24WQ6SmU2ATaU+O5tioZXjq5/ZYHZLqARAnmrrMtrY7cYYkrlXqOHM2+lG7SAYL1poB8HY2+lGdfKyCoBpKzcKk0ghFUxbufJk1LrjevHsUoG3YOXf+A/28K0/S+gHCgAAAABJRU5ErkJggg==">
     <!-- Example page styles -->
     <style>
     :root {
@@ -2241,10 +2241,10 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
                         </nav>
                         <div data-content>
                             <div data-tab="1">
-                                <h2>DEFAULT content</h2>
+                                <h2>Default Accent</h2>
                                 <hr>
                                 <p><strong>YaiTabs</strong> supports <em>unlimited nesting</em>, <em>dynamic content loading</em>, and <em>URL-based routing</em> — all handled by just <strong>2 listeners on each root</strong>, with nested components inheriting the same delegation. Built on YEH (YpsilonEventHandler) Foundation - O(1) Performance: Single listener per container regardless of complexity. Perfect Isolation: Container-scoped event handling using `:scope >` selectors.</p>
-                                <pre class="ymb-0"><code>data-color-scheme="light"</code><br><code>data-color-scheme="red"</code></pre>
+                                <pre class="ymb-0"><code>data-theme="default"</code><br><code>data-color-accent="red"</code></pre>
                             </div>
                             <div data-tab="2">
                                 <h2>Default content 2</h2>
@@ -2269,9 +2269,9 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
                         </nav>
                         <div data-content>
                             <div data-tab="1">
-                                <h2>Blue content</h2>
+                                <h2>Blue Accent</h2>
                                 <hr>
-                                <p class="ymb-0"><code>data-color-scheme="blue"</code> maps to CSS tokens like <code>--yai-accent</code> and <code>--yai-shadow-accent</code>. Theme via custom properties; structure and layout are inherited automatically. WCAG 2.1 AA Compliance - Full ARIA implementation with screen reader support. Keyboard Navigation - Arrow keys, Home/End, Enter/Space support.</p>
+                                <p class="ymb-0"><code>data-color-accent="blue"</code> maps to CSS tokens like <code>--yai-tabs-color-accent</code> and <code>--yai-tabs-shadow-medium</code>. Theme via custom properties; structure and layout are inherited automatically. WCAG 2.1 AA Compliance - Full ARIA implementation with screen reader support. Keyboard Navigation - Arrow keys, Home/End, Enter/Space support.</p>
                             </div>
                             <div data-tab="2">
                                 <h2>Blue content 2</h2>
@@ -2288,19 +2288,20 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
 
                     <hr>
                     <!-- Styles 3 Dark -->
-                    <div data-yai-tabs data-behavior="slide-left" data-nav="top" data-color-accent="warning" data-color-scheme="dark" data-ref-path="s-dark">
+                    <div data-yai-tabs data-behavior="slide-left" data-nav="top" data-color-scheme="dark" data-color-accent="warning" data-ref-path="s-dark">
                         <nav data-controller data-grow>
-                            <button data-tab-action="open" data-open="1">Dark</button>
+                            <button data-tab-action="open" data-open="1">Dark-Warning</button>
                             <button data-tab-action="open" data-open="2">Dark 2</button>
                             <button data-tab-action="open" data-open="3">Dark 3</button>
                             <button data-tab-action="open" data-open="4">Dark Unique</button>
                         </nav>
                         <div data-content>
                             <div data-tab="1">
-                                <h2>Dark content</h2>
+                                <h2>Dark Scheme and Warning Accent</h2>
                                 <hr>
-                                <p><code>data-color-scheme="dark"</code> swaps semantic colors (e.g. <code>--yai-text</code>, <code>--yai-bg</code>, <code>--yai-loader-color</code>) for high-contrast UI while preserving component structure.</p>
-                                <p class="ymb-0">Event Delegation Hierarchy: YaiTabs (Root) → 2 event listeners, nested components → 0 listeners (inherits).</p>
+                                <p><code>data-color-scheme="dark"</code> swaps semantic colors (e.g. <code>--yai-tabs-color-text</code>, <code>--yai-tabs-color-background</code>, <code>--yai-loader-color</code>) for high-contrast UI while preserving component structure.</p>
+                                <p><code>data-color-accent="warning"</code> swaps semantic colors of the tab buttons (e.g. <code>--yai-tabs-color-accent</code>, <code>--yai-tabs-shadow-medium</code>, <code>--yai-tabs-shadow-subtle-color</code>).</p>
+                                <p class="ymb-0">Event Delegation Hierarchy: YaiTabs (Root) → 5 event listeners, nested components → 0 listeners (inherits).</p>
                             </div>
                             <div data-tab="2">
                                 <h2>Dark content 2</h2>
@@ -2333,7 +2334,7 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
                             <div data-tab="1">
                                 <div data-yai-tabs data-behavior="slide-down" data-nav="top" data-color-accent="primary" data-ref-path="s-m-blue">
                                     <nav data-controller>
-                                        <button data-tab-action="open" data-open="1">Level 3: Blue Scheme</button>
+                                        <button data-tab-action="open" data-open="1">Level 3: Blue Accent</button>
                                         <button data-tab-action="open" data-open="2">More Blue</button>
                                     </nav>
                                     <div data-content>
@@ -2350,7 +2351,7 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
 
                                                         <div data-yai-tabs data-behavior="slide-down" data-nav="top" data-color-accent="primary" data-ref-path="sub-s-blue">
                                                             <nav data-controller>
-                                                                <button data-tab-action="open" data-open="1">Level 5: Blue Scheme</button>
+                                                                <button data-tab-action="open" data-open="1">Level 5: Dark &amp; Blue</button>
                                                                 <button data-tab-action="open" data-open="2">Spaceless</button>
                                                             </nav>
                                                             <div data-content>
@@ -2371,7 +2372,7 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
 
                                                                                 <div data-yai-tabs data-behavior="slide-down" data-nav="left" data-color-accent="success" data-color-scheme="light" data-ref-path="y-s-light">
                                                                                     <nav data-controller data-nav-button="center">
-                                                                                        <button data-tab-action="open" data-open="1">Level 7: Scheme</button>
+                                                                                        <button data-tab-action="open" data-open="1">Level 7: Light</button>
                                                                                         <button data-tab-action="open" data-open="2">Next</button>
                                                                                     </nav>
                                                                                     <div data-content>
@@ -2410,8 +2411,8 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
                                                                     </div>
                                                                     <div data-yai-tabs data-nav="top" data-color-accent="funky" data-color-scheme="light" data-ref-path="sub-nested-s">
                                                                         <nav data-controller>
-                                                                            <button data-tab-action="open" data-open="3">Level 6: Light Scheme</button>
-                                                                            <button data-tab-action="open" data-open="4">Level: Second</button>
+                                                                            <button data-tab-action="open" data-open="3">Level 6: Funky Light</button>
+                                                                            <button data-tab-action="open" data-open="4">Level 6: Next</button>
                                                                         </nav>
                                                                         <div data-content>
                                                                             <div data-tab="3">
