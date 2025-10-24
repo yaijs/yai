@@ -4,6 +4,9 @@ Advanced patterns, real-world examples, and architectural deep-dives for YaiTabs
 
 ## Table of Contents
 
+- [Automatic Event Tunneling](#automatic-event-tunneling) ⚡ NEW
+- [Keyboard Navigation API](#keyboard-navigation-api) 🎹 NEW
+- [Swipe/Drag Navigation](#swipedrag-navigation) 🎯 NEW
 - [Single-Tab Applications](#single-tab-applications)
 - [Event Bus Patterns](#event-bus-patterns)
 - [Analytics Integration](#analytics-integration)
@@ -17,26 +20,618 @@ Advanced patterns, real-world examples, and architectural deep-dives for YaiTabs
 ## CDN
 
 ```html
-<!-- Required Event Handler, accessible using `window.YEH` -->
-<script src="https://cdn.jsdelivr.net/npm/@yaijs/yeh@1.0.2/yeh.min.js"></script>
-<!-- Recommended: Bundles 'yai-core.js', 'yai-tabs.js' & 'yai-viewport.js' and stores them in `window.YaiJS` -->
-<script type="module" src="https://cdn.jsdelivr.net/npm/@yaijs/core@1.0.1/dist/yai-bundle.js"></script>
+<!-- Default styles (required) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@yaijs/core@1.0.1/tabs/yai-tabs.css">
 
-<!--
-    Individual Components
--->
-<!-- Core Class -->
-<script type="module" src="https://cdn.jsdelivr.net/npm/@yaijs/core@1.0.1/yai-core.min.js"></script>
-<!-- YaiTabs Class -->
-<script type="module" src="https://cdn.jsdelivr.net/npm/@yaijs/core@1.0.1/tabs/yai-tabs.min.js"></script>
-<!-- YaiViewport Class -->
-<script type="module" src="https://cdn.jsdelivr.net/npm/@yaijs/core@1.0.1/utils/yai-viewport.min.js"></script>
-<!-- AutoSwitch Class -->
-<script type="module" src="https://cdn.jsdelivr.net/npm/@yaijs/core@1.0.1/utils/auto-switch.min.js"></script>
-<!-- Default styles -->
-<link rel="stylesheet" href="https://unpkg.com/@yaijs/core@1.0.0-beta.1/tabs/yai-tabs.css">
+<!-- Required: YEH Event Handler (peer dependency) -->
+<script src="https://cdn.jsdelivr.net/npm/@yaijs/yeh@1/yeh.js"></script>
+
+<!-- YaiJS Bundle: yai-core.js + yai-tabs.js + yai-viewport.js (exposes window.YaiJS) -->
+<script type="module" src="https://cdn.jsdelivr.net/npm/@yaijs/core@1.0.1/dist/yai-bundle.js"></script>
 ```
 
+**Usage:**
+```js
+const { YaiCore, YaiTabs, YaiViewport } = window.YaiJS;
+```
+
+---
+
+## Automatic Event Tunneling
+
+**⚡ The Revolutionary Feature:** YaiCore automatically generates event handlers for **ANY** event type you configure. Zero boilerplate required!
+
+### How It Works
+
+When you add an event to `setListener`, YaiCore's `_generateMethodHandlers()` method automatically:
+
+1. Creates a handler function for that event type
+2. Extracts `event`, `target`, `container` from arguments
+3. Reads `action` from `data-[eventType]` attribute
+4. **Tunnels directly to the hook system** via `_executeHook()`
+5. Only the root component (data-nesting="0") will get this listeners initially
+  - Just to make sure: No element within a root components gets registered.
+  - Nested and dynamic content will be handled by the roots listeners.
+  - If you remove elements, fine. Removing from Markup is all you need to do.
+  - Adding dynamic elements work the same. Just add any and they work.
+
+**Result:** Infinite event extensibility with zero configuration!
+
+```js
+const tabs = new YaiTabs({
+    events: {
+        setListener: {
+            '[data-yai-tabs]': [
+                // Only 3 default events required by YaiTabs:
+                'click',           // ✅ Default (required for tab switching)
+                'keydown',         // ✅ Default (required for keyboard navigation)
+                'hashchange',      // ✅ Default (required for hash routing)
+
+                // All other events are auto-generated with hooks!
+                'input',           // ✨ Auto-generated hook: eventInput
+                'change',          // ✨ Auto-generated hook: eventChange
+                'submit',          // ✨ Auto-generated hook: eventSubmit
+                'focus',           // ✨ Auto-generated hook: eventFocus
+                'blur',            // ✨ Auto-generated hook: eventBlur
+                'mouseover',       // ✨ Auto-generated hook: eventMouseover
+                'mouseout',        // ✨ Auto-generated hook: eventMouseout
+                'mousedown',       // ✨ Auto-generated hook: eventMousedown
+                'mousemove',       // ✨ Auto-generated hook: eventMousemove
+                'mouseup',         // ✨ Auto-generated hook: eventMouseup
+                'touchstart',      // ✨ Auto-generated hook: eventTouchstart
+                'touchmove',       // ✨ Auto-generated hook: eventTouchmove
+                'touchend',        // ✨ Auto-generated hook: eventTouchend
+                'dragstart',       // ✨ Auto-generated hook: eventDragstart
+                'drop',            // ✨ Auto-generated hook: eventDrop
+                'scroll',          // ✨ Auto-generated hook: eventScroll
+                'resize',          // ✨ Auto-generated hook: eventResize
+                'myCustomEvent'    // ✨ Auto-generated hook: eventMyCustomEvent
+            ]
+        }
+    }
+});
+
+// Hooks are automatically available for ALL events!
+tabs.hook('eventFocus', ({ event, target, container, action, context }) => {
+    // action is extracted from data-focus attribute
+    if (action === 'highlight') highlightField(target);
+    if (action === 'clearErrors') clearFieldErrors(target);
+});
+
+tabs.hook('eventBlur', ({ event, target, container, action, context }) => {
+    if (action === 'validate') validateField(target);
+    if (action === 'save') autoSaveField(target);
+});
+
+tabs.hook('eventMouseover', ({ event, target, container, action, context }) => {
+    if (action === 'preview') showPreview(target);
+    if (action === 'tooltip') showTooltip(target);
+});
+
+tabs.hook('eventDragstart', ({ event, target, container, action, context }) => {
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/plain', target.dataset.id);
+});
+
+tabs.hook('eventDrop', ({ event, target, container, action, context }) => {
+    event.preventDefault();
+    const id = event.dataTransfer.getData('text/plain');
+    if (action === 'uploadArea') handleFileUpload(id, target);
+});
+```
+
+### Hook Naming Convention
+
+Hook names follow a simple pattern: `"event" + capitalize(eventType)`
+
+- `'click'` → `tabs.hook('eventClick', ...)`
+- `'keydown'` → `tabs.hook('eventKeydown', ...)`
+- `'mouseover'` → `tabs.hook('eventMouseover', ...)`
+- `'touchstart'` → `tabs.hook('eventTouchstart', ...)`
+- `'myCustomEvent'` → `tabs.hook('eventMyCustomEvent', ...)`
+
+**All hooks receive the same signature:**
+```javascript
+tabs.hook('eventName', ({ event, target, container, action, context }) => {
+    // event: The native DOM event
+    // target: The element that triggered the event
+    // container: The [data-yai-tabs] container (for scoping)
+    // action: Extracted from data-[eventType] attribute
+    // context: The YaiTabs instance (access to openTab(), etc.)
+});
+```
+
+### Action Attributes
+
+Actions are extracted from `data-[eventType]` attributes on your HTML elements:
+
+```html
+<!-- Focus/Blur actions -->
+<input
+    data-focus="highlight"
+    data-blur="validate"
+    placeholder="Email">
+
+<!-- Mouse actions -->
+<div
+    data-mouseover="preview"
+    data-mouseout="hidePreview"
+    data-click="openModal">
+    Hover me
+</div>
+
+<!-- Drag and drop -->
+<div
+    data-dragstart="itemDrag"
+    draggable="true"
+    data-id="123">
+    Drag me
+</div>
+
+<div
+    data-drop="uploadArea"
+    data-dragover="highlight">
+    Drop here
+</div>
+
+<!-- Custom events -->
+<button data-mycustomevent="specialAction">Custom</button>
+```
+
+### Why This Is Revolutionary
+
+**Before (traditional approach):**
+```js
+// Manual event binding for each interaction
+document.querySelectorAll('input').forEach(input => {
+    input.addEventListener('focus', handleFocus);
+    input.addEventListener('blur', handleBlur);
+});
+
+document.querySelectorAll('.draggable').forEach(el => {
+    el.addEventListener('dragstart', handleDragStart);
+});
+
+// Result: N event listeners (grows with DOM size)
+```
+
+**After (YaiTabs automatic tunneling):**
+```js
+// Add event types to config once
+const tabs = new YaiTabs({
+    events: {
+        setListener: {
+            '[data-yai-tabs]': ['focus', 'blur', 'dragstart', 'drop']
+        }
+    }
+});
+
+// Hooks automatically available
+tabs.hook('eventFocus', handleFocus);
+tabs.hook('eventBlur', handleBlur);
+tabs.hook('eventDragstart', handleDragStart);
+
+// Result: 4 event listeners TOTAL (O(1) scaling)
+```
+
+**Benefits:**
+- ✅ **O(1) Scaling:** Number of listeners doesn't grow with DOM size
+- ✅ **Zero Boilerplate:** No manual handler registration
+- ✅ **Dynamic Content:** Works automatically with newly added elements
+- ✅ **Infinite Extensibility:** Add any event type instantly
+- ✅ **Action-Based:** Semantic `data-*` attributes for clarity
+
+---
+
+## Keyboard Navigation API
+
+Build powerful keyboard shortcuts using automatic event tunneling. Press **1-9** to instantly switch between tabs - works at **every nesting level**!
+
+### Implementation
+
+```javascript
+const tabs = new YaiTabs({
+    events: {
+        setListener: {
+            '[data-yai-tabs]': [
+                'click',
+                'keydown'  // ✨ Auto-tunnels to eventKeydown hook!
+            ]
+        }
+    }
+});
+
+// Keyboard shortcuts: Press 1-9 to switch tabs
+tabs.hook('eventKeydown', ({ event, target, container, action, context }) => {
+    if (['1', '2', '3', '4', '5', '6', '7', '8', '9'].includes(event.key)) {
+        const searchTarget = container.querySelectorAll(`[data-open]`);
+        const index = parseInt(event.key, 10) - 1;
+
+        if (searchTarget[index]) {
+            const getTargetTab = searchTarget[index];
+            if (getTargetTab && !getTargetTab.classList.contains('active')) {
+                // Direct API call - no click simulation needed!
+                context.openTab(getTargetTab, event, container);
+                requestAnimationFrame(() => { context.yaiFocus(getTargetTab) });
+            }
+        }
+    }
+});
+```
+
+### How It Works
+
+1. **Container Scoping:** Each `container` only sees its own tabs via `querySelectorAll('[data-open]')`
+2. **Number Key Mapping:** Keys 1-9 map to array indices 0-8
+3. **Direct API Access:** Uses `context.openTab()` to bypass click events entirely
+4. **Smart Focus:** `requestAnimationFrame()` ensures focus happens after tab activation
+5. **Multi-Level Support:** Works in nested tabs because each container is independent!
+
+### HTML Setup
+
+No special markup needed - just add `keydown` to your events:
+
+```html
+<div data-yai-tabs>
+    <button data-open="tab1">Tab 1</button>
+    <button data-open="tab2">Tab 2</button>
+    <button data-open="tab3">Tab 3</button>
+
+    <div data-tab="tab1">
+        <!-- Press 1-3 at this level to switch parent tabs -->
+
+        <div data-yai-tabs>
+            <button data-open="nested1">Nested 1</button>
+            <button data-open="nested2">Nested 2</button>
+
+            <div data-tab="nested1">
+                <!-- Press 1-2 here to switch nested tabs! -->
+            </div>
+        </div>
+    </div>
+</div>
+```
+
+### Advanced: Custom Key Bindings
+
+Extend to support arrow keys, Ctrl+Tab, or custom shortcuts:
+
+##### DEV_ToDo: The keys necessary for correct ARIA are preserved and can't be used
+
+```js
+// YaiTabs:516-587 - This keys are preserved for YaiTabs, all other will be tunneled and shared shared.
+if (!['Escape', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(event.key)) {
+    if (this.config.callable?.eventKeydown) {
+        this._executeHook('eventKeydown', { event, target, container, action, context });
+    }
+    return;
+}
+```
+
+- Using 1-9 to open tabs using they key as index.
+- Theme switcher with 4 extra lines
+- The switcher:
+  - Click in focused components `d` for `dark` or `l` for `light`
+  - To change the cheme for active tab buttons, use `p`, `w`, `s` or `f` (sets `['primary'|'warning'|'success'|'funky'] `it's just a demo)
+
+```javascript
+tabs.hook('eventKeydown', ({ event, target, container, action, context }) => {
+    // Skip if a form input element is focused
+    const activeElement = document.activeElement;
+    const formInputs = ['INPUT', 'TEXTAREA', 'SELECT'];
+    if (activeElement && formInputs.includes(activeElement.tagName)) {
+        return;
+    }
+    const key = event.key;
+
+    // Number keys 1-9 for tab navigation
+    if (key >= '1' && key <= '9') {
+        const tab = container.querySelector(`[data-open="${key}"]`);
+        tab && context.openTab(tab, event, container);
+    }
+
+    // Letter keys for theme toggles
+    const themes = { d: 'dark', l: 'light' };
+    const accents = { p: 'primary', w: 'warning', s: 'success', f: 'funky' };
+
+    if (themes[key]) container.dataset.colorScheme = themes[key];
+    if (accents[key]) container.dataset.colorAccent = accents[key];
+})
+```
+
+### Why This Is Powerful
+
+- 🎹 **Under 20 lines** for complete keyboard navigation
+- 🪆 **Multi-level support** - works in all nested tabs independently
+- ⚡ **Zero global state** - container scoping handles everything
+- 🎯 **Direct API access** - uses `openTab()` instead of click simulation
+- 🔌 **Framework agnostic** - just JavaScript and the hook system
+
+**[See it in action →](https://yaijs.github.io/yai/tabs/Example.html)** *(Press 1-9 to switch tabs!)*
+
+---
+
+## Swipe/Drag Navigation
+
+Add mobile-first swipe gestures and desktop drag navigation to your tabs. Works perfectly at **every nesting level** with automatic container scoping!
+
+### Features
+
+- 📱 **Touch support** - swipe left/right on mobile devices
+- 🖱️ **Mouse support** - drag left/right on desktop
+- 🎨 **Visual feedback** - live `translateX()` during interaction
+- 🪆 **Multi-level nesting** - each tab container independently swipeable
+- ⚡ **Smart thresholds** - customizable distance detection
+- 🎯 **Container scoped** - no global state conflicts
+
+### Implementation
+
+```javascript
+const tabs = new YaiTabs({
+    events: {
+        setListener: {
+            '[data-yai-tabs]': [
+                'click',
+                'keydown',
+                // Mouse events for desktop drag
+                'mousemove',
+                'mousedown',
+                { type: 'mouseup', debounce: 1 },
+                // Touch events for mobile swipe
+                { type: 'touchstart', debounce: 1 },
+                { type: 'touchmove', debounce: 1 },
+                { type: 'touchend', debounce: 1 }
+            ]
+        }
+    }
+});
+
+// Shared state for drag/swipe tracking
+const slideState = {
+    threshold: 80,      // Desktop threshold (px)
+    isDragging: false,
+    startX: 0,
+    currentX: 0,
+    startTime: 0
+};
+
+// Helper: Get tabs container from any element
+const getTabsContainer = (target) => target.closest('[data-yai-tabs]');
+
+// Helper: Get active panel or closest panel
+const getTabsPanel = (target) =>
+    target.querySelector(':scope > [data-tab].active') || target.closest('[data-tab]');
+
+// Helper: Switch to relative tab (previous/next)
+const switchToRelativeTab = (container, offset) => {
+    const tabs = Array.from(container.querySelectorAll('[data-open]'));
+    const currentIndex = tabs.findIndex(tab => tab.classList.contains('active'));
+    const targetIndex = currentIndex + offset;
+
+    if (targetIndex >= 0 && targetIndex < tabs.length) {
+        const targetTab = tabs[targetIndex];
+        if (targetTab && !targetTab.classList.contains('active')) {
+            targetTab.click();
+            return true;
+        }
+    }
+    return false;
+};
+
+// Desktop: Mouse drag handlers
+tabs.hook('eventMousedown', ({ event, target }) => {
+    const panel = getTabsPanel(target);
+    if (!panel) return;
+
+    slideState.isDragging = true;
+    slideState.startX = event.clientX;
+    slideState.currentX = event.clientX;
+    slideState.startTime = Date.now();
+    panel.classList.add('dragging');
+});
+
+tabs.hook('eventMousemove', ({ event, target }) => {
+    const panel = getTabsPanel(target);
+    if (!panel || !slideState.isDragging) return;
+
+    slideState.currentX = event.clientX;
+    const deltaX = slideState.currentX - slideState.startX;
+    // Visual feedback with damping
+    panel.style.transform = `translateX(${deltaX * 0.5}px)`;
+});
+
+tabs.hook('eventMouseup', ({ event, target }) => {
+    const panel = getTabsPanel(target);
+    if (!panel || !slideState.isDragging) return;
+
+    const deltaX = slideState.currentX - slideState.startX;
+    const absDistance = Math.abs(deltaX);
+
+    // Reset visual state
+    panel.classList.remove('dragging');
+    panel.style.transform = '';
+
+    // Switch tab if threshold exceeded
+    if (absDistance > slideState.threshold) {
+        const container = getTabsContainer(panel);
+        if (container) {
+            switchToRelativeTab(container, deltaX < 0 ? 1 : -1);
+        }
+    }
+
+    slideState.isDragging = false;
+});
+
+// Mobile: Touch swipe handlers
+tabs.hook('eventTouchstart', ({ event, target }) => {
+    const panel = getTabsPanel(target);
+    if (!panel) return;
+
+    slideState.isDragging = true;
+    slideState.startX = event.touches[0].clientX;
+    slideState.currentX = event.touches[0].clientX;
+    slideState.startTime = Date.now();
+    panel.classList.add('dragging');
+});
+
+tabs.hook('eventTouchmove', ({ event, target }) => {
+    const panel = getTabsPanel(target);
+    if (!panel || !slideState.isDragging) return;
+
+    slideState.currentX = event.touches[0].clientX;
+    const deltaX = slideState.currentX - slideState.startX;
+    panel.style.transform = `translateX(${deltaX * 0.5}px)`;
+});
+
+tabs.hook('eventTouchend', ({ event, target }) => {
+    const panel = getTabsPanel(target);
+    if (!panel || !slideState.isDragging) return;
+
+    const deltaX = slideState.currentX - slideState.startX;
+    const absDistance = Math.abs(deltaX);
+
+    panel.classList.remove('dragging');
+    panel.style.transform = '';
+
+    // Lower threshold for touch (30px vs 80px)
+    if (absDistance > 30) {
+        const container = getTabsContainer(target);
+        if (container) {
+            switchToRelativeTab(container, deltaX < 0 ? 1 : -1);
+        }
+    }
+
+    slideState.isDragging = false;
+});
+```
+
+### CSS for Visual Feedback
+
+Add smooth transitions and dragging states:
+
+```css
+/* Smooth tab transitions */
+[data-tab] {
+    transition: transform 0.3s ease-out;
+}
+
+/* Disable transitions during drag */
+[data-tab].dragging {
+    transition: none;
+    cursor: grabbing;
+}
+
+/* Optional: Add momentum effect */
+[data-tab]:not(.dragging) {
+    transform: translateX(0) !important;
+}
+```
+
+### HTML Setup
+
+```html
+<div data-yai-tabs>
+    <nav data-controller>
+        <button data-open="tab1">Tab 1</button>
+        <button data-open="tab2">Tab 2</button>
+        <button data-open="tab3">Tab 3</button>
+    </nav>
+
+    <div data-content>
+        <div data-tab="tab1">
+            Swipe right to go to Tab 2 →
+        </div>
+        <div data-tab="tab2">
+            ← Swipe left to Tab 1 | Swipe right to Tab 3 →
+
+            <!-- Nested tabs - independently swipeable! -->
+            <div data-yai-tabs>
+                <nav data-controller>
+                    <button data-open="nested1">Nested 1</button>
+                    <button data-open="nested2">Nested 2</button>
+                </nav>
+                <div data-content>
+                    <div data-tab="nested1">Swipe within this nested container!</div>
+                    <div data-tab="nested2">Each level is independent!</div>
+                </div>
+            </div>
+        </div>
+        <div data-tab="tab3">
+            ← Swipe left to go to Tab 2
+        </div>
+    </div>
+</div>
+```
+
+### How It Works
+
+1. **Event Detection**
+   - Desktop: `mousedown` → `mousemove` → `mouseup`
+   - Mobile: `touchstart` → `touchmove` → `touchend`
+
+2. **Container Scoping**
+   - `getTabsPanel()` finds the active panel or closest panel
+   - `getTabsContainer()` finds the parent tabs container
+   - Each nesting level operates independently!
+
+3. **Visual Feedback**
+   - During drag: `transform: translateX()` with 0.5x damping
+   - After release: smooth transition back to position
+   - CSS `.dragging` class for custom styling
+
+4. **Smart Threshold**
+   - Desktop: 80px movement required (larger for mouse precision)
+   - Mobile: 30px movement required (smaller for touch sensitivity)
+   - Direction detection: negative deltaX = swipe left (next), positive = swipe right (previous)
+
+5. **Multi-Level Support**
+   - Single `slideState` object works for all levels
+   - Container scoping isolates each level automatically
+   - Can swipe parent tabs, then immediately swipe nested tabs!
+
+### Advanced: Velocity-Based Switching
+
+Add velocity detection for flick gestures:
+
+```javascript
+tabs.hook('eventMouseup', ({ event, target }) => {
+    const panel = getTabsPanel(target);
+    if (!panel || !slideState.isDragging) return;
+
+    const deltaX = slideState.currentX - slideState.startX;
+    const deltaTime = Date.now() - slideState.startTime;
+    const velocity = Math.abs(deltaX) / deltaTime; // px per ms
+
+    panel.classList.remove('dragging');
+    panel.style.transform = '';
+
+    // Switch on distance OR velocity (flick gesture)
+    const shouldSwitch =
+        Math.abs(deltaX) > slideState.threshold ||
+        velocity > 0.5; // Fast flick
+
+    if (shouldSwitch) {
+        const container = getTabsContainer(panel);
+        if (container) {
+            switchToRelativeTab(container, deltaX < 0 ? 1 : -1);
+        }
+    }
+
+    slideState.isDragging = false;
+});
+```
+
+### Why This Is Powerful
+
+- 🎯 **~100 lines** for complete swipe/drag navigation
+- 📱 **Mobile-first** - works on touch devices out of the box
+- 🖱️ **Desktop support** - mouse drag works identically
+- 🪆 **Perfect nesting** - each level independently swipeable
+- 🎨 **Visual feedback** - live transform during interaction
+- ⚡ **Zero dependencies** - no Hammer.js, no Swiper.js needed
+- 🔌 **Framework agnostic** - pure YaiJS hooks
+
+**Replace 50KB libraries with 100 lines of code!** 🚀
 
 ---
 
@@ -125,7 +720,7 @@ async function loadView(viewName) {
 
 ## Event Bus Patterns
 
-### Super Subscriber
+**Super Subscriber**
 
 Monitor all events for debugging, analytics, or logging:
 
@@ -652,9 +1247,9 @@ if (!isSlow) {
 
 ## See Also
 
-- [README.md](./README.md) - Main documentation
-- [Example.html](./Example.html) - Live interactive demo
-- [YpsilonEventHandler](https://github.com/yaijs/yeh) - Event delegation foundation
-- [YaiTabs GitHub](https://github.com/yaijs/yai) - Source code and components
+- [Example.html](https://yaijs.github.io/yai/tabs/Example.html) — Live interactive demo
+- [YaiJS README.md](https://github.com/yaijs/yai) - Main documentation
+- [YaiTabs README.md](https://github.com/yaijs/yai/tabs) - Source code and components
+- [YEH README.md](https://github.com/yaijs/yeh) - Event delegation foundation
 - [NPM @yaijs/core](https://www.npmjs.com/package/@yaijs/core) - Package installation
 - [NPM @yaijs/yeh](https://www.npmjs.com/package/@yaijs/yeh) - Event handler package

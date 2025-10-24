@@ -11,11 +11,12 @@ class YaiTabs extends YaiCore {
             rootSelector: '[data-yai-tabs]', /** @var string Tabs container selector, can handle multiple */
             closable: true,                  /** @var bool Closable tabs, click on active tab button closes the tab */
             defaultBehavior: 'fade',         /** @var string Default animation behavior if no data-behavior is specified */
-            autoFocus: false,                /** @var bool Automatically focus the first container's active tab on init */
+            autoFocus: true,                 /** @var bool Automatically focus the first container's active tab on init */
             autoAccessibility: true,         /** @var bool Enable comprehensive ARIA accessibility setup */
-            autoDisambiguate: true,          /** @var bool Automatically make identical data-open/data-tab values unique to prevent cross-contamination */
+            autoDisambiguate: false,         /** @var bool Automatically make identical data-open/data-tab values unique to prevent cross-contamination */
             lazyNestedComponents: true,      /** @var bool On init, marks nested tab components as laty "data-yai-tabs-lazy" */
-            autoFocusNested: false,          /** @var bool Auto-focus first focusable in nested active tabs */
+            autoFocusNested: true,          /** @var bool Auto-focus first focusable in nested active tabs */
+            maxNestedReconstruction: 150,     /** @var int Maximum nested components to reconstruct (prevents freeze with deep nesting) */
             timeout: {
                 debounce: {
                     hashchange: 500,
@@ -28,22 +29,22 @@ class YaiTabs extends YaiCore {
                 actionableAttributes: ['data-tab-action'],
                 actionableClasses: [],
                 actionableTags: [],
-                setListener: null,
             },
 
             // Extend base emitable events with YaiTabs-specific ones
             // Base events are automatically merged from YaiCore.getBaseEmitableEvents()
             dispatchName: 'yai.tabs', // prefix for emitables
             emitable: {
-                tabOpening:  'tabOpening',
-                tabClosing:  'tabClosing',
-                tabClosed:   'tabClosed',
-                tabSwitched: 'tabSwitched',
-                nested:      'nested',
-                tabReady:    'tabReady',
-                tabs:        'tabs',
-                tabClicked:  'tabClicked',
-                tabs:        'tabs',
+                tabs:         'tabs',
+                tabClicked:   'tabClicked',
+                tabOpening:   'tabOpening',
+                tabOpened:    'tabOpened',
+                tabSwitched:  'tabSwitched',
+                tabSwitching: 'tabSwitching',
+                tabReady:     'tabReady',
+                tabClosing:   'tabClosing',
+                tabClosed:    'tabClosed',
+                nested:       'nested',
             },
 
             // Event hooks. Leveraging YEHs event delegation via hooks
@@ -55,37 +56,11 @@ class YaiTabs extends YaiCore {
         super(YaiCore.deepMerge(tabsConfig, customConfig));
 
         this.tabOpenAttribute = this.config.autoDisambiguate ? 'data-original-id' : 'data-open';
+        this.tabTabAttribute = this.config.autoDisambiguate ? 'data-original-id' : 'data-tab';
         this.rootIndex = 0;
 
-        // Set up loading hooks
-        this.hook('setLoading', ({ container, isLoading, target }) => {
-            this.toggleLoading(container, isLoading, target);
-        })
-        .hook('removeLoading', ({ container, isLoading, target }) => {
-            this.toggleLoading(container, isLoading, target);
-        })
-        .hook('contentReady', ({ content, target, url }) => {
-            if (target) {
-                if (target.classList.contains('active')) {
-                    content.classList.add('active');
-                }
-                if (target.style.minWidth) {
-                    target.style.minWidth = 'auto';
-                }
-                if (target.dataset.restoreText) {
-                    target.textContent = target.dataset.restoreText;
-                }
-                // Restore focus to button after dynamic content loading (url exists)
-                if (url && document.activeElement !== target && target.classList.contains('active')) {
-                    requestAnimationFrame(() => { this.yaiFocus(target) });
-                }
-            }
-        });
-
-        // Prep lazy components
-        if (this.config.lazyNestedComponents) {
-            this._markLazyComponents();
-        }
+        // Mark root containers
+        this._markRootContainers();
 
         /**
          * Create event handler using YaiCore factory | this.events
@@ -102,6 +77,8 @@ class YaiTabs extends YaiCore {
             this.config.events.setAliases,
             this.config.events
         );
+
+        this.handleHooks();
 
         // Activate lazy components after event registration
         if (this.config.lazyNestedComponents) {
@@ -127,34 +104,75 @@ class YaiTabs extends YaiCore {
             document.querySelectorAll(this.config.rootSelector).forEach(container => {
                 this._updateAriaStates(container);
             });
+            this._executeHook('afterInit', { context: this }, this);
         }, 50);
     }
 
-    yaiFocus(target, preventScroll = true) {
-        target.focus({ preventScroll })
+    /**
+     * Auto handled hooks
+     */
+    handleHooks() {
+        // Set up loading hooks
+        this.hook('contentLoading', ({ container, isLoading, target }) => {
+            this.toggleLoading(container, isLoading, target);
+        })
+        .hook('contentLoaded', ({ container, isLoading, target }) => {
+            this.toggleLoading(container, isLoading, target);
+        })
+        .hook('removingActiveContent', ({ button, content }) => {
+            if (typeof button.dataset.urlRefresh !== 'undefined' && content) {
+                setTimeout(() => { content.innerHTML = '' }, 250);
+            }
+        })
+        .hook('tabSwitching', ({ action }) => {
+            if (action === 'switching') {
+                document.activeElement.blur();
+            }
+        })
+        .hook('contentReady', ({ event, content, target, url, container }) => {
+            if (target) {
+                if (target.style.minWidth) {
+                    target.style.minWidth = 'auto';
+                }
+                if (target.dataset.restoreText) {
+                    target.textContent = target.dataset.restoreText;
+                }
+                if (target.classList.contains('active')) {
+                    content.classList.add('active');
+
+                    if (this.config.autoFocus) {
+                        setTimeout(() => { this.yaiFocus(target) }, 150);
+                    }
+                }
+            }
+            this._updateAriaStates(container);
+        });
     }
 
     /**
-     * Mark nested components as lazy to prevent event listener proliferation
-     * Only root components keep the data-yai-tabs attribute for initial event registration
+     * Mark root containers and optionally apply lazy component optimization
+     * Always sets data-root on root containers, and conditionally makes nested components lazy
      */
-    _markLazyComponents() {
+    _markRootContainers() {
         const allTabContainers = document.querySelectorAll(this.config.rootSelector);
 
-        allTabContainers.forEach((container, index) => {
+        allTabContainers.forEach((container) => {
             // Check if this container is nested inside another tab container
             const parentTabContainer = container.parentElement?.closest(this.config.rootSelector);
 
             if (parentTabContainer) {
-                // This is a nested component - make it lazy
-                const attributeValue = container.getAttribute('data-yai-tabs') || '';
-                container.setAttribute('data-yai-tabs-lazy', attributeValue);
-                container.removeAttribute('data-yai-tabs');
-                container.setAttribute('data-lazy-component', 'true'); // Mark for easy identification
+                // This is a nested component
+                if (this.config.lazyNestedComponents) {
+                    // Make it lazy - move attribute and mark as lazy
+                    const attributeValue = container.getAttribute('data-yai-tabs') || '';
+                    container.setAttribute('data-yai-tabs-lazy', attributeValue);
+                    container.removeAttribute('data-yai-tabs');
+                    container.setAttribute('data-lazy-component', 'true'); // Mark for easy identification
+                }
             } else {
                 this.rootIndex++;
-                // This is a root component
-                container.setAttribute('data-root', `r-${this.rootIndex}`); // Mark as root for initialization optimization
+                // This is a root component - always mark with data-root
+                container.setAttribute('data-root', `r-${this.rootIndex}`);
             }
         });
     }
@@ -219,7 +237,7 @@ class YaiTabs extends YaiCore {
             // Collect button-panel pairs within this depth level ONLY
             containers.forEach(container => {
                 // Use specific selectors to only find direct children (no nested containers)
-                const buttons = container.querySelectorAll(':scope > nav[data-controller] > [data-open]');
+                const buttons = container.querySelectorAll(':scope > nav[data-controller] [data-open]');
                 const panels = container.querySelectorAll(':scope > div[data-content] > [data-tab]');
 
                 // Group by ID to keep button-panel pairs together
@@ -340,7 +358,7 @@ class YaiTabs extends YaiCore {
                 buttons: Array.from(this.findAll(':scope > nav[data-controller] [data-open]', container)),
                 panels: Array.from(this.findAll(':scope > div[data-content] [data-tab]', container)),
                 defaultButton: this.find(':scope > nav[data-controller] [data-default]', container),
-                isVisible: this._isContainerVisible(container),
+                isVisible: this.isContainerVisible(container),
                 isRoot: true
             };
         });
@@ -388,11 +406,6 @@ class YaiTabs extends YaiCore {
         // Initialize default tab if visible
         if (defaultButton && defaultButton.dataset.open && isVisible) {
             this.openTab(defaultButton, null, container, true);
-
-            // Set initial focus on the first visible container's active tab
-            if (this.config.autoFocus && index === 0) {
-                this.yaiFocus(defaultButton);
-            }
         }
     }
 
@@ -448,37 +461,6 @@ class YaiTabs extends YaiCore {
     }
 
     /**
-     * Universal event proxy - properly routes events to handlers or hooks
-     */
-    handleEventProxy(event, target, container) {
-        if (['keydown', 'hashchange'].includes(event.type)) return;
-
-        const customEvent = this._isCustomEvent(target);
-        if (!customEvent) return;
-
-        // 1. Handle tab actions first (open/close) - Core functionality
-        const tabAction = target.dataset.tabAction;
-        if (tabAction && typeof this[tabAction] === 'function') {
-            this._cleanupStaleActiveStates();
-            return this[tabAction](target, event, container);
-        }
-
-        // 2. Check for event-specific attribute (data-click, data-submit, etc.)
-        const action = target.dataset[event.type];
-
-        // Only fire hook if element has the specific event attribute
-        if (action) {
-            const eventType = event.type.charAt(0).toUpperCase() + event.type.slice(1);
-            this._executeHook(`event${eventType}`, {
-                event,
-                target,
-                container,
-                action
-            }, this);
-        }
-    }
-
-    /**
      * Check if element has custom event attributes (data-click, data-input, etc.)
      */
     _isCustomEvent(element) {
@@ -489,10 +471,52 @@ class YaiTabs extends YaiCore {
     }
 
     /**
+     * Universal event proxy - properly routes events to handlers or hooks
+     */
+    handleEventProxy(event, target, container) {
+        if (['keydown', 'hashchange'].includes(event.type)) return;
+
+        const customEvent = this._isCustomEvent(target);
+
+        if (customEvent) {
+            // 1. Handle tab actions first (open/close) - Core functionality
+            const tabAction = target.dataset.tabAction;
+            if (tabAction && typeof this[tabAction] === 'function') {
+                this._executeHook('tabClicked', { target, event, container });
+                return this[tabAction](target, event, container);
+            }
+
+            // 2. Check for event-specific attribute (data-click, data-submit, etc.)
+            const action = target.dataset[event.type];
+            if (action) {
+                this._executeHook(`event${this._capitalize(event.type)}`, {
+                    event, target, container, action, context: this
+                });
+            }
+        }
+    }
+
+    /**
      * Handle hash change events
      */
-    handleHashchange() {
+    handleHashchange(event, target) {
+        this._executeHook('eventHashchange', { event, target, context: this });
         const hashParams = this.parseHash();
+
+        // Close all active tabs by simulating clicks (triggers proper closeTab behavior)
+        let allActiveTabs = document.querySelectorAll(`[data-yai-tabs][data-ref-path] .active[${this.tabOpenAttribute}]`);
+
+        if (allActiveTabs.length) {
+            allActiveTabs = [...allActiveTabs].reverse();
+
+            allActiveTabs.forEach(activeTab => {
+                const container = activeTab.closest(this.config.rootSelector);
+                const refPath = container.dataset.refPath;
+                if (!(hashParams[refPath] && hashParams[refPath] === activeTab.getAttribute(this.tabOpenAttribute))) {
+                    this.simulateClick(activeTab);
+                }
+            });
+        }
 
         // Sync tabs to hash state
         for (const [refPath, tabId] of Object.entries(hashParams)) {
@@ -500,17 +524,19 @@ class YaiTabs extends YaiCore {
             if (!tabContainer) continue;
 
             // Look for button using original ID (before disambiguation) first, then fallback to direct match
-            const targetTab = this.find(`[${this.tabOpenAttribute}="${tabId}"]`, tabContainer);
-            const currentActive = this.find('.active[data-open]', tabContainer);
+            const targetTab = this.find(`[data-controller] [${this.tabOpenAttribute}="${tabId}"]`, tabContainer);
+            const currentActive = this.find(`[data-controller] .active[${this.tabOpenAttribute}]`, tabContainer);
 
             // Only change if different from current active (compare using original IDs)
             const currentOriginalId = currentActive?.getAttribute(this.tabOpenAttribute)|| currentActive?.dataset.open;
-            if (targetTab && currentOriginalId !== tabId) {
+            if (targetTab && currentOriginalId !== tabId && !targetTab.classList.contains('active')) {
                 this.simulateClick(targetTab);
             }
 
             this.routeMap.set(refPath, tabId);
         }
+
+        this._executeHook('eventHashchangeSwitched', { event, target, context: this });
     }
 
     /**
@@ -520,8 +546,11 @@ class YaiTabs extends YaiCore {
     handleKeydown(event, target, container) {
         // Only handle specific keys
         if (!['Escape', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(event.key)) {
-            // Keys not used by YoiTabs
-            this.handleEventProxy(event, target, container);
+            // Keys not used by YoiTabs, share it
+            if (this.config.callable?.eventKeydown) {
+                const action = target.dataset[event.type] || null;
+                this._executeHook('eventKeydown', { event, target, container, action, context: this });
+            }
             return;
         }
 
@@ -583,162 +612,9 @@ class YaiTabs extends YaiCore {
     }
 
     /**
-     * Centralized ARIA state management for container and its nested components
-     * Uses inert attribute to prevent interaction with hidden content
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/inert
-     * Note: inert has good modern browser support but may need polyfill for older browsers
-     */
-    _updateAriaStates(container) {
-        // Skip ARIA updates if autoAccessibility is disabled
-        if (!this.config.autoAccessibility) return;
-
-        // Find all tab containers within this container (including itself)
-        const allContainers = [container, ...this.findAll(`${this.config.rootSelector}`, container)];
-
-        allContainers.forEach(tabContainer => {
-            // Get the active panel in this container
-            const activePanel = this.find(':scope > [data-content] > [data-tab].active', tabContainer);
-            const allPanels = this.findAll(':scope > [data-content] > [data-tab]', tabContainer);
-            const allButtons = this.findAll(':scope > nav[data-controller] [data-open]', tabContainer);
-
-            // Update panels
-            allPanels.forEach(panel => {
-                const isActive = panel === activePanel;
-                const isParentVisible = this._isElementVisible(panel.closest('[data-tab]') || document.body);
-
-                if (isActive && isParentVisible) {
-                    // Active panel in visible container
-                    panel.removeAttribute('aria-hidden');
-                    panel.setAttribute('tabindex', '0');
-                    panel.removeAttribute('inert');
-
-                    // Restore focusability for interactive elements in active panel
-                    const disabledElements = this.findAll('button[tabindex="-1"], [href][tabindex="-1"], input[tabindex="-1"], select[tabindex="-1"], textarea[tabindex="-1"]', panel);
-                    disabledElements.forEach(element => {
-                        // Only restore if not in a hidden nested tab
-                        const isInHiddenNestedTab = element.closest('[data-tab][aria-hidden="true"]');
-                        if (!isInHiddenNestedTab) {
-                            element.removeAttribute('tabindex');
-                        }
-                    });
-                } else {
-                    // Double-check: Never hide elements that are active or contain active children
-                    const hasActiveChildren = panel.querySelector('.active');
-                    const isActuallyActive = panel.classList.contains('active');
-
-                    if (isActuallyActive || hasActiveChildren) {
-                        // Element or its children are active - must remain visible
-                        panel.removeAttribute('aria-hidden');
-                        panel.setAttribute('tabindex', '0');
-
-                        // Restore focusability for interactive elements
-                        const disabledElements = this.findAll('button[tabindex="-1"], [href][tabindex="-1"], input[tabindex="-1"], select[tabindex="-1"], textarea[tabindex="-1"]', panel);
-                        disabledElements.forEach(element => {
-                            const isInHiddenNestedTab = element.closest('[data-tab][aria-hidden="true"]');
-                            if (!isInHiddenNestedTab) {
-                                element.removeAttribute('tabindex');
-                            }
-                        });
-                    } else {
-                        // Truly inactive panel
-                        panel.setAttribute('aria-hidden', 'true');
-                        panel.setAttribute('tabindex', '-1');
-                        panel.setAttribute('inert', '');
-
-                        // Disable focusability for interactive elements in hidden panel
-                        const focusableElements = this.findAll('button:not([tabindex="-1"]), [href]:not([tabindex="-1"]), input:not([tabindex="-1"]), select:not([tabindex="-1"]), textarea:not([tabindex="-1"])', panel);
-                        focusableElements.forEach(element => {
-                            // Only disable if not in an active nested tab
-                            const nestedActiveTab = element.closest('[data-tab]:not([aria-hidden="true"])');
-                            if (!nestedActiveTab || nestedActiveTab === panel) {
-                                element.setAttribute('tabindex', '-1');
-                            }
-                        });
-                    }
-                }
-            });
-
-            // Check if any button in this container is active (more efficient approach)
-            const activeButton = this.find(':scope > nav[data-controller] > button.active', tabContainer);
-            const hasActiveButton = !!activeButton;
-
-            // Update buttons
-            allButtons.forEach((button, index) => {
-                const isActive = button.classList.contains('active');
-                const isParentVisible = this._isElementVisible(button.closest('[data-tab]') || document.body);
-
-                button.setAttribute('aria-selected', (isParentVisible && isActive) ? 'true' : 'false');
-
-                if (isParentVisible) {
-                    // Button in visible container
-                    button.removeAttribute('aria-hidden');
-                    // For TAB navigation: active button gets tabindex="0",
-                    // or first button if no active button exists
-                    const shouldBeFocusable = isActive || (!hasActiveButton && index === 0);
-                    button.setAttribute('tabindex', shouldBeFocusable ? '0' : '-1');
-                } else {
-                    // Button in hidden container
-                    button.setAttribute('aria-hidden', 'true');
-                    button.setAttribute('tabindex', '-1');
-                }
-            });
-        });
-    }
-
-    /**
-     * Clean up stale active states from hidden containers
-     * Prevents cross-contamination between identical nested structures
-     */
-    _cleanupStaleActiveStates(container = document) {
-        // Find all active elements anywhere in the document
-        const scope = container === document ? document : container;
-        const allActiveButtons = scope.querySelectorAll(`${this.config.rootSelector} nav[data-controller] button.active[data-open]`);
-        const allActivePanels = scope.querySelectorAll(`${this.config.rootSelector} [data-tab].active`);
-        // const allActiveButtons = container.querySelectorAll(`${this.config.rootSelector} nav[data-controller] button.active[data-open]`);
-
-        // More comprehensive cleanup - check entire hierarchy chain
-        [...allActiveButtons, ...allActivePanels].forEach(element => {
-            // Check if this element is in a container that's nested in a hidden panel
-            const parentContainer = element.closest(`${this.config.rootSelector}`);
-            let currentPanel = parentContainer?.closest('[data-tab]');
-            let shouldClean = false;
-
-            // Walk up the hierarchy to find any hidden parent panel
-            while (currentPanel) {
-                if (!currentPanel.classList.contains('active')) {
-                    shouldClean = true;
-                    break;
-                }
-                // Go up one more level
-                const nextContainer = currentPanel.closest(`${this.config.rootSelector}`)?.parentElement?.closest(`${this.config.rootSelector}`);
-                currentPanel = nextContainer?.closest('[data-tab]');
-            }
-
-            if (shouldClean) {
-                // Remove stale active state
-                element.classList.remove('active');
-                element.removeAttribute('inert');
-
-                // Reset ARIA states for cleaned elements (only if autoAccessibility is enabled)
-                if (this.config.autoAccessibility) {
-                    if (element.matches('[data-open]')) {
-                        element.setAttribute('aria-selected', 'false');
-                        element.setAttribute('tabindex', '-1');
-                    }
-                    else if (element.matches('[data-tab]')) {
-                        element.setAttribute('aria-hidden', 'true');
-                        element.setAttribute('tabindex', '-1');
-                        element.setAttribute('inert', '');
-                    }
-                }
-            }
-        });
-    }
-
-    /**
      * Check if an element is visible (not in a hidden parent)
      */
-    _isElementVisible(element) {
+    isElementVisible(element) {
         if (!element || element === document.body) return true;
 
         // Check if this element or any parent has aria-hidden="true"
@@ -755,7 +631,7 @@ class YaiTabs extends YaiCore {
     /**
      * Check if a container is visible (either root level or parent is active)
      */
-    _isContainerVisible(container) {
+    isContainerVisible(container) {
         // Find the parent tab panel this container is nested in
         const parentTabPanel = container.closest('[data-tab]');
         if (!parentTabPanel) return true; // Root level, always visible
@@ -845,6 +721,18 @@ class YaiTabs extends YaiCore {
     }
 
     /**
+     * Check if tabs in a container are closable
+     * @param {HTMLElement} container - Tabs container element
+     * @returns {boolean} True if tabs are closable
+     * @description Checks data-closable attribute on container, falls back to config.closable
+     */
+    getIsClosable(container) {
+        const isClosable = container.dataset.closable;
+        if (isClosable) return isClosable === 'true';
+        return this.config.closable;
+    }
+
+    /**
      * Short open- cloase tab handler
      */
     close(...args) { this.closeTab(...args) }
@@ -853,10 +741,9 @@ class YaiTabs extends YaiCore {
     /**
      * Attribute/Alias handlers, can be used with both.
      */
-    closeTab(target, _event, container) {
-        if (!this.config.closable) return;
-        this.yaiEmit('tabClosing', { target, _event, container });
-
+    closeTab(target, event, container) {
+        if (!this.getIsClosable(container)) return;
+        this.yaiEmit('tabClosing', { target, event, container });
         this._removeActive(target, container);
         this._removeLastActiveTab(container);
         this._cleanupSiblingContainers(container);
@@ -883,8 +770,21 @@ class YaiTabs extends YaiCore {
     }
 
     openTab(target, event, container, isDefaultInitialization = false) {
+        if (this.isAnyProcessing()) {
+            requestAnimationFrame(() => {
+                if (!this._loggedProcessing?.has(container)) {
+                    this._loggedProcessing = this._loggedProcessing || new WeakSet();
+                    this._loggedProcessing.add(container);
+                    return;
+                }
+            });
+        }
+        this._loggedProcessing?.delete(container);
+
+        this._updateAriaStates(container);
+
         if (target.classList.contains('active')) {
-            if (this.config.closable) {
+            if (this.getIsClosable(container)) {
                 this.closeTab(target, event, container);
             }
             return;
@@ -897,6 +797,7 @@ class YaiTabs extends YaiCore {
         this._setProcessingState(container, true);
         this._preserveContentHeight(container);
         target.removeAttribute('data-default');
+        target.removeAttribute('data-inview-default');
 
         const tabId = target.dataset.open;
         const content = this.find(`:scope > [data-content] > [data-tab="${tabId}"]`, container);
@@ -930,23 +831,17 @@ class YaiTabs extends YaiCore {
             // Update ARIA states for all nested components after DOM changes are complete
             this._updateAriaStates(container);
 
-            // Restore user's previous navigation state within this content
-            this._restoreNavigationState(content);
+            if (!target.dataset.url) {
+                // Restore user's previous navigation state within this content
+                this._restoreNavigationState(content);
+            }
 
             // Initialize nested default tabs now that this content is visible
             this._initializeNestedDefaults(content);
 
-            // Optional: Move focus to panel for screen readers (only on Enter/Space, NOT arrow keys)
-            if (event && (event.key === 'Enter' || event.key === ' ')) {
-                this.yaiFocus(content);
-            }
-
             this._markRootContainer(container, true);
 
-            // Clear processing state after animation completes
-            setTimeout(() => {
-                this._setProcessingState(container, false);
-            }, 80); // Match animation duration
+            this._setProcessingState(container, false);
 
             // Load dynamic content if data-url is specified
             if (target.dataset.url) {
@@ -957,8 +852,8 @@ class YaiTabs extends YaiCore {
                 } else {
                     // URL validation failed - treat as static content
                     console.error('YaiTabs: Dynamic content loading blocked due to invalid URL:', target.dataset.url);
-                    this._executeHook('contentReady', { content, target, container });
                     this._resetContentHeight(container);
+                    this._executeHook('contentReady', { content, target, container });
                 }
             }
 
@@ -970,26 +865,23 @@ class YaiTabs extends YaiCore {
             }
 
             // Emit tab ready event after tab is fully active (for breadcrumbs, analytics, etc.)
-            // This fires for ALL tab activations: user clicks, defaults, hash routing
-            setTimeout(() => {
-                if (!target.dataset.url) {
-                    // For static content, manually trigger contentReady hook
-                    this._executeHook('contentReady', { content, target, container });
-                    this._resetContentHeight(container);
-                }
-                // Verify tab is still active (avoid race conditions)
-                if (target.classList.contains('active') && content.classList.contains('active')) {
-                    this.yaiEmit('tabReady', {
-                        container,
-                        target,
-                        content,
-                        id: tabId,
-                        refPath: container.dataset.refPath,
-                        isVisible: this._isElementVisible(container),
-                        isDefaultInit: isDefaultInitialization,
-                    });
-                }
-            }, 20); // Small delay to ensure DOM updates complete
+            if (!target.dataset.url) {
+                // For static content, manually trigger contentReady hook
+                this._executeHook('contentReady', { content, target, container });
+                this._resetContentHeight(container);
+            }
+            // Verify tab is still active (avoid race conditions)
+            if (target.classList.contains('active') && content.classList.contains('active')) {
+                this.yaiEmit('tabReady', {
+                    container,
+                    target,
+                    content,
+                    id: tabId,
+                    refPath: container.dataset.refPath,
+                    isVisible: this.isElementVisible(container),
+                    isDefaultInit: isDefaultInitialization,
+                });
+            }
 
             // Update hash routing if container has ref-path (skip for default initialization)
             const refPath = container.dataset.refPath;
@@ -1051,10 +943,7 @@ class YaiTabs extends YaiCore {
 
         const domOrder = this._getDomOrder(container);
 
-        return {
-            depth,
-            domOrder
-        };
+        return { depth, domOrder };
     }
 
     _getDomOrder(element) {
@@ -1197,7 +1086,6 @@ class YaiTabs extends YaiCore {
         }
     }
 
-
     /**
      * Clean up hash entries for nested tab containers when parent closes
      * @param {Element} parentContainer - The parent container that's being closed
@@ -1291,9 +1179,9 @@ class YaiTabs extends YaiCore {
 
     _setLastActiveTab(container) {
         const getTabWrapper = container.matches(this.config.rootSelector) ? container : container.closest(`${this.config.rootSelector}`);
-        const activeButton = getTabWrapper.querySelector(':scope > nav[data-controller] [data-open].active');
+        const activeButton = getTabWrapper.querySelector(`:scope > nav[data-controller] [${this.tabOpenAttribute}].active`);
         if (activeButton) {
-            getTabWrapper.dataset.lastActive = activeButton.dataset.open;
+            getTabWrapper.dataset.lastActive = activeButton.getAttribute(this.tabOpenAttribute);
         }
     }
 
@@ -1399,41 +1287,41 @@ class YaiTabs extends YaiCore {
 
         // Use :scope to target direct children within THIS container's elements
         const elements = [
-            this.find(`:scope > nav[data-controller] > button.active${selectorButton[0]}`, container),
+            this.find(`:scope > nav[data-controller] button.active${selectorButton[0]}`, container),
             this.find(`:scope > div[data-content] > .active${selectorButton[1]}`, container),
         ];
+
+        // For closing tabs, trigger exit animation first
+        const isClosing = target.classList.contains('active');
+        const [button, content] = elements;
+
+        this._executeHook('tabSwitching', { target, container, button, content, action: isClosing ? 'closing' : 'switching' });
 
         elements.forEach((el, index) => {
             if (!el) return;
 
-            // For closing tabs, trigger exit animation first
-            const isClosing = target.classList.contains('active');
+            if (typeof el.dataset.open !== 'undefined') {
+                this._executeHook('removingActiveContent', { target, container, button, content, action: isClosing ? 'closing' : 'switching' });
+            }
 
             if (isClosing) {
-                // Remove active and exit classes after animation completes
                 setTimeout(() => {
                     // Always remove active class when closing
                     el.classList.remove('active');
-
-                    // Handle focus and ARIA after visual state changes complete
-                    this._manageFocusForHiddenElements(container);
-                    this._updateAriaStates(container);
                 }, 50);
             } else {
                 // Normal tab switching - immediate removal
                 el.classList.remove('active');
-
-                // Handle focus and ARIA after visual state changes
-                this._manageFocusForHiddenElements(container);
-                this._updateAriaStates(container);
             }
 
             if (typeof el.dataset.default !== 'undefined') {
                 el.removeAttribute('data-default');
             }
 
-            // Remove container marker (tab-active)
-            this._markRootContainer(container, false);
+            if (index === 0) {
+                // Remove container marker (tab-active)
+                this._markRootContainer(container, false);
+            }
 
             if (this.config.autoAccessibility) {
                 YaiTabs._clearInteractiveState(el, isClosing);
@@ -1462,21 +1350,26 @@ class YaiTabs extends YaiCore {
 
             if (lastActiveId) {
                 // Find button with matching data-open value
-                targetButton = this.find(`nav[data-controller] [data-open="${lastActiveId}"]`, container);
+                targetButton = this.find(`nav[data-controller] [${this.tabOpenAttribute}="${lastActiveId}"]`, container);
             }
 
             // If no last-active state, look for data-default button
             if (!targetButton) {
-                targetButton = this.find('nav[data-controller] [data-default]', container);
+                targetButton = this.find(`
+                    nav[data-controller] [data-default],
+                    nav[data-controller] [data-inview-default]
+                `, container);
             }
 
             // Only activate if we found a button (don't activate first button if nothing is set)
-            if (targetButton && targetButton.dataset.open) {
-                // Check if BUTTON is actually active (button state is the source of truth)
-                if (!targetButton.classList.contains('active')) {
-                    targetButton.removeAttribute('data-default');
-                    this.simulateClick(targetButton);
-                }
+            if (targetButton
+                && targetButton.dataset.open
+                && this.isElementVisible(targetButton)
+                && !targetButton.classList.contains('active')
+            ) {
+                targetButton.removeAttribute('data-default');
+                targetButton.removeAttribute('data-inview-default');
+                this.simulateClick(targetButton);
             }
         });
     }
@@ -1574,7 +1467,7 @@ class YaiTabs extends YaiCore {
         // Use unified initialization for any dynamically loaded containers
         this.initializeAllContainers(container);
 
-        // // Activate any data-default buttons in the dynamically loaded content
+        // Activate any data-default buttons in the dynamically loaded content
         this._activateDefaultTabs(container);
     }
 
@@ -1584,11 +1477,14 @@ class YaiTabs extends YaiCore {
      */
     _activateDefaultTabs(container) {
         // Find all data-default buttons within the provided scope that aren't active yet
-        const defaultButtons = container.querySelectorAll('[data-content] button[data-default]:not(.active)');
+        const defaultButtons = container.querySelectorAll(`
+            [data-content] button[data-default]:not(.active),
+            [data-content] button[data-inview-default]:not(.active)
+        `);
         // Small delay to ensure DOM is settled after initialization
         setTimeout(() => {
             defaultButtons.forEach(button => {
-                if (!button.classList.contains('active')) {
+                if (!button.classList.contains('active') && this.isElementVisible(button)) {
                     this.simulateClick(button);
                 }
             });
@@ -1614,6 +1510,7 @@ class YaiTabs extends YaiCore {
         }
 
         const pathChain = [];
+        let openerChain = {};
         let currentElement = targetContainer;
 
         // Walk up the DOM to find parent tab containers
@@ -1630,6 +1527,8 @@ class YaiTabs extends YaiCore {
             const parentRefPath = parentTabContainer.dataset.refPath;
             if (parentRefPath) {
                 pathChain.unshift(parentRefPath); // Add to beginning for correct order
+                // Get the opener ID
+                openerChain[parentRefPath] = parentTabPanel.dataset.originalId || parentTabPanel.dataset.tab;
             }
 
             // Move up: start from the parent tab panel, then look for the next level up
@@ -1637,6 +1536,7 @@ class YaiTabs extends YaiCore {
         }
 
         return {
+            opener: openerChain,
             parents: pathChain,
             target: targetRef,
             fullPath: [...pathChain, targetRef],
@@ -1671,6 +1571,7 @@ class YaiTabs extends YaiCore {
         if (YaiTabs._urlReconstructionCache.has(cacheKey)) {
             return YaiTabs._urlReconstructionCache.get(cacheKey);
         }
+
         const pathData = YaiTabs.getRefPath(targetRef, containerElement);
 
         if (pathData.error) {
@@ -1678,54 +1579,23 @@ class YaiTabs extends YaiCore {
             return '';
         }
 
-        // Start from the target and work backwards to find which tabs contain it
+        // Build URL by looking up each ref-path and getting its active tab
         const urlParts = [];
-        let currentContainer = pathData.container;
 
         // Process from deepest (target) to shallowest (root)
         for (let i = pathData.fullPath.length - 1; i >= 0; i--) {
             const refPath = pathData.fullPath[i];
+            let tabValue = undefined; // default
 
-            if (i === pathData.fullPath.length - 1) {
-                // For the target itself, use provided value or find default/first available
-                let finalTargetValue;
-                if (targetValue !== undefined) {
-                    finalTargetValue = targetValue;
-                } else {
-                    const defaultButton = currentContainer.querySelector(':scope > nav[data-controller] [data-default]');
-                    const firstButton = currentContainer.querySelector(':scope > nav[data-controller] button[data-open]');
-                    finalTargetValue = defaultButton?.dataset.originalId || firstButton?.dataset.originalId ||
-                                     defaultButton?.dataset.open || firstButton?.dataset.open || '1';
-                }
-                urlParts.unshift(`${refPath}=${finalTargetValue}`);
+            // Check if explicit value provided for target
+            if (i === pathData.fullPath.length - 1 && targetValue !== undefined) {
+                tabValue = targetValue;
             } else {
-                // For parent containers, find which tab contains the current container
-                const parentContainer = containerElement.querySelector(`[data-yai-tabs][data-ref-path="${refPath}"]`);
-                if (!parentContainer) {
-                    urlParts.unshift(`${refPath}=1`);
-                    continue;
-                }
+                tabValue = pathData.opener[refPath];
+            }
 
-                // Find which tab panel contains our current container
-                const allTabPanels = parentContainer.querySelectorAll(':scope > div[data-content] > [data-tab]');
-                let containingTabValue = '1'; // default
-
-                for (const panel of allTabPanels) {
-                    if (panel.contains(currentContainer)) {
-                        // For panels, we want the data-tab value, which corresponds to the URL routing
-                        // Find the corresponding button to get its original data-open value
-                        const tabValue = panel.dataset.tab;
-                        const correspondingButton = parentContainer.querySelector(
-                            `:scope > nav[data-controller] button[data-open="${tabValue}"]`
-                        );
-                        // Use the button's original data-open value (preserved in data-original-id)
-                        containingTabValue = correspondingButton?.dataset.originalId || tabValue;
-                        break;
-                    }
-                }
-
-                urlParts.unshift(`${refPath}=${containingTabValue}`);
-                currentContainer = parentContainer;
+            if (tabValue !== undefined) {
+                urlParts.unshift(`${refPath}=${tabValue}`);
             }
         }
 
@@ -1736,6 +1606,295 @@ class YaiTabs extends YaiCore {
 
         return result;
     }
+
+    /**
+     * Updates ARIA attributes and tabindex for buttons and panels in a container.
+     * @param {HTMLElement} container - The tab container to update
+     */
+    _updateAriaStates(container) {
+        const buttons = container.querySelectorAll(':scope > nav[data-controller] button[data-open]');
+        const panels = container.querySelectorAll(':scope > div[data-content] > [data-tab]');
+
+        let hasActive = false;
+        buttons.forEach(btn => {
+            const isActive = btn.classList.contains('active');
+            if (isActive) hasActive = true;
+            btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+            btn.setAttribute('tabindex', isActive ? '0' : '-1');
+        });
+        if (!hasActive && buttons.length) {
+            if (this.isElementVisible(buttons[0])) {
+                buttons[0].setAttribute('tabindex', '0');
+            }
+        }
+
+        panels.forEach(panel => {
+            const isActive = panel.classList.contains('active');
+            panel.setAttribute('aria-hidden', isActive ? 'false' : 'true');
+            if (!isActive && !this.isContainerVisible(panel)) {
+                panel.setAttribute('inert', '');
+            } else {
+                panel.removeAttribute('inert');
+            }
+        });
+
+        // Recursively update nested containers
+        const nestedContainers = container.querySelectorAll(':scope [data-yai-tabs]');
+        nestedContainers.forEach(nested => {
+            if (this.isContainerVisible(nested)) {
+                this._updateAriaStates(nested);
+            }
+        });
+    }
+
+    /**
+     * Validates the state of all tabs, buttons, and nested components.
+     * Resource-intensive, for debugging only. Checks active states, ARIA, focus, inert, hash routing, and nested consistency.
+     * @returns {Object} Validation result with errors and summary
+     */
+    validateTabStates() {
+        const errors = [];
+        let checkedContainers = 0;
+        let checkedButtons = 0;
+        let checkedPanels = 0;
+
+        const containers = document.querySelectorAll(this.config.rootSelector);
+        checkedContainers = containers.length;
+
+        // Track the last visible active button for focus validation
+        let lastVisibleActiveButton = null;
+        if (this.config.autoFocus || this.config.autoFocusNested) {
+            const allActiveButtons = document.querySelectorAll(`${this.config.rootSelector} > nav[data-controller] button.active`);
+            for (const btn of allActiveButtons) {
+                const container = btn.closest(this.config.rootSelector);
+                if (this.isElementVisible(btn) && (!lastVisibleActiveButton || this._getContainerDepth(container) <= this._getContainerDepth(lastVisibleActiveButton.closest(this.config.rootSelector)))) {
+                    lastVisibleActiveButton = btn;
+                }
+            }
+        }
+
+        containers.forEach((container, index) => {
+            // Use container ID or fallback to unique identifier
+            const refPath = container.dataset.refPath || container.id || `yai-tabs-${index + 1}`;
+            const depth = this._getContainerDepth(container);
+
+            // 1. Active button state
+            const buttons = container.querySelectorAll(':scope > nav[data-controller] button[data-open]');
+            const activeButtons = Array.from(buttons).filter(btn => btn.classList.contains('active'));
+            checkedButtons += buttons.length;
+
+            if (activeButtons.length > 1) {
+                errors.push({
+                    type: 'active_button',
+                    container: refPath,
+                    depth,
+                    message: `Multiple active buttons (${activeButtons.length}) found in container ${refPath}`,
+                });
+            }
+            if (activeButtons.length === 0 && !this.config.closable) {
+                errors.push({
+                    type: 'active_button',
+                    container: refPath,
+                    depth,
+                    message: `No active button found in container ${refPath} (closable: false)`,
+                });
+            }
+
+            // 2. Active panel state
+            const panels = container.querySelectorAll(':scope > div[data-content] > [data-tab]');
+            const activePanels = Array.from(panels).filter(panel => panel.classList.contains('active'));
+            checkedPanels += panels.length;
+
+            if (activePanels.length > 1) {
+                errors.push({
+                    type: 'active_panel',
+                    container: refPath,
+                    depth,
+                    message: `Multiple active panels (${activePanels.length}) found in container ${refPath}`,
+                });
+            }
+            if (activePanels.length === 0 && !this.config.closable) {
+                errors.push({
+                    type: 'active_panel',
+                    container: refPath,
+                    depth,
+                    message: `No active panel found in container ${refPath} (closable: false)`,
+                });
+            }
+
+            // 3. Button-panel correspondence
+            if (activeButtons.length === 1 && activePanels.length === 1) {
+                const activeButton = activeButtons[0];
+                const activePanel = activePanels[0];
+                const buttonOpen = activeButton.dataset.open;
+                const panelTab = activePanel.dataset.tab;
+
+                if (buttonOpen !== panelTab) {
+                    errors.push({
+                        type: 'mismatch',
+                        container: refPath,
+                        depth,
+                        message: `Active button (data-open="${buttonOpen}") does not match active panel (data-tab="${panelTab}") in ${refPath}`,
+                    });
+                }
+            }
+
+            // 4. ARIA attributes
+            if (this.config.autoAccessibility) {
+                buttons.forEach(btn => {
+                    const isActive = btn.classList.contains('active');
+                    const ariaSelected = btn.getAttribute('aria-selected') === 'true';
+                    const tabindex = btn.getAttribute('tabindex') || '0';
+
+                    if (isActive && !ariaSelected) {
+                        errors.push({
+                            type: 'aria',
+                            container: refPath,
+                            depth,
+                            message: `Active button ${btn.dataset.open} in ${refPath} lacks aria-selected="true"`,
+                        });
+                    }
+                    if (!isActive && ariaSelected) {
+                        errors.push({
+                            type: 'aria',
+                            container: refPath,
+                            depth,
+                            message: `Inactive button ${btn.dataset.open} in ${refPath} has aria-selected="true"`,
+                        });
+                    }
+                    if (isActive && tabindex !== '0') {
+                        errors.push({
+                            type: 'focus',
+                            container: refPath,
+                            depth,
+                            message: `Active button ${btn.dataset.open} in ${refPath} has incorrect tabindex="${tabindex}" (expected 0)`,
+                        });
+                    }
+                    if (!isActive && tabindex !== '-1') {
+                        errors.push({
+                            type: 'focus',
+                            container: refPath,
+                            depth,
+                            message: `Inactive button ${btn.dataset.open} in ${refPath} has incorrect tabindex="${tabindex}" (expected -1)`,
+                        });
+                    }
+                });
+
+                panels.forEach(panel => {
+                    const isActive = panel.classList.contains('active');
+                    const ariaHidden = panel.getAttribute('aria-hidden') === 'true';
+                    const isInert = panel.hasAttribute('inert');
+
+                    if (isActive && ariaHidden) {
+                        errors.push({
+                            type: 'aria',
+                            container: refPath,
+                            depth,
+                            message: `Active panel ${panel.dataset.tab} in ${refPath} has aria-hidden="true"`,
+                        });
+                    }
+                    if (!isActive && !ariaHidden) {
+                        errors.push({
+                            type: 'aria',
+                            container: refPath,
+                            depth,
+                            message: `Inactive panel ${panel.dataset.tab} in ${refPath} lacks aria-hidden="true"`,
+                        });
+                    }
+                    if (!isActive && !isInert && this.isContainerVisible(panel)) {
+                        errors.push({
+                            type: 'inert',
+                            container: refPath,
+                            depth,
+                            message: `Inactive panel ${panel.dataset.tab} in ${refPath} lacks inert attribute but is in visible container`,
+                        });
+                    }
+                });
+            }
+
+            // 5. Focus states (only check last visible active button)
+            if ((this.config.autoFocus && depth === 0) || (this.config.autoFocusNested && depth > 0)) {
+                const activeButton = activeButtons[0];
+                if (activeButton && document.activeElement !== activeButton && activeButton === lastVisibleActiveButton) {
+                    errors.push({
+                        type: 'focus',
+                        container: refPath,
+                        depth,
+                        message: `Active button ${activeButton.dataset.open} in ${refPath} is not focused (autoFocus: ${this.config.autoFocus})`,
+                    });
+                }
+                if (this.config.autoFocusNested && depth > 0) {
+                    const nestedActive = container.querySelector(':scope > div[data-content] > [data-tab].active [data-yai-tabs]');
+                    if (nestedActive && !nestedActive.querySelector('button.active:focus') && nestedActive.querySelector('button.active') === lastVisibleActiveButton) {
+                        errors.push({
+                            type: 'focus_nested',
+                            container: refPath,
+                            depth,
+                            message: `Nested active container in ${refPath} lacks focused button (autoFocusNested: ${this.config.autoFocusNested})`,
+                        });
+                    }
+                }
+            }
+
+            // 6. Hash routing (only validate if container is visible and refPath is in hash)
+            const activeButton = activeButtons[0];
+            if (activeButton && this.isContainerVisible(container)) {
+                const currentHash = window.location.hash || '#';
+                const hashParams = new URLSearchParams(currentHash.replace('#', ''));
+                // Only validate if refPath is expected in the hash
+                if (hashParams.has(refPath)) {
+
+                    console.log(this.tabOpenAttribute , activeButton.getAttribute(this.tabOpenAttribute) )
+
+                    const expectedKeyValue = `${refPath}=${activeButton.getAttribute(this.tabOpenAttribute)}`;
+                    if (hashParams.get(refPath) !== activeButton.getAttribute(this.tabOpenAttribute)) {
+                        errors.push({
+                            type: 'hash',
+                            container: refPath,
+                            depth,
+                            message: `Hash ${currentHash} does not reflect active button ${activeButton.getAttribute(this.tabOpenAttribute)} in ${refPath} (expected ${expectedKeyValue})`,
+                        });
+                    }
+                }
+            }
+        });
+
+        console.group('YaiTabs State Validation');
+        console.log(`Checked ${checkedContainers} containers, ${checkedButtons} buttons, ${checkedPanels} panels`);
+        if (errors.length === 0) {
+            console.log('%cAll states valid! 🎉', 'color: green; font-weight: bold;');
+        } else {
+            console.warn(`Found ${errors.length} issues:`);
+            errors.forEach((error, i) => {
+                console.warn(`[${i + 1}] ${error.type.toUpperCase()} (Depth ${error.depth}, ${error.container}): ${error.message}`);
+            });
+        }
+        console.groupEnd();
+
+        return {
+            valid: errors.length === 0,
+            errors,
+            stats: { containers: checkedContainers, buttons: checkedButtons, panels: checkedPanels }
+        };
+    }
+
+    /**
+     * Helper to get container depth
+     * @param {HTMLElement} container
+     * @returns {number} Depth level
+     */
+    _getContainerDepth(container) {
+        let depth = 0;
+        let current = container;
+        while (current && current !== document.body) {
+            if (current.matches(this.config.rootSelector)) {
+                depth++;
+            }
+            current = current.parentElement.closest(this.config.rootSelector);
+        }
+        return depth - 1;
+    }
+
 }
 
 export {YaiTabs};

@@ -564,6 +564,16 @@
    DEFAULT THEME
    ========================= */
 
+[data-yai-tabs] {
+    /* Tabs default color */
+    --yai-tabs-background: #c5f7fe;
+    --yai-tabs-nav-background: #ecdec9;
+
+    --yai-tabs-content-text-color: #272e31;
+    --yai-tabs-content-text-muted: #4a5568;
+    --yai-tabs-content-text-background: #ffffff;
+}
+
 [data-theme="default"],
 [data-theme="default"] [data-yai-tabs] {
     background-color: var(--yai-tabs-color-background);
@@ -613,31 +623,12 @@
    UTILITY CLASSES FOR CUSTOMIZATION
    ========================= */
 
-[data-yai-tabs] [data-tabs-header] {
-    background-color: var(--yai-tabs-header-color-background, #ffffff);
-    color: var(--yai-tabs-header-color, #2b2929);
-}
-[data-yai-tabs] [data-tabs-footer] {
-    position: relative;
-    background-color: var(--yai-tabs-nav-background);
-    box-shadow: var(--yai-tabs-shadow-nav-bottom) var(--yai-tabs-shadow-medium-color);
-}
-.yai-orientation-hint {
-    padding: 14px;
-    text-align: center;
-    box-shadow: inset -1px 5px 5px 0px #5f51518b;
-    color: var(--yai-tabs-orientation-hint-color, #e9e2e2);
-    font-size: 14px;
-    user-select: none;
-    cursor: default;
-}
-
 /* Semantic Variants for Active Buttons */
-[data-yai-tabs][data-theme="default"] nav[data-controller][data-variant] button.active {
+/* [data-yai-tabs][data-theme="default"] nav[data-controller][data-variant] button.active {
     --yai-loader-color: var(--yai-tabs-color-accent-contrast);
-}
+} */
 
-[data-theme="default"] nav[data-controller][data-variant="primary"] button.active {
+/* [data-theme="default"] nav[data-controller][data-variant="primary"] button.active {
     --yai-tabs-shadow-accent: rgb(49, 96, 199, .9);
     --yai-tabs-nav-button-active-color: var(--yai-tabs-color-primary-contrast);
     --yai-loader-color: var(--yai-tabs-nav-button-active-color);
@@ -699,7 +690,7 @@
     --yai-loader-color: var(--yai-tabs-nav-button-active-color);
     color: var(--yai-tabs-color-light);
     background-color: var(--yai-tabs-color-light-contrast);
-}
+} */
 
 /* Color Accent Overrides */
 [data-color-accent="primary"] {
@@ -760,14 +751,14 @@
 [data-color-apply="light"] { color: var(--yai-tabs-color-light); }
 
 /* .yai-btns */
-[data-yai-tabs] .yai-btn-primary { background-color: var(--yai-tabs-color-primary); color: var(--yai-tabs-color-primary-contrast) }
+/* [data-yai-tabs] .yai-btn-primary { background-color: var(--yai-tabs-color-primary); color: var(--yai-tabs-color-primary-contrast) }
 [data-yai-tabs] .yai-btn-secondary { background-color: var(--yai-tabs-color-secondary); color: var(--yai-tabs-color-secondary-contrast) }
 [data-yai-tabs] .yai-btn-success { background-color: var(--yai-tabs-color-success); color: var(--yai-tabs-color-success-contrast) }
 [data-yai-tabs] .yai-btn-warning { background-color: var(--yai-tabs-color-warning); color: var(--yai-tabs-color-warning-contrast) }
 [data-yai-tabs] .yai-btn-danger { background-color: var(--yai-tabs-color-danger); color: var(--yai-tabs-color-danger-contrast) }
 [data-yai-tabs] .yai-btn-funky { background-color: var(--yai-tabs-color-funky); color: var(--yai-tabs-color-funky-contrast) }
 [data-yai-tabs] .yai-btn-dark { background-color: var(--yai-tabs-color-dark); color: var(--yai-tabs-color-dark-contrast) }
-[data-yai-tabs] .yai-btn-light { background-color: var(--yai-tabs-color-light); color: var(--yai-tabs-color-light-contrast) }
+[data-yai-tabs] .yai-btn-light { background-color: var(--yai-tabs-color-light); color: var(--yai-tabs-color-light-contrast) } */
 
 /* --- YAI form elements --- */
 [data-yai-tabs] .yai-input,

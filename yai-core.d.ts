@@ -98,10 +98,14 @@ export interface YaiCoreConfig extends HandlerConfig {
 
   /** Component lifecycle callback hooks for extensible behavior */
   callbacks?: {
-    /** Called when loading state should be applied to UI elements */
-    setLoading?: ((context: HookContext) => void | Promise<void>) | null;
-    /** Called when loading state should be removed from UI elements */
-    removeLoading?: ((context: HookContext) => void | Promise<void>) | null;
+    /** Called when hash-based routing starts, for showing page loaders */
+    routeLoading?: ((context: HookContext) => void | Promise<void>) | null;
+    /** Called when hash-based routing completes, for hiding page loaders */
+    routeLoaded?: ((context: HookContext) => void | Promise<void>) | null;
+    /** Called when dynamic content fetch starts (show loading UI) */
+    contentLoading?: ((context: HookContext) => void | Promise<void>) | null;
+    /** Called when dynamic content fetch completes (hide loading UI) */
+    contentLoaded?: ((context: HookContext) => void | Promise<void>) | null;
     /** Called when content is ready for animation/display */
     contentReady?: ((context: HookContext) => void | Promise<void>) | null;
     /** Called after all loading operations complete successfully */
@@ -165,15 +169,27 @@ export interface HookContext {
  * Each hook receives a rich context object and can return values for advanced workflows.
  *
  * **Available Hooks:**
- * - `setLoading`: When loading UI should be shown
- * - `removeLoading`: When loading UI should be hidden
+ * - `routeLoading`: When hash-based routing starts (show page loader)
+ * - `routeLoaded`: When hash-based routing completes (hide page loader)
+ * - `contentLoading`: When dynamic content fetch starts
+ * - `contentLoaded`: When dynamic content fetch completes
  * - `contentReady`: When content is ready for animation/display
  * - `afterLoad`: When all loading operations complete
  *
  * @example
  * ```typescript
  * const callbacks: LifecycleCallbacks = {
- *   setLoading: ({ target, isLoading }) => {
+ *   routeLoading: ({ context }) => {
+ *     // Show page loader during hash-based navigation
+ *     document.getElementById('page-loader')?.classList.add('active');
+ *   },
+ *
+ *   routeLoaded: ({ context }) => {
+ *     // Hide page loader when routing completes
+ *     document.getElementById('page-loader')?.classList.remove('active');
+ *   },
+ *
+ *   contentLoading: ({ target, isLoading }) => {
  *     target?.classList.toggle('loading', isLoading);
  *     target?.setAttribute('aria-busy', String(isLoading));
  *   },
@@ -192,10 +208,14 @@ export interface HookContext {
  * ```
  */
 export interface LifecycleCallbacks {
+  /** Called when hash-based routing starts - ideal for showing page loaders */
+  routeLoading?: (context: HookContext) => void | Promise<void>;
+  /** Called when hash-based routing completes - ideal for hiding page loaders */
+  routeLoaded?: (context: HookContext) => void | Promise<void>;
   /** Called when loading state should be applied to UI elements */
-  setLoading?: (context: HookContext) => void | Promise<void>;
-  /** Called when loading state should be removed from UI elements */
-  removeLoading?: (context: HookContext) => void | Promise<void>;
+  contentLoading?: (context: HookContext) => void | Promise<void>;
+  /** Called when dynamic content fetch completes (hide loading UI) */
+  contentLoaded?: (context: HookContext) => void | Promise<void>;
   /** Called when content is ready for animation/display (perfect timing for CSS transitions) */
   contentReady?: (context: HookContext) => void | Promise<void>;
   /** Called after all loading operations complete successfully */
@@ -1093,20 +1113,21 @@ export declare class YaiCore extends YEH {
   // === Lifecycle Hook System ===
 
   /**
-   * 🎛️ **Loading State Hook (Override)**
+   * 🎛️ **Content Loading Start Hook (Override)**
    *
-   * Lifecycle hook for managing loading states. Override in components for custom
-   * loading behavior (spinners, button states, etc.). Called via hook system.
+   * Lifecycle hook for managing content loading states. Override in components for custom
+   * loading behavior (spinners, button states, etc.). Called via hook system when dynamic
+   * content fetch starts.
    */
-  setLoading(): void;
+  contentLoading(): void;
 
   /**
-   * 🎛️ **Loading Cleanup Hook (Override)**
+   * 🎛️ **Content Loaded Hook (Override)**
    *
-   * Lifecycle hook for cleaning up loading states. Override in components for custom
-   * cleanup behavior. Called via hook system for consistent state management.
+   * Lifecycle hook for cleaning up content loading states. Override in components for custom
+   * cleanup behavior. Called via hook system when dynamic content fetch completes.
    */
-  removeLoading(): void;
+  contentLoaded(): void;
 
   /**
    * 🎣 **Execute Lifecycle Hook**
@@ -1181,6 +1202,97 @@ export declare class YaiCore extends YEH {
    * ```
    */
   protected _postProcessContent(): void;
+
+  /**
+   * 🌍 **Global Mouse/Touch Watcher - Universal Event Bridge**
+   *
+   * Provides a centralized hook system for global mouse/touch events on the document body.
+   * This enables cross-component coordination and state management for drag operations,
+   * focus management, and other global interactions.
+   *
+   * **🎯 Primary Use Cases:**
+   * - Drag operation cancellation when mouse leaves components
+   * - Global focus management and blur handling
+   * - Cross-component gesture coordination
+   * - Stuck state recovery for interactive elements
+   *
+   * **⚡ Event Configuration:**
+   * ```typescript
+   * events: {
+   *     setListener: {
+   *         'body': [
+   *             { type: 'mouseup', handler: 'globalMouseWatch', debounce: 100 },
+   *             { type: 'touchend', handler: 'globalMouseWatch', debounce: 100 },
+   *             { type: 'touchcancel', handler: 'globalMouseWatch', debounce: 100 }
+   *         ]
+   *     }
+   * }
+   * ```
+   *
+   * **🔧 Hook Payload Structure:**
+   * ```typescript
+   * {
+   *     event: MouseEvent | TouchEvent,  // Original DOM event
+   *     target: Element,                 // Event target element
+   *     container: Element,              // Closest component container
+   *     context: YaiCore                 // Current instance context
+   * }
+   * ```
+   *
+   * **💡 Usage Examples:**
+   *
+   * **Drag Cancellation:**
+   * ```typescript
+   * tabs.hook('globalMouseWatch', ({ event, target, context }) => {
+   *     if (!target.closest('[data-yai-tabs]')) {
+   *         // Cancel any active drag operations
+   *         swypeInstance.resetDraggingState();
+   *     }
+   * });
+   * ```
+   *
+   * **Focus Management:**
+   * ```typescript
+   * tabs.hook('globalMouseWatch', ({ event, target }) => {
+   *     // Close dropdowns when clicking outside
+   *     if (event.type === 'mouseup' && !target.closest('.dropdown')) {
+   *         closeAllDropdowns();
+   *     }
+   * });
+   * ```
+   *
+   * **Multi-component Coordination:**
+   * ```typescript
+   * tabs.hook('globalMouseWatch', ({ event, context }) => {
+   *     // Notify other components of global interaction
+   *     eventBus.emit('globalInteraction', { type: event.type, source: context });
+   * });
+   * ```
+   *
+   * **🚀 Performance Notes:**
+   * - Uses 100ms debounce to prevent excessive firing
+   * - Only triggers on body-level events (efficient delegation)
+   * - Passive event listeners where supported
+   * - Automatic cleanup with component destruction
+   *
+   * @param event - The original DOM event (MouseEvent or TouchEvent)
+   * @param target - The event target element
+   * @param container - The closest component container element
+   * @fires globalMouseWatch - Hook event with contextual data
+   *
+   * @example
+   * ```typescript
+   * // Cleanup stuck drag states
+   * class MyTabs extends YaiCore {
+   *   globalMouseWatch(event, target, container) {
+   *     if (this.isDragging && !target.closest('[data-draggable]')) {
+   *       this.cancelDrag();
+   *     }
+   *   }
+   * }
+   * ```
+   */
+  globalMouseWatch(event: MouseEvent | TouchEvent, target: Element, container: Element): void;
 
   // === Static Accessibility Utilities ===
 

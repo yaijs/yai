@@ -3,7 +3,18 @@
 /**
  * YaiViewport - Advanced Viewport Tracking System
  * High-performance viewport visibility tracking with spatial optimization for elements.
+ *
+ * @requires YEH - Expects YEH (YpsilonEventHandler) to be globally available
+ * Load via: <script src="https://unpkg.com/@yaijs/yeh@1.0.0/yeh.js"></script>
+ * Or ensure YEH is imported before this module
  */
+
+// Ensure YEH is available (for better error messages)
+if (typeof YEH === 'undefined') {
+    throw new Error('YaiViewport requires YEH (YpsilonEventHandler) to be loaded. ' +
+                    'Load it via: <script src="https://unpkg.com/@yaijs/yeh@1.0.0/yeh.js"></script>');
+}
+
 class YaiViewport extends YEH {
     constructor(setConfig = {}) {
         const { throttle, ...restConfig } = setConfig;
@@ -62,8 +73,8 @@ class YaiViewport extends YEH {
             },
         }
 
-        // Callback functions for lifecycle events
-        const callbacks = {
+        // Hooks for lifecycle events
+        const callable = {
             pageTop: null,              // Called when page reaches top
             pageEnd: null,              // Called when page reaches bottom
             pageScrolled: null,         // Called when page is scrolled past threshold
@@ -84,7 +95,7 @@ class YaiViewport extends YEH {
         this.config = {
             ...this.config,
             ...this._objectMerge(defaultConfig, restConfig),
-            callbacks
+            callable
         };
 
         // Spatial optimization system
@@ -111,6 +122,7 @@ class YaiViewport extends YEH {
     }
 
     // YEH Event Handlers
+
     handleLoad(event) {
         this._updateViewportState();
         this._executeHook('afterLoad', {
@@ -591,24 +603,31 @@ class YaiViewport extends YEH {
     }
 
     /**
-     * Execute a lifecycle callback hook with context data
+     * Track elements and automatically refresh when new matching elements are found
      */
-    _executeHook(hookName, context = {}) {
-        const callback = this.config.callbacks[hookName];
-        if (typeof callback === 'function') {
-            const scrollDirection = this._scrollDirection;
-            return callback.call(this, context, scrollDirection, this);
+    trackWithRefresh(selector) {
+        // Store the selector for future refreshes
+        if (!this._trackedSelectors) {
+            this._trackedSelectors = new Set();
         }
-        return undefined;
+        this._trackedSelectors.add(selector);
+
+        // Initial tracking
+        this.track(selector);
+        return this;
     }
 
     /**
-     * Set a lifecycle callback hook
+     * Refresh tracking for all stored selectors
      */
-    hook(hookName, callback) {
-        if (this.config.callbacks.hasOwnProperty(hookName)) {
-            this.config.callbacks[hookName] = callback;
+    refreshAll() {
+        if (this._trackedSelectors) {
+            this._trackedSelectors.forEach(selector => {
+                this.track(selector);
+            });
         }
+        this._refreshElementViewportPositions();
+        this._updateViewportState();
         return this;
     }
 

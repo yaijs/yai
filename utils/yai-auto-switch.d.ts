@@ -1,5 +1,5 @@
 /**
- * AutoSwitch - Generic component testing utility for YaiJS
+ * YaiAutoSwitch - Generic component testing utility for YaiJS
  *
  * Automatically cycles through interactive elements (tabs, modals, accordions, etc.)
  * to demonstrate animations and test component behavior.
@@ -7,7 +7,7 @@
  * @example
  * ```typescript
  * // Basic usage
- * const tester = new AutoSwitch({
+ * const tester = new YaiAutoSwitch({
  *   target: '#my-tabs',
  *   triggerSelector: 'button[data-open]',
  *   timeout: 1000
@@ -17,7 +17,7 @@
  * @example
  * ```typescript
  * // Chainable configuration
- * const tester = new AutoSwitch()
+ * const tester = new YaiAutoSwitch()
  *   .setContainer('#demo-tabs', 'button[data-open]')
  *   .setConfig('timeout', 800)
  *   .on('cycleInit', () => console.log('Starting demo'))
@@ -35,23 +35,23 @@ export interface ClickConfig {
 }
 
 /**
- * Callback functions for AutoSwitch lifecycle events
+ * Callback functions for YaiAutoSwitch lifecycle events
  */
 export interface AutoSwitchCallbacks {
     /** Called before cycling starts */
-    cycleInit?: ((instance: AutoSwitch) => void) | null;
+    cycleInit?: ((instance: YaiAutoSwitch) => void) | null;
     /** Called between each trigger click */
-    cycleBetween?: ((instance: AutoSwitch) => void) | null;
+    cycleBetween?: ((instance: YaiAutoSwitch) => void) | null;
     /** Called after last trigger */
-    afterLast?: ((instance: AutoSwitch) => void) | null;
+    afterLast?: ((instance: YaiAutoSwitch) => void) | null;
     /** Called before demo stops */
-    beforeStop?: ((instance: AutoSwitch) => void) | null;
+    beforeStop?: ((instance: YaiAutoSwitch) => void) | null;
     /** Called after demo stops */
-    afterStop?: ((instance: AutoSwitch) => void) | null;
+    afterStop?: ((instance: YaiAutoSwitch) => void) | null;
 }
 
 /**
- * Configuration options for AutoSwitch
+ * Configuration options for YaiAutoSwitch
  */
 export interface AutoSwitchConfig {
     /** CSS selector for container element */
@@ -69,12 +69,12 @@ export interface AutoSwitchConfig {
 }
 
 /**
- * Event names for AutoSwitch callbacks
+ * Event names for YaiAutoSwitch callbacks
  */
 export type AutoSwitchEventName = 'cycleInit' | 'cycleBetween' | 'afterLast' | 'beforeStop' | 'afterStop';
 
 /**
- * AutoSwitch class for automated component testing and demonstrations
+ * YaiAutoSwitch class for automated component testing and demonstrations
  *
  * This utility automatically cycles through interactive elements to showcase
  * component animations and behavior. Perfect for demos, testing, and presentations.
@@ -90,10 +90,10 @@ export type AutoSwitchEventName = 'cycleInit' | 'cycleBetween' | 'afterLast' | '
  * @example
  * ```typescript
  * // Quick demo start
- * new AutoSwitch({ target: '#my-component' }).cycle();
+ * new YaiAutoSwitch({ target: '#my-component' }).cycle();
  *
  * // Full configuration
- * const demo = new AutoSwitch({
+ * const demo = new YaiAutoSwitch({
  *   target: '#tabs-container',
  *   triggerSelector: 'button[data-open]',
  *   initialTimeout: 1000,
@@ -108,7 +108,8 @@ export type AutoSwitchEventName = 'cycleInit' | 'cycleBetween' | 'afterLast' | '
  * demo.abort(); // Emergency stop if needed
  * ```
  */
-export declare class AutoSwitch {
+export declare class YaiAutoSwitch {
+
     /** Configuration object */
     config: Required<AutoSwitchConfig>;
 
@@ -122,7 +123,7 @@ export declare class AutoSwitch {
     timeouts: number[];
 
     /**
-     * Create a new AutoSwitch instance
+     * Create a new YaiAutoSwitch instance
      *
      * @param config - Configuration options
      * @param config.target - CSS selector for container element (default: '#tabs-component')
@@ -134,7 +135,7 @@ export declare class AutoSwitch {
      *
      * @example
      * ```typescript
-     * const autoSwitch = new AutoSwitch({
+     * const autoSwitch = new YaiAutoSwitch({
      *   target: '#my-tabs',
      *   timeout: 1200,
      *   callbacks: {
@@ -183,7 +184,7 @@ export declare class AutoSwitch {
      * autoSwitch.abort().setConfig('timeout', 500).cycle();
      * ```
      */
-    abort(): AutoSwitch;
+    abort(): YaiAutoSwitch;
 
     /**
      * Stop the demo with proper callback lifecycle
@@ -198,7 +199,7 @@ export declare class AutoSwitch {
      * autoSwitch.stopDemo(); // Triggers beforeStop -> abort -> afterStop
      * ```
      */
-    stopDemo(): AutoSwitch;
+    stopDemo(): YaiAutoSwitch;
 
     /**
      * Set a configuration option
@@ -214,7 +215,7 @@ export declare class AutoSwitch {
      *   .setConfig('initialTimeout', 2000);
      * ```
      */
-    setConfig<K extends keyof AutoSwitchConfig>(key: K, value: AutoSwitchConfig[K]): AutoSwitch;
+    setConfig<K extends keyof AutoSwitchConfig>(key: K, value: AutoSwitchConfig[K]): YaiAutoSwitch;
 
     /**
      * Set the target container and optionally the trigger selector
@@ -228,13 +229,13 @@ export declare class AutoSwitch {
      * autoSwitch.setContainer('#new-tabs', 'button[data-open]');
      * ```
      */
-    setContainer(selector: string, triggerSelector?: string): AutoSwitch;
+    setContainer(selector: string, triggerSelector?: string): YaiAutoSwitch;
 
     /**
      * Set an event callback
      *
      * @param event - Event name (cycleInit, cycleBetween, afterLast, beforeStop, afterStop)
-     * @param callback - Callback function that receives the AutoSwitch instance
+     * @param callback - Callback function that receives the YaiAutoSwitch instance
      * @returns Returns this for chaining
      *
      * @example
@@ -248,7 +249,7 @@ export declare class AutoSwitch {
      *   });
      * ```
      */
-    on(event: AutoSwitchEventName, callback: (instance: AutoSwitch) => void): AutoSwitch;
+    on(event: AutoSwitchEventName, callback: (instance: YaiAutoSwitch) => void): YaiAutoSwitch;
 
     /**
      * Create a dispatchable click event
@@ -284,19 +285,19 @@ export declare class AutoSwitch {
      * @param callbackName - Name of callback to execute
      * @returns Returns this for chaining
      */
-    private _execCallback(callbackName: keyof AutoSwitchCallbacks): AutoSwitch;
+    private _execCallback(callbackName: keyof AutoSwitchCallbacks): YaiAutoSwitch;
 }
 
 /**
  * Export for ES modules and CommonJS compatibility
  */
-export default AutoSwitch;
+export default YaiAutoSwitch;
 
 /**
  * Global declaration for browser usage
  */
 declare global {
     interface Window {
-        AutoSwitch: typeof AutoSwitch;
+        YaiAutoSwitch: typeof YaiAutoSwitch;
     }
 }

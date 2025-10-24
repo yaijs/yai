@@ -13,6 +13,7 @@ YaiJS delivers enterprise-grade UI components with mathematical O(1) scaling per
 **Built on YEH (YpsilonEventHandler) Foundation**
 - **O(1) Performance:** Single listener per container regardless of complexity
 - **Perfect Isolation:** Container-scoped event handling using `:scope >` selectors
+- **EventListener Orchestration:** 52% fewer listeners via selective registration
 - **Zero Memory Leaks:** Automatic cleanup with no listener proliferation
 - **Framework Agnostic:** Works with React, Vue, Angular, or Vanilla JS
 - **Pure ES6 Modules:** No build pipeline required
@@ -37,12 +38,16 @@ For YaiTabs:
 - ✅ **4 Navigation Positions** - Top, left, right, bottom placement
 - ✅ **WCAG 2.1 AA Compliance** - Full ARIA implementation with screen reader support
 - ✅ **Keyboard Navigation** - Arrow keys, Home/End, Enter/Space support
-- ✅ **Dynamic Content Loading** - Fetch remote content with abort controllers
+- ✅ **Touch/Swipe Navigation** - Mobile-first swipe gestures with YaiTabsSwype utility
+- ✅ **Dynamic Content Loading** - Fetch remote content via `data-url` with abort controllers
 - ✅ **Container Isolation** - Unique IDs prevent cross-contamination
+- ✅ **Infinite Nesting** - Dynamically loaded nested components instantly become swipable
 
 **[View YaiTabs Documentation →](./tabs/README.md)**
 
-**[Try Live Demo →](https://yaijs.github.io/yai/tabs/Example.html)**
+**[View YaiTabsSwype Documentation →](./utils/README.md)**
+
+**[Try Live Demo →](https://yaijs.github.io/yai/tabs/Example.html)** (43 components with recursive AJAX loading)
 
 **Quick Start via CDN**
 
@@ -83,6 +88,505 @@ For YaiTabs:
 </html>
 ```
 
+**Per-Container Configuration**
+
+Override global settings on individual containers using data attributes:
+
+```html
+<!-- This container allows closable tabs, even if global config says false -->
+<div data-yai-tabs data-closable="true">
+    <nav data-controller>
+        <button data-tab-action="open" data-open="1">Tab 1</button>
+        <button data-tab-action="close" data-close="1">×</button>
+    </nav>
+    <div data-content>
+        <div data-tab="1">Content...</div>
+    </div>
+</div>
+
+<!-- This container disables closable tabs, even if global config says true -->
+<div data-yai-tabs data-closable="false">
+    <!-- Tabs in this container cannot be closed -->
+</div>
+```
+
+**Available Data Attributes:**
+- `data-closable="true|false"` - Override closable setting per container
+
+## YaiTabsSwype - Touch/Swipe Navigation
+
+**🎯 Mobile-first swipe gestures with advanced boundary behaviors**
+
+YaiTabsSwype adds fluid touch/swipe navigation to YaiTabs with support for infinite nesting and intelligent boundary handling.
+
+### Key Features
+
+- ✅ **2D Swipe Support** - Horizontal and vertical navigation with axis locking
+- ✅ **Semantic Directions** - Human-readable left/right/up/down detection
+- ✅ **Auto-Axis Detection** - Automatically detect swipe direction from `aria-orientation`
+- ✅ **Boundary Behaviors** - Circular navigation, auto-descend into nested tabs, auto-ascend to parent
+- ✅ **Infinite Nesting** - Works flawlessly with recursive AJAX-loaded content
+- ✅ **Haptic Feedback** - Adaptive haptic feedback for mobile devices
+- ✅ **Data-Attribute Config** - Per-container swipe configuration
+
+### Quick Start
+
+```javascript
+import YaiTabs from './yai/tabs/yai-tabs.js';
+import YaiTabsSwype from './yai/utils/yai-tabs-swype.js';
+
+// Initialize tabs with swipe events
+const tabs = new YaiTabs({
+    events: {
+        setListener: {
+            '[data-yai-tabs]': ['click', 'keydown'],
+            '[data-mousedown]': [
+                { type: 'mousedown', debounce: 1 },
+                { type: 'mousemove', debounce: 1 },
+                { type: 'mouseup', debounce: 1 },
+                { type: 'touchstart', debounce: 1 },
+                { type: 'touchmove', debounce: 1 },
+                { type: 'touchend', debounce: 1 }
+            ]
+        }
+    }
+});
+
+// Initialize swype with advanced features
+const swype = new YaiTabsSwype({
+    axis: 'auto',  // Auto-detect from aria-orientation
+    boundaryBehavior: {
+        circular: true,            // Loop from last to first tab
+        descendIntoNested: true,   // Auto-open nested tabs at boundary
+        ascendFromNested: true,    // Switch parent tab when nested boundary reached
+        transitionDelay: 100       // Delay before switching (shows parent chain)
+    },
+    hapticFeedback: 'adaptive',    // Haptic feedback on mobile
+    orientationAware: true         // Show orientation hints
+})
+    .setInstance(tabs)
+    .watchHooks();
+
+// Global mouse watch for boundary cleanup
+tabs.hook('globalMouseWatch', ({ event, target }) => {
+    if (swype.isDragging()) {
+        swype.resetDraggingState();
+    }
+});
+```
+
+### Data-Attribute Configuration
+
+Configure swipe behavior per container:
+
+```html
+<div data-yai-tabs
+     data-mousedown="slyde"
+     data-swype-axis="horizontal"
+     data-swype-circular="true"
+     data-swype-descend="true"
+     data-swype-ascend="true"
+     data-swype-threshold-mobile="40"
+     data-swype-threshold-desktop="40">
+    <!-- Tabs with custom swipe config -->
+</div>
+```
+
+### Boundary Behaviors
+
+**Circular Navigation:**
+```
+A → B → C → D → E → (loops back to) A
+```
+
+**Descend into Nested:**
+```
+Root:  A  B  C  D  [E]  ← Swiping right at E
+                    ↓
+Nested:             F  G  H  I  ← Opens F automatically
+```
+
+**Ascend from Nested:**
+```
+Root:  A  B  [C]  D  E  ← Switches to C when nested boundary reached
+           ↑
+Nested:    F  G  H  [I]  ← Swiping right at I (last nested tab)
+```
+
+**Combined with Dynamic Content Loading:**
+- Use `data-url` on any tab button to load nested components via AJAX
+- Dynamically loaded content becomes **instantly swipable** via hooks
+- Example: `mega-tree-full.html` loads a massive nested tree into any tab
+- Recursive ascension through all parent levels (static or dynamic)
+- Parent chain visibility before switching
+- Configurable transition delay for smooth UX
+
+**Example Flow:**
+1. Static page has 43 components
+2. Swipe through tabs until you reach one with `data-url="dynamic/mega-tree-full.html"`
+3. Click loads massive nested tree via AJAX
+4. New nested components are **instantly swipable** (no re-initialization needed)
+5. Swipe through infinite levels seamlessly
+
+**[View Full YaiTabsSwype Documentation →](./utils/README.md)**
+
+## Event Bus System
+
+**🎯 YaiTabs is more than tabs - it's a complete application event bus!**
+
+### Automatic Event Tunneling
+
+YaiCore automatically generates event handlers for **ANY** event type you add. No boilerplate required!
+
+```js
+const tabs = new YaiTabs({
+    events: {
+        setListener: {
+            window: [
+                { type: 'hashchange', debounce: 500 } // ✅ Built-in (required)
+            ],
+            '[data-yai-tabs]': [
+                'click',           // ✅ Built-in (required)
+                'keydown',         // ✅ Built-in (required)
+                'input',           // ✨ Auto-generated!
+                'change',          // ✨ Auto-generated!
+                'submit',          // ✨ Auto-generated!
+                'focus',           // ✨ Auto-generated!
+                'mouseover',       // ✨ Auto-generated!
+                'myCustomEvent'    // ✨ Auto-generated!
+            ]
+        }
+    }
+});
+
+// Hooks are automatically available for ALL events!
+tabs.hook('eventFocus', ({ event, target, container, action, context }) => {
+    console.log('Focus event:', target);
+});
+
+tabs.hook('eventMouseover', ({ event, target, container, action, context }) => {
+    // action is extracted from data-mouseover attribute
+    if (action === 'preview') showPreview(target);
+});
+
+tabs.hook('eventMyCustomEvent', ({ event, target, container, action, context }) => {
+    // Your custom event logic here
+});
+```
+
+**How it works:**
+1. Add any event to `setListener`
+2. YaiCore automatically creates `event[EventType]` hook
+3. Hook receives: `{event, target, container, action, context}`
+4. Action is extracted from `data-[eventType]` attribute
+
+### Multiple Hooks Support
+
+**🎯 NEW: Register multiple callbacks for the same event!**
+
+YEH's hook system uses array-based callback storage, allowing you to attach multiple handlers to any hook:
+
+```javascript
+// Register multiple handlers for the same hook
+tabs
+    .hook('tabOpened', (ctx) => {
+        console.log('First handler - Analytics');
+        trackPageView(ctx.target);
+    })
+    .hook('tabOpened', (ctx) => {
+        console.log('Second handler - UI Updates');
+        updateActiveState(ctx.target);
+    })
+    .hook('tabOpened', (ctx) => {
+        console.log('Third handler - Lazy Loading');
+        loadDynamicContent(ctx.target);
+    });
+
+// All three callbacks execute in registration order!
+```
+
+**Helper methods:**
+- `tabs.unhook('tabOpened', callback)` - Remove specific callback
+- `tabs.clearHooks('tabOpened')` - Clear all callbacks for hook
+
+**Zero boilerplate. Infinite extensibility.** 🚀
+
+### Building Single-Page Applications
+
+Use one YaiTabs container as your entire app shell:
+
+```html
+<div data-yai-tabs class="app-shell full-size">
+  <div data-tab="main">
+    <aside class="sidebar">
+      <button data-click="loadDashboard">Dashboard</button>
+      <button data-click="loadUsers">Users</button>
+      <input data-input="globalSearch" placeholder="Search...">
+    </aside>
+    <main id="app-content"></main>
+  </div>
+</div>
+
+<script type="module">
+const { YaiTabs } = window.YaiJS;
+
+const tabs = new YaiTabs({
+    events: {
+        setListener: {
+            window: [
+                { type: 'hashchange', debounce: 500 }
+            ],
+            '[data-yai-tabs]': [
+                'click',
+                'keydown',
+                { type: 'input', debounce: 400 }
+            ]
+        },
+        actionableAttributes: [
+            'data-tab-action',
+            'data-click',
+            'data-input',
+        ],
+    }
+});
+
+// All interactions use 4 listeners for entire app
+tabs.hook('eventClick', ({ event, target, container, action, context }) => {
+    // action is automatically extracted from data-click attribute
+    if (action === 'loadDashboard') loadView('dashboard');
+    if (action === 'loadUsers') loadView('users');
+});
+
+tabs.hook('eventInput', ({ event, target, container, action, context }) => {
+    // action is automatically extracted from data-input attribute
+    if (action === 'globalSearch') {
+        performSearch(target.value);
+    }
+});
+
+async function loadView(name) {
+    const area = document.getElementById('app-content');
+    const html = await (await fetch(`/views/${name}.html`)).text();
+    area.innerHTML = html;
+    // Re-init if dynamic content contains nested tabs
+    tabs.initializeAllContainers(area);
+}
+</script>
+```
+
+**Result:** Complete SPA with:
+- ✅ 4 event listeners total (not 4 per element!)
+- ✅ Automatic debouncing
+- ✅ Dynamic content support
+- ✅ Zero framework overhead
+
+### Advanced Patterns
+
+**Analytics Integration:**
+```js
+tabs.on('yai.tabs.tabReady', ({ detail }) => {
+    if (!detail.isDefaultInit && detail.isVisible) {
+        analytics.track('Tab Viewed', { id: detail.id });
+    }
+});
+```
+
+**Action Dispatcher Pattern:**
+```js
+const actions = new Map([
+    ['save', async ({ target }) => await saveForm(target.form)],
+    ['delete', async ({ target }) => await deleteItem(target.dataset.id)],
+    ['refresh', async () => await refreshData()]
+]);
+
+tabs.hook('eventClick', async ({ event, target, container, action, context }) => {
+    const handler = actions.get(action);
+    if (handler) await handler({ event, target, container, context });
+});
+```
+
+**Progressive Enhancement:**
+```js
+const conn = navigator.connection;
+const slow = conn && /(2g|slow-2g)/.test(conn.effectiveType);
+
+const tabs = new YaiTabs({
+    defaultBehavior: slow ? 'instant' : 'fade',
+    events: {
+        setListener: {
+            '[data-yai-tabs]': [
+                'click',
+                { type: 'input', debounce: slow ? 1000 : 400 }
+            ]
+        }
+    }
+});
+```
+
+**[View Advanced Examples →](./tabs/ADVANCED.md)**
+
+---
+
+## 🎼 EventListener Orchestration
+
+**YaiJS uses EventListener Orchestration** - intelligent coordination of event listeners across your application for optimal performance.
+
+### The Concept
+
+Like a symphony orchestra where different instruments play at different times, YaiJS registers event listeners **only where needed**:
+
+```javascript
+const tabs = new YaiTabs({
+    events: {
+        setListener: {
+            // Core events - all tabs (essential melody)
+            '[data-yai-tabs]': ['click', 'keydown'],
+
+            // Swipe events - only swipeable tabs (optional harmony)
+            '[data-swipe]': [
+                'mousedown', 'mousemove', 'mouseup',
+                'touchstart', 'touchmove', 'touchend'
+            ]
+        }
+    }
+});
+```
+
+### Performance Results
+
+**Real-world benchmark:** 43 nested tab components with infinite recursive AJAX loading
+
+| Approach | Elements | Listeners | Reduction |
+|----------|----------|-----------|-----------|
+| Without orchestration | 43 | 352+ | baseline |
+| **With orchestration** | **10** | **35** | **🎯 90%** |
+
+**Current Setup** (includes body: 3, window: 6 listeners):
+- 📊 Total Elements with Listeners: **10**
+- 🔥 Total Event Listeners Found: **35**
+- 📈 Average Listeners per Element: **3.50**
+
+**Result:** 317+ fewer event listeners while supporting infinite nesting and dynamic content loading!
+
+### How It Works
+
+**Traditional approach** (all events everywhere):
+```javascript
+// Every tab container gets every event
+'[data-yai-tabs]': [
+    'click', 'keydown',
+    'change', 'input', 'submit',
+    'mousedown', 'mousemove', 'mouseup',
+    'touchstart', 'touchmove', 'touchend'
+]
+// Result: 352 listeners across 32 elements 😰
+```
+
+**Orchestrated approach** (selective registration):
+```javascript
+// Essential events for all tabs
+'[data-yai-tabs]': ['click', 'keydown'],
+
+// Form events only where needed
+'[data-yai-forms]': ['change', 'input', 'submit'],
+
+// Swipe events only where needed
+'.yai-tabs-swype[data-mousedown]': [
+    'mousedown', 'mousemove', 'mouseup',
+    'touchstart', 'touchmove', 'touchend'
+]
+// Result: 32 listeners across 8 elements 🎉
+// That's 91% fewer listeners!
+```
+
+A console script (Chromium based browser only) to get a list with all elements that has listeners assigned to them including stats.
+
+```js
+// 🔍 Enhanced Real-World Listener Scanner with Counter
+let totalListeners = 0;
+const elementsWithListeners = [];
+
+[window, document, ...document.querySelectorAll('*')].filter(el => {
+    const listeners = getEventListeners(el);
+    return listeners && Object.keys(listeners).length > 0;
+}).forEach((el, i) => {
+    const elementName = el === window
+        ? 'window'
+        : el === document ? 'document' : el.tagName.toLowerCase() + (el.id ? '#' + el.id : '') + (el.className ? '.' + el.className.split(' ').join('.') : '');
+
+    const listeners = getEventListeners(el);
+
+    // Count total listeners for this element
+    let elementListenerCount = 0;
+    Object.values(listeners).forEach(eventArray => {
+        elementListenerCount += eventArray.length;
+    });
+    totalListeners += elementListenerCount;
+
+    // Enhanced display format
+    console.log(`${i + 1}. ${elementName}:`);
+    Object.entries(listeners).forEach(([eventType, eventArray]) => {
+        console.log(`  - ${eventType}: ${eventArray.length}`);
+    });
+    console.log(`  Total: ${elementListenerCount} listeners`);
+    console.log('  Raw data:', listeners);
+    console.log(''); // Empty line for readability
+
+    elementsWithListeners.push({elementName, count: elementListenerCount, listeners});
+});
+
+// Final summary
+console.log(`🎯 SCAN COMPLETE:`);
+console.log(`📊 Total Elements with Listeners: ${elementsWithListeners.length}`);
+console.log(`🔥 Total Event Listeners Found: ${totalListeners}`);
+console.log(`📈 Average Listeners per Element: ${(totalListeners / elementsWithListeners.length).toFixed(2)}`);
+
+// Top listener hotspots
+const sorted = elementsWithListeners.sort((a, b) => b.count - a.count).slice(0, 5);
+console.log(`🥇 Top 5 Listener Hotspots:`);
+sorted.forEach((item, i) => {
+    console.log(`${i + 1}. ${item.elementName}: ${item.count} listeners`);
+});
+```
+
+### Benefits
+
+- 🎯 **Selective Registration** - Events only where needed
+- ⚡ **Better Performance** - Fewer listeners = faster event handling
+- 💾 **Reduced Memory** - Less overhead per component
+- 🎼 **Clear Intent** - Markup shows which features are active
+- 🔌 **Progressive Enhancement** - Add features incrementally
+
+### Usage Example
+
+```html
+<!-- Basic tab (click + keydown only) -->
+<div data-yai-tabs>
+    <nav data-controller>
+        <button data-open="tab1">Tab 1</button>
+    </nav>
+    <div data-content>
+        <div data-tab="tab1">Basic content</div>
+    </div>
+</div>
+
+<!-- Swipeable tab (adds mouse/touch events) -->
+<div data-yai-tabs data-swipe>
+    <nav data-controller>
+        <button data-open="tab1">Tab 1</button>
+        <button data-open="tab2">Tab 2</button>
+    </nav>
+    <div data-content>
+        <div data-tab="tab1">Swipe to tab 2 →</div>
+        <div data-tab="tab2">← Swipe to tab 1</div>
+    </div>
+</div>
+```
+
+**Each selector acts like a different instrument in the orchestra - playing only when needed for the perfect performance!** 🎭
+
+---
+
 ## Installation
 
 **NPM Installation (Recommended)**
@@ -106,12 +610,12 @@ npm install @yaijs/yeh @yaijs/core
 
 ```js
 // Import everything
-import { YaiCore, YaiTabs, YaiViewport, AutoSwitch } from '@yaijs/core';
+import { YaiCore, YaiTabs, YaiViewport, YaiAutoSwitch } from '@yaijs/core';
 
 // Import specific components
 import { YaiTabs } from '@yaijs/core/tabs';
 import { YaiViewport } from '@yaijs/core/viewport';
-import { AutoSwitch } from '@yaijs/core/autoswitch';
+import { YaiAutoSwitch } from '@yaijs/core/autoswitch';
 
 // Import YEH foundation separately
 import YEH from '@yaijs/yeh';
@@ -120,243 +624,16 @@ import YEH from '@yaijs/yeh';
 
 ## YaiJS Utilities
 
-Shared utils.
+Powerful standalone utilities that enhance YaiTabs:
 
+- **[YaiTabsSwype](./utils/README.md#yaitabsswype)** - Touch/swipe navigation with boundary behaviors
+- **[YaiAutoSwitch](./utils/README.md#yaiautoswitch-testing-utility)** - Automated tab switching for demos and testing
+- **[YaiViewport](./utils/README.md#yaiviewport--advanced-viewport-tracking-observer-free)** - Observer-free viewport tracking
 
-### AutoSwitch Testing Utility
-
-**Automated component demonstration and testing tool:**
-
-**Component demonstration and validation tool:**
-- Automated cycling through interactive elements
-- Configurable timing and behavior patterns
-- Event-driven architecture with lifecycle hooks
-- Emergency abort functionality for testing control
-- ~250 lines of testing automation code
-
-#### ES Module
-
-```html
-<!-- YEH class, included once, re-used everywhere -->
-<script src="https://cdn.jsdelivr.net/npm/@yaijs/yeh@latest/yeh.min.js"></script>
-```
-
-```js
-import { AutoSwitch } from '@yaijs/core/autoswitch';
-
-// Quick demo setup
-const tester = new AutoSwitch({
-    target: '#tabs-component',            // Container element selector
-    triggerSelector: 'button[data-open]', // Elements to cycle through
-    initialTimeout: 1000,                 // Delay before starting (ms)
-    timeout: 800,                         // Delay between clicks (ms)
-    callbacks: {
-        cycleInit: (instance) => console.log('Demo starting...'),
-        afterLast: (instance) => console.log('Demo complete!')
-    }
-});
-
-// Start automated cycling
-tester.cycle();
-
-// Stop when needed
-tester.stopDemo();
-
-// Or emergency abort
-tester.abort();
-```
-
-**Chainable Configuration:**
-```js
-// Fluent API for easy setup
-new AutoSwitch()
-    .setContainer('#my-component', 'button[role="tab"]')
-    .setConfig('timeout', 1200)
-    .on('cycleInit', (instance) => instance.container.classList.add('demo-active'))
-    .on('afterLast', (instance) => instance.container.classList.remove('demo-active'))
-    .cycle();
-```
-
-**Key Features:**
-- ✅ Automated Element Cycling - Sequentially clicks through interactive elements
-- ✅ Smart Container Detection - Filters nested components to avoid conflicts
-- ✅ Loading State Awareness - Waits for content loading between interactions
-- ✅ Lifecycle Event Hooks - Full callback system for custom behavior
-- ✅ Emergency Abort Control - Immediate stop with timeout cleanup
-- ✅ Chainable Configuration - Fluent API for easy setup
-- ✅ Disabled Element Skipping - Automatically skips non-interactive elements
-
-**Perfect For:**
-- Component demos and presentations
-- Animation testing and validation
-- Automated behavior verification
-- Interactive documentation examples
-
-The AutoSwitch utility makes component testing and demonstration effortless with ~250 lines of focused automation code.
+**[View Full Utils Documentation →](./utils/README.md)**
 
 
 ---
-
-
-### YaiViewport — Advanced Viewport Tracking (Observer-free)
-
-YaiViewport is a lightweight, IntersectionObserver-free viewport tracker that runs on the YEH event layer. It tags elements with visibility classes/attributes and emits rich lifecycle hooks for scroll-driven UIs (sticky headers, staged animations, lazy reveals, analytics). It’s designed as a practical alternate to browser observers—particularly useful when you want total control over thresholds, directionality, and hook timing.
-
-**Key Features**
-- ✅ Element Visibility Tracking - Track when elements enter/leave viewport
-- ✅ Observer-free: Works everywhere without relying on IntersectionObserver.
-- ✅ Direction-aware states: visible → leaving(top|bottom) → left(top|bottom) transitions.
-- ✅ Declarative styling: Automatic classes and data-* attributes for CSS-only effects.
-- ✅ Page-level flags: pageTop, pageEnd, pageScrolled with thresholds.
-- ✅ Hook system: Subscribe to page and element lifecycle events with hook(name, fn).
-- ✅ YEH integration: Throttled load/resize/scroll/scrollend handling via a single container listener.
-
-[Live Demo on JSFiddle](https://jsfiddle.net/w6je4ck1/)
-
-#### ES Module
-
-```html
-<!-- YEH class, included once, re-used everywhere -->
-<script src="https://cdn.jsdelivr.net/npm/@yaijs/yeh@latest/yeh.min.js"></script>
-```
-
-```js
-import YaiViewport from '@yaijs/core/viewport';
-// import YaiViewport from 'https://yaijs.github.io/yai/utils/yai-viewport.js';
-
-const viewport = new YaiViewport({
-  // optional throttles (ms)
-  throttle: { resize: 500, scroll: 250, scrollend: 250 },
-
-  // merge-on-top configuration
-  set: {
-    selector: {
-      // set to null to disable any marker
-      pageTop: 'yvp-is-page-top',
-      pageEnd: 'yvp-is-page-end',
-      pageScrolled: 'yvp-is-scrolled',
-      trackDistance: 'data-yvp-position',
-      isVisibleAttr: 'data-yvp-is-visible',
-      isVisibleClass: 'yvp-is-visible',
-      hasBeenVisibleClass: 'yvp-was-visible',
-      isLeavingClass: 'yvp-is-leaving',
-      isLeavingTopClass: 'yvp-is-leaving-top',
-      isLeavingBottomClass: 'yvp-is-leaving-bottom',
-      hasLeftClass: 'yvp-has-left',
-      hasLeftTopClass: 'yvp-has-left-top',
-      hasLeftBottomClass: 'yvp-has-left-bottom',
-    }
-  },
-  threshold: {
-    pageTop: 0,
-    pageEnd: 50,
-    pageScrolled: 0,
-    elementVisible: 0,
-    elementHidden: 0,
-    elementLeaving: 0,
-    elementLeft: 0,
-    // direction-specific overrides (pixels); null → use global
-    elementVisibleTop: null,
-    elementVisibleBottom: null,
-    elementLeavingTop: null,
-    elementLeavingBottom: null,
-    elementLeftTop: null,
-    elementLeftBottom: null,
-  }
-});
-```
-(YEH is a required peer—YaiViewport extends YEH.)
-
-#### Quick Start
-
-```html
-<section class="feature" id="hero"></section>
-<section class="feature" id="stats"></section>
-<section class="feature" id="cta"></section>
-
-<script type="module">
-  import YaiViewport from '@yaijs/core/viewport';
-  // import YaiViewport from 'https://yaijs.github.io/yai/utils/yai-viewport.js';
-
-  const yvp = new YaiViewport();
-
-  // Track by selector or nodes/arrays
-  yvp.track('.feature');
-
-  // React to visibility transitions
-  yvp
-    .hook('elementVisible', ({ element }) => element.classList.add('fade-in'))
-    .hook('elementLeavingTop', ({ element }) => element.classList.add('slide-out-up'))
-    .hook('elementLeavingBottom', ({ element }) => element.classList.add('slide-out-down'));
-</script>
-```
-
-All tracked elements get `data-yvp-is-visible="true|false"` and `yvp-is-visible` while visible; once an element has ever been visible, it receives `yvp-was-visible`. The body is toggled with `yvp-is-page-top`, `yvp-is-page-end`, and `yvp-is-scrolled` based on thresholds.
-
-#### CSS Markers (defaults)
-
-- Body classes:
-  - `yvp-is-page-top`, `yvp-is-page-end`, `yvp-is-scrolled`
-- Element attribute:
-  - `data-yvp-is-visible="true|false"`
-- Element classes:
-  - `yvp-is-visible`, `yvp-was-visible`
-  - `yvp-is-leaving`, `yvp-is-leaving-top`, `yvp-is-leaving-bottom`
-  - `yvp-has-left`, `yvp-has-left-top`, `yvp-has-left-bottom`
-
-Distance probe (optional): `data-yvp-position` (rounded px from viewport top).
-Set any of these to null in `set.selector` to disable them.
-
-#### Lifecycle Hooks
-
-Register with `viewport.hook(name, fn);` each `fn(context, scrollDirection, instance)` receives:
-
-context: `{ event?, element?, rect?, state?, direction?, scrollY?, viewport?, ... }`
-scrollDirection: 'up' | 'down'
-instance: the `YaiViewport` instance
-
-**Page hooks**
-`pageTop`, `pageEnd`, `pageScrolled`, `afterLoad`, `afterResize`, `afterScroll`
-
-**Element hooks**
-`elementVisible`, `elementHidden`, `elementVisibleCheck`,
-`elementLeaving`, `elementLeavingTop`, `elementLeavingBottom`,
-`elementLeft`, `elementLeftTop`, `elementLeftBottom`
-
-```js
-viewport
-  .hook('pageEnd',        ({ scrollY }) => console.log('Near bottom @', scrollY))
-  .hook('elementVisible', ({ element }) => element.classList.add('in-view'))
-  .hook('elementLeftTop', ({ element }) => element.classList.add('left-above'));
-```
-
-#### Public API
-- `track(elements)`: Track a CSS selector, a single element, or an array/NodeList. Chainable.
-- `hook(name, fn)`: Register a lifecycle callback. Chainable.
-- `refresh()`: Recompute positions & states (use after DOM mutations). Chainable.
-- `destroy()`: Cleanup internal maps and detach YEH listeners.
-- Read-only props: `scrollDirection`, `isScrollingUp`, `isScrollingDown`.
-
-#### Thresholds Explained
-- Thresholds are pixel buffers that shift the effective viewport edges:
-- Visible if: `rect.top < vh + visibleBottom` and `rect.bottom > 0 - visibleTop`
-  - `Leaving(top)` when `rect.bottom + leavingTop <= 0`
-  - `Leaving(bottom)` when `rect.top - leavingBottom >= vh`
-  - `Left(top/bottom)` uses the same form with elementLeft* thresholds.
-- Provide *Top/*Bottom for direction-specific control; otherwise the global value is used.
-
-#### Performance Notes
-- YEH attaches throttled scroll/resize handlers; tweak throttle for your UX.
-- For maximal throughput on heavy pages, consider disabling trackDistance and keep CSS work minimal in hooks.
-- If you have many tracked nodes, prefer batching DOM writes in hooks (e.g., toggle a single container class).
-
-#### Browser Notes on YaiViewport
-- `scrollend`: If your target browsers lack native `scrollend`, YEH may polyfill/simulate it (or you can rely solely on afterScroll).
-- Works in modern ES module environments (same as other Yai components). See supported browsers in the main README.
-
-
----
-
 
 ## Browser Compatibility
 
@@ -371,6 +648,20 @@ YaiJS and all components are written in standards-compliant ES6. Modern browsers
 **Legacy Support:**
 For older browsers, use any build tool (Webpack, Vite, etc.) with polyfills targeting your required browser support matrix.
 
+
+### Tested succesfully in
+
+- **macOS**
+  - Safari 15.6 (MacBook 2015)
+- **Android**
+  - Chrome 106
+- **Ubuntu (24.04)**
+  - Chrome 141
+  - Brave 1.83
+  - Opera 122
+  - Firefox 143
+
+
 ## Repository Structure
 
 ```
@@ -383,8 +674,8 @@ yai/                         // Published at github.com/yaijs/Yai
 │   ├── README.md            // Component documentation
 │   └── dynamic/             // Dynamic content examples
 ├── utils/
-│   ├── auto-switch.js       // Component testing utility (~250 LOC)
-│   ├── auto-switch.d.ts     // AutoSwitch TypeScript definitions
+│   ├── yai-auto-switch.js   // Component testing utility (~250 LOC)
+│   ├── yai-auto-switch.d.ts // YaiAutoSwitch TypeScript definitions
 │   ├── yai-viewport.js      // Viewport util
 │   └── yai-viewport.d.ts    // Viewport util TypeScript definitions
 ├── yai-core.js              // Shared base class (~700 LOC)

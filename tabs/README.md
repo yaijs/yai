@@ -32,6 +32,11 @@ YaiTabs doubles as a powerful application event bus. Add listeners for ANY event
 - Pre-built themes (default, minimal, pills)
 - Component-level scheme inheritance
 
+**🎮 Try It Now**
+- **[Live Example →](https://yaijs.github.io/yai/tabs/Example.html)** - Full-featured demo with nested tabs, animations, and event bus
+- **[JSFiddle Playground →](https://jsfiddle.net/w6je4ck1/)** - Interactive editor to experiment with code
+- **[Advanced Patterns →](./ADVANCED.md)** - Real-world examples and architectural deep-dives
+
 ## Quick Start
 
 ```html
@@ -407,9 +412,21 @@ const pathData = YaiTabs.getRefPath('s-2-r');
 // Returns: { fullPath: ['styles', 's-mixed', 's-m-dark', 's-2-r'], ... }
 ```
 
+<details>
+<summary>Description</summary>
+</details>
+
+"&lt;details&gt;",
+"&lt;summary&gt; $1 &lt;/summary&gt;",
+"&lt;/details&gt;",
+
+
+
 ## Theming
 
-YaiTabs uses a **semantic color system** with three levels of customization:
+<details>
+
+<summary>YaiTabs uses a **semantic color system** with three levels of customization:</summary>
 
 ### 1. Color Scheme (Layout-wide)
 Controls background, text, and surface colors for the entire component:
@@ -524,6 +541,9 @@ Create complete visual overrides:
 ```
 
 **Colors cascade:** Set scheme/accent on parent, override on nested components as needed.
+</details>
+
+---
 
 ## Performance Metrics
 
@@ -551,6 +571,18 @@ Create complete visual overrides:
 4. **Theming**: Leverage CSS variables for consistent design
 5. **Event Delegation**: Use event hooks instead of multiple listeners
 
+### Tested succesfully in
+
+- **macOS**
+  - Safari 15.6 (MacBook 2015)
+- **Android**
+  - Chrome 106
+- **Ubuntu (24.04)**
+  - Chrome 141
+  - Brave 1.83
+  - Opera 122
+  - Firefox 143
+
 ## Advanced Examples
 
 See [ADVANCED.md](./ADVANCED.md) for:
@@ -569,9 +601,6 @@ See [ADVANCED.md](./ADVANCED.md) for:
 - **[NPM @yaijs/yeh](https://www.npmjs.com/package/@yaijs/yeh)** - Event handler package
 
 ## Authors
-
-**YAI** = **Y**psilon + **AI** 🤖
-
 - **Engin Ypsilon** - Architecture & concept
 - **Claude-3.5-Sonnet** - Implementation & optimization
 - **DeepSeek-V3** - Documentation & examples
@@ -580,4 +609,4 @@ See [ADVANCED.md](./ADVANCED.md) for:
 
 ---
 
-**License:** MIT | **Version:** 1.0.0-beta.1
+**License:** MIT

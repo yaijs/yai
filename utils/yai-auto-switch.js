@@ -1,14 +1,14 @@
 "use strict";
 
 /**
- * AutoSwitch - Generic component testing utility
+ * YaiAutoSwitch - Generic component testing utility
  *
  * Automatically cycles through interactive elements (autoplay)
  * to demonstrate animations and test component behavior.
  *
  * @example
  * // Basic usage
- * const tester = new AutoSwitch({
+ * const tester = new YaiAutoSwitch({
  *   target: '#my-tabs',
  *   triggerSelector: 'button[data-open]',
  *   timeout: 1000
@@ -16,7 +16,7 @@
  *
  * @example
  * // Chainable configuration
- * const tester = new AutoSwitch()
+ * const tester = new YaiAutoSwitch()
  *   .setContainer('#demo-tabs', 'button[data-open]')
  *   .setConfig('timeout', 800)
  *   .on('cycleInit', () => console.log('Starting demo'))
@@ -27,9 +27,9 @@
  * // Emergency stop
  * tester.abort(); // Immediate stop, clears all timeouts
  */
-class AutoSwitch {
+class YaiAutoSwitch {
     /**
-     * Create a new AutoSwitch instance
+     * Create a new YaiAutoSwitch instance
      * @param {Object} config - Configuration options
      * @param {string} config.target - CSS selector for container element
      * @param {string} config.triggerSelector - CSS selector for clickable elements
@@ -63,7 +63,7 @@ class AutoSwitch {
 
     /**
      * Immediately stop the demo and clear all timeouts
-     * @returns {AutoSwitch} Returns this for chaining
+     * @returns {YaiAutoSwitch} Returns this for chaining
      */
     toggleRunning(add) {
         if (typeof add !== 'boolean') return;
@@ -219,7 +219,7 @@ class AutoSwitch {
 
     /**
      * Immediately stop the demo and clear all timeouts
-     * @returns {AutoSwitch} Returns this for chaining
+     * @returns {YaiAutoSwitch} Returns this for chaining
      */
     abort() {
         this._clearTimeouts();
@@ -229,7 +229,7 @@ class AutoSwitch {
 
     /**
      * Stop the demo with proper callback lifecycle
-     * @returns {AutoSwitch} Returns this for chaining
+     * @returns {YaiAutoSwitch} Returns this for chaining
      */
     stopDemo() {
         this._execCallback('beforeStop');
@@ -242,7 +242,7 @@ class AutoSwitch {
      * Set a configuration option
      * @param {string} key - Configuration key
      * @param {*} value - Configuration value
-     * @returns {AutoSwitch} Returns this for chaining
+     * @returns {YaiAutoSwitch} Returns this for chaining
      */
     setConfig(key, value) {
         this.config[key] = value;
@@ -253,7 +253,7 @@ class AutoSwitch {
      * Set the target container and optionally the trigger selector
      * @param {string} selector - CSS selector for container
      * @param {string} [triggerSelector] - Optional CSS selector for triggers
-     * @returns {AutoSwitch} Returns this for chaining
+     * @returns {YaiAutoSwitch} Returns this for chaining
      */
     setContainer(selector, triggerSelector) {
         this.config.target = selector;
@@ -277,7 +277,7 @@ class AutoSwitch {
      * Set an event callback
      * @param {string} event - Event name (cycleInit, cycleBetween, afterLast, beforeStop, afterStop)
      * @param {Function} callback - Callback function
-     * @returns {AutoSwitch} Returns this for chaining
+     * @returns {YaiAutoSwitch} Returns this for chaining
      */
     on(event, callback) {
         if (this.config.callbacks.hasOwnProperty(event)) {
@@ -287,5 +287,5 @@ class AutoSwitch {
     }
 }
 
-export {AutoSwitch};
-export default AutoSwitch;
+export {YaiAutoSwitch};
+export default YaiAutoSwitch;

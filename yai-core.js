@@ -17,6 +17,14 @@ class YaiCore {
 
         this._safeShallowMerge(this.config, customConfig);
 
+        // Handle callbacks alias for callable (backwards compatibility)
+        if (customConfig.callbacks && typeof customConfig.callbacks === 'object') {
+            if (!this.config.callable) {
+                this.config.callable = {};
+            }
+            this._safeShallowMerge(this.config.callable, customConfig.callbacks);
+        }
+
         // Handle emitable events with safety
         if (customConfig.emitable && typeof customConfig.emitable === 'object') {
             this.config.emitable = {
@@ -26,8 +34,6 @@ class YaiCore {
         } else {
             this.config.emitable = YaiCore.getBaseEmitableEvents();
         }
-
-        this.getUserPreferences = this.getUserPreferences();
 
         /**
          * Shared state management
@@ -84,6 +90,7 @@ class YaiCore {
                 actionableAttributes: ['data-yai-action'],
                 actionableClasses: [],
                 actionableTags: [],
+                setListener: null,
             },
 
             // Dispatch
@@ -100,14 +107,21 @@ class YaiCore {
                 eventSubmit: null,
                 eventBlur: null,
                 eventFocus: null,
+                eventHashchange: null,
+                eventHashchangeSwitched: null,
                 // Essential hooks only
-                setLoading: null,       // When loading state should be applied
-                removeLoading: null,    // When loading state should be removed
+                routeLoading: null,     // On hash change, while opening tabs based on location.hash
+                routeLoaded: null,      // When hash-based routing completes, remove page loader
+                globalMouseWatch: null, // Hook for Mouse events on defined element
+                afterInit: null,
+                contentLoading: null,   // When dynamic content fetch starts (show loading UI)
+                contentLoaded: null,    // When dynamic content fetch completes (hide loading UI)
                 validateUrl: null,      // Custom URL validation for dynamic content loading
                 sanitizeHtml: null,     // Custom HTML sanitization for dynamic content
                 contentReady: null,     // When content is ready for animation
                 afterLoad: null,        // After everything completes
                 tabClicked: null,       // When a tab button gets clicked
+                removingActiveContent: null,
             },
         };
     }
@@ -167,29 +181,121 @@ class YaiCore {
     createEventHandler(selectors, aliases, options = {}) {
         const eventOptions = this.deepMerge(this.config.events, options);
 
-        // Event type scoped
+        // Default event types required for tabs functionality
+        const defaultEvents = ['click', 'keydown', 'hashchange'];
+
+        // Extract event types from setListener configuration
+        const configuredEvents = this._extractEventTypes(eventOptions.setListener);
+
+        // Find custom events
+        const customEvents = configuredEvents.filter(event => !defaultEvents.includes(event));
+
+        // Auto-generate callable hooks for custom events
+        this._generateCallableHooks(customEvents);
+
+        // Auto-generate method handlers for custom events if not provided
+        this._generateMethodHandlers(customEvents, options);
+
         const methods = {
-            keydown:    {    handleKeydown: (...args) => this.handleKeydown(...args) },
+            click:      { handleClick: (...args) => this.handleEventProxy(...args) },
+            keydown:    { handleKeydown: (...args) => this.handleKeydown(...args) },
             hashchange: { handleHashchange: (...args) => this.handleHashchange(...args) },
-            submit:     {     handleSubmit: (...args) => this.handleEventProxy(...args) },
-            change:     {     handleChange: (...args) => this.handleEventProxy(...args) },
-            click:      {      handleClick: (...args) => this.handleEventProxy(...args) },
-            input:      {      handleInput: (...args) => this.handleEventProxy(...args) },
         };
 
-        // Merge with any additional methods from options
         if (options.methods) {
             this._safeShallowMerge(methods, options.methods);
         }
 
+        if (typeof this.config.callable.globalMouseWatch !== null) {
+            methods.globalMouseWatch = (...args) => this.globalMouseWatch(...args);
+        }
+
         const finalOptions = {
             ...eventOptions, ...options,
-            methods: methods, enableHandlerValidation: true
+            methods: methods,
+            enableHandlerValidation: true
         };
 
         this.events = new YEH(selectors, aliases, finalOptions);
 
         return this.events;
+    }
+
+    /**
+     * Global Mouse/Touch Watcher - Universal Event Bridge
+     *
+     * Centralized hook for global mouse/touch events. Enables cross-component
+     * coordination, drag cancellation, and stuck state recovery.
+     *
+     * See TypeScript definitions (yai-core.d.ts) for full documentation.
+     *
+     * @param {MouseEvent|TouchEvent} event - The original DOM event
+     * @param {Element} target - The event target element
+     * @param {Element} container - The closest component container element
+     */
+    globalMouseWatch(event, target, container) {
+        this._executeHook('globalMouseWatch', { event, target, container, context: this });
+    }
+
+    // Helper method to extract event types from setListener config
+    _extractEventTypes(setListener) {
+        const events = new Set();
+
+        for (const selector in setListener) {
+            const listeners = setListener[selector];
+            listeners.forEach(listener => {
+                if (typeof listener === 'string') {
+                    events.add(listener);
+                } else if (listener.type) {
+                    events.add(listener.type);
+                }
+            });
+        }
+
+        return Array.from(events);
+    }
+
+    // Generate callable hooks for custom events
+    _generateCallableHooks(customEvents) {
+        customEvents.forEach(eventType => {
+            const callableName = `event${this._capitalize(eventType)}`;
+
+            // Only add if not already defined
+            if (!this.config.callable.hasOwnProperty(callableName)) {
+                this.config.callable[callableName] = null;
+            }
+        });
+    }
+
+    // Generate default method handlers for custom events if not provided
+    _generateMethodHandlers(customEvents, options) {
+        if (!options.methods) {
+            options.methods = {};
+        }
+
+        customEvents.forEach(eventType => {
+            const methodName = `handle${this._capitalize(eventType)}`;
+
+            // Only add default handler if not already provided
+            if (!options.methods[eventType] || !options.methods[eventType][methodName]) {
+                if (!options.methods[eventType]) {
+                    options.methods[eventType] = {};
+                }
+                options.methods[eventType][methodName] = (...args) => {
+                    const [event, target, container] = args;
+                    const context = this;
+                    const action = target.dataset[eventType] || null;
+
+                    // console.log( event, target, container )
+                    this._executeHook(`event${this._capitalize(eventType)}`, { event, target, container, action, context });
+                };
+            }
+        });
+    }
+
+    // Utility to capitalize event names (mouseenter -> Mouseenter)
+    _capitalize(str) {
+        return str.charAt(0).toUpperCase() + str.slice(1);
     }
 
     /**
@@ -462,6 +568,12 @@ class YaiCore {
         element.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
     }
 
+    yaiFocus(target, preventScroll = true) {
+        if (target) {
+            target.focus({ preventScroll })
+        }
+    }
+
     /**
      * Event dispatch utility (legacy)
      */
@@ -665,7 +777,7 @@ class YaiCore {
         const triggerElement = this.find(`[data-url="${url}"]`, container);
 
         // Show loading state using hook system
-        this._executeHook('setLoading', { container: content, isLoading: true, target });
+        this._executeHook('contentLoading', { container: content, isLoading: true, target });
 
         if (!content.hasAttribute('aria-live')) {
             content.setAttribute('aria-live', 'polite');
@@ -721,8 +833,8 @@ class YaiCore {
             // Execute contentReady hook (perfect timing for animations)
             this._executeHook('contentReady', { html, url, targetSelector, container, append, target, content });
 
-            // // Remove loading state (always cleanup, regardless of view status)
-            this._executeHook('removeLoading', { container: content, isLoading: false, target });
+            // Remove loading state (always cleanup, regardless of view status)
+            this._executeHook('contentLoaded', { container: content, isLoading: false, target });
 
             // Execute afterLoad hook
             this._executeHook('afterLoad', { html, url, targetSelector, container, append, target, content });
@@ -752,7 +864,7 @@ class YaiCore {
             this._resetContentHeight(container);
 
             // Execute error cleanup hooks
-            this._executeHook('removeLoading', { container: content, isLoading: false, target });
+            this._executeHook('contentLoaded', { container: content, isLoading: false, target });
 
             // Clean up fetch controller
             this._fetchControllers.delete(container);
@@ -806,32 +918,37 @@ class YaiCore {
     }
 
     /**
-     * Set loading state callback hook - override in components for custom loading behavior
+     * Content loading start callback hook - override in components for custom loading behavior
      * @param {Element} container - The container to set loading state on
      * @param {boolean} isLoading - Whether to show loading state
      * @param {Element} target - The button/element that triggered the loading
      */
-    setLoading() {}
+    contentLoading() {}
 
     /**
-     * Remove loading state callback hook - override in components for custom loading behavior
+     * Content loaded callback hook - override in components for custom loading behavior
      * @param {Element} container - The container to remove loading state from
      * @param {Element} target - The button/element that triggered the loading
      */
-    removeLoading() {}
+    contentLoaded() {}
 
     /**
      * Execute a lifecycle callback hook with context data
      * @param {string} hookName - Name of the callback hook
      * @param {Object} context - Context data to pass to the callback
+     * @param {Object} [instance] - Optional instance to check for hooks (defaults to this)
      * @returns {*} Result from callback execution
      */
-    _executeHook(hookName, context = {}) {
-        const callback = this.config.callable[hookName];
-        if (typeof callback === 'function') {
-            return callback.call(this, context, this);
+    _executeHook(hookName, context = {}, instance = this) {
+        if (!this.events) {
+            // Events not initialized - check if hook exists in config.callable
+            const hook = this.config?.callable?.[hookName];
+            if (typeof hook === 'function') {
+                return hook(context, instance);
+            }
+            return undefined;
         }
-        return undefined;
+        return this.events._executeHook(hookName, context, instance);
     }
 
     /**
@@ -840,10 +957,16 @@ class YaiCore {
      * @param {Function} callback - Callback function to execute
      * @returns {YaiCore} Returns this for chaining
      */
-    hook(hookName, callback) {
-        if (this.config.callable.hasOwnProperty(hookName)) {
+    hook(hookName, callback, instance = this) {
+        if (!this.events) {
+            // Events not initialized - store hook in config.callable directly
+            if (!this.config.callable) {
+                this.config.callable = {};
+            }
             this.config.callable[hookName] = callback;
+            return this;
         }
+        this.events.hook(hookName, callback, instance);
         return this;
     }
 
@@ -1059,25 +1182,42 @@ class YaiCore {
         }
     }
 
-    getUserPreferences() {
-        if (typeof window.matchMedia !== 'undefined') {
-            return {
-                reduceMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-                colorScheme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
-                highContrast: window.matchMedia('(prefers-contrast: high)').matches,
-                touchDevice: window.matchMedia('(pointer: coarse)').matches,
-                isMobile: window.matchMedia('(max-width: 768px)').matches
-            };
-        }
+    /**
+     * Get user preferences and device capabilities
+     * Uses a clean, straightforward approach without complex transforms
+     */
+    static getUserPreferences() {
+        // Pre-check touch capability once (most reliable method)
+        const hasTouchCapability = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
-        // Fallback for older browsers
-        return {
-            reduceMotion: false,
-            colorScheme: 'light',
-            highContrast: false,
-            touchDevice: false,
-            isMobile: false
+        const deviceDetectionConfig = {
+            reduceMotion: { mediaQuery: '(prefers-reduced-motion: reduce)', fallback: false },
+            highContrast: { mediaQuery: '(prefers-contrast: high)',         fallback: false },
+            isMobile:     { mediaQuery: '(max-width: 768px)',               fallback: false },
+            hasHover:     { mediaQuery: '(hover: hover)',                   fallback: true },
+            finePointer:  { mediaQuery: '(pointer: fine)',                  fallback: true },
+            dataSaver:    { mediaQuery: '(prefers-reduced-data: reduce)',   fallback: false },
+            darkContrast: { mediaQuery: '(prefers-color-scheme: dark) and (prefers-contrast: high)', fallback: false },
+            colorScheme:  { mediaQuery: '(prefers-color-scheme: dark)', fallback: 'light', transform: (m) => m ? 'dark' : 'light' },
+            hasTouch:     { fallback: hasTouchCapability },
+            touchDevice:  { mediaQuery: '(pointer: coarse)', fallback: hasTouchCapability },
         };
+
+        const prefs = {};
+        Object.entries(deviceDetectionConfig).forEach(([key, config]) => {
+            if (config.mediaQuery && typeof window.matchMedia !== 'undefined') {
+                try {
+                    const matches = window.matchMedia(config.mediaQuery).matches;
+                    prefs[key] = config.transform ? config.transform(matches) : matches;
+                } catch (error) {
+                    prefs[key] = config.fallback;
+                }
+            } else {
+                prefs[key] = config.fallback;
+            }
+        });
+
+        return prefs;
     }
 
     /**

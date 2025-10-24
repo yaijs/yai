@@ -430,6 +430,27 @@ export declare class YaiTabs extends YaiCore {
   openTab(target: Element, event: Event | null, container: Element, isDefaultInitialization?: boolean): void;
 
   /**
+   * 🔍 **Check if Closable**
+   *
+   * Determine if tabs in a container are closable by checking the data-closable attribute.
+   * Falls back to global config.closable if attribute is not set.
+   *
+   * @param container - Tab container element to check
+   * @returns True if tabs are closable, false otherwise
+   * @example
+   * ```typescript
+   * // Per-container override via data attribute
+   * <div data-yai-tabs data-closable="true">...</div>
+   *
+   * // Check closability
+   * if (tabs.getIsClosable(container)) {
+   *   // Show close buttons
+   * }
+   * ```
+   */
+  getIsClosable(container: Element): boolean;
+
+  /**
    * ❌ **Close Tab**
    *
    * Close the currently active tab if closable option is enabled.
@@ -491,12 +512,13 @@ export declare class YaiTabs extends YaiCore {
   // === Internal Processing Methods ===
 
   /**
-   * 🏷️ **Mark Lazy Components**
+   * 🏷️ **Mark Root Containers**
    *
-   * Identify and mark nested components for lazy activation.
-   * Only root components keep active event listeners for O(1) performance.
+   * Mark root containers with data-root attribute and optionally apply lazy optimization.
+   * Always sets data-root on root containers, and conditionally makes nested components lazy
+   * based on config.lazyNestedComponents setting.
    */
-  protected _markLazyComponents(): void;
+  protected _markRootContainers(): void;
 
   /**
    * ⚡ **Activate Lazy Components**
@@ -700,7 +722,7 @@ export declare class YaiTabs extends YaiCore {
    * @param element - Element to check visibility for
    * @returns True if element is visible
    */
-  protected _isElementVisible(element: Element): boolean;
+  protected isElementVisible(element: Element): boolean;
 
   /**
    * 📦 **Check Container Visibility**
@@ -711,7 +733,7 @@ export declare class YaiTabs extends YaiCore {
    * @param container - Container to check visibility for
    * @returns True if container is visible
    */
-  protected _isContainerVisible(container: Element): boolean;
+  protected isContainerVisible(container: Element): boolean;
 
   /**
    * 🏷️ **Mark Root Container**
