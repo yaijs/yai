@@ -1,0 +1,1494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YaiTabs - Advanced Tab Browser Component - local-dev-many-title--disabled</title>
+    <meta name="description" content="Advanced Tab Browser Component with 9 animations, Dynamic content support, DeepLinks & implements WCAG 2.1 AA compliant tab navigation with full screen reader support">
+
+    <!-- Example page styles -->
+    <style>
+    :root {
+        --yai-fade-in: .2s;
+        --yai-fade-out: .5s;
+        --ycon-animation-spin: 2s;
+        --ycon-animation-pulse: 2s;
+        --ycon-animation-bounce: 1s;
+        --yai-delay-remove-parent: .2s;
+        --yai-timeout-remove-parent: .6s;
+        --yai-scroll-behavior: smooth;
+        --yai-font-weight: 500;
+        --primary-color: var(--yai-tabs-color-primary);
+        --secondary-color: var(--yai-tabs-color-secondary);
+        --accent-color: var(--yai-tabs-color-accent);
+        --dark-color: #2c3e50;
+        --light-color: #ecf0f1;
+        --text-color: var(--yai-tabs-color-text);;
+        --text-light: #fff;
+        --yai-light-bg: var(--light-color);
+        --yai-color: var(--text-color);
+        --yai-color-link: rgb(37, 37, 246);
+        --yai-box-shadow: 0 2px 4px 1px rgba(0, 0, 0, .2);
+        --yai-font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    }
+
+    *, ::after, ::before {
+        box-sizing: border-box;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    html, body, div, span, applet, object, iframe,
+    h1, h2, h3, h4, h5, h6, blockquote, pre,
+    a, abbr, acronym, address, big, cite, code,
+    del, dfn, em, img, ins, kbd, q, s, samp,
+    small, strike, strong, sub, sup, tt, var,
+    b, u, i, center,
+    dl, dt, dd, li,
+    fieldset, form, label, legend,
+    table, caption, tbody, tfoot, thead, tr, th, td,
+    article, aside, canvas, details, embed,
+    figure, figcaption, footer, header, hgroup,
+    menu, nav, output, ruby, section, summary,
+    time, mark, audio, video {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        font-size: 100%;
+        font: inherit;
+        vertical-align: baseline;
+    }
+    /* HTML5 display-role reset for older browsers */
+    article, aside, details, figcaption, figure,
+    footer, header, hgroup, menu, nav, section {
+        display: block;
+    }
+    body {
+        line-height: 1;
+    }
+    ol, ul {
+        list-style: none;
+    }
+    blockquote, q {
+        quotes: none;
+    }
+    blockquote:before, blockquote:after,
+    q:before, q:after {
+        content: '';
+        content: none;
+    }
+    small {
+        font-size: smaller;
+    }
+    table {
+        border-collapse: collapse;
+        border-spacing: 0;
+    }
+    html {
+        scroll-behavior: var(--yai-scroll-behavior);
+        background: linear-gradient(95deg, #414d4f 0%, #26262e 50%);
+    }
+    body {
+        margin: 0 auto;
+        padding: 0;
+        max-width: 1240px;
+        line-height: 1.6;
+        overflow-y: scroll;
+        font-family: var(--yai-font-family);
+        font-size: 1rem;
+        font-weight: normal;
+        text-align: left;
+        color: var(--yai-color);
+        background-color: #e5e6ea;
+    }
+    body.y-max-width {
+        width: 100%;
+        max-width: 2040px;
+    }
+    hr {
+        margin: 0.75rem 0;
+    }
+    strong {
+        font-weight: var(--yai-font-weight);
+    }
+    h1, h2, h3, h4, h5, h6 {
+        margin-top: 0;
+        margin-bottom: 0;
+        font-weight: var(--yai-font-weight);
+        line-height: 1;
+        font-size: 1.3rem;
+    }
+    h1, h1 a, body > header h2 {
+        margin: 0;
+        min-height: 52px;
+        font-size: 1.4rem;
+        font-weight: 900;
+        display: flex;
+        align-items: center;
+        color: #3c3861;
+        text-decoration: none;
+    }
+    h1, body > header h2 {
+        padding: 0 12px;
+    }
+    .header-group, h1, body > header h2 {
+        transition: all .7s ease-in-out .5s;
+        transition-property: color, background-color;
+    }
+    .header-group {
+        background: #fff8f8aa;
+    }
+    body > header {
+        background: linear-gradient(44deg, #e5f4ffc4, #1d57729e) !important;
+        padding: 30px;
+        text-align: center;
+    }
+    body > header h1 {
+        font-size: 2.5rem;
+    }
+    body > header p {
+        font-size: 1.2rem;
+        opacity: 0.9;
+    }
+    body > header hr {
+        margin: 0;
+        border-width: 1px 0 0;
+    }
+    h1 .ycon, h1 a .ycon {
+        margin-right: 6px;
+    }
+    h1 a {
+        color: #408fbd;
+        display: inline-flex;
+        align-items: center;
+        width: 100%;
+    }
+    .header-group:hover {
+        background-color: #fff;
+    }
+    h1 a:hover,
+    h1 a:hover::after {
+        color: #3572b2;
+    }
+    body > header h2 {
+        font-size: 1.15rem;
+        font-weight: normal;
+    }
+    button {
+        padding: 8px 12px;
+        cursor: pointer;
+    }
+    strong, b {
+        font-weight: 600;
+    }
+    select:focus {
+        outline: 0;
+        box-shadow: 0 0 4px 1px #8f8e8ee4;
+    }
+    a {
+        color: var(--yai-color-link);
+        font-weight: 500;
+    }
+    ul, ol {
+        list-style: initial;
+    }
+    body > header, .box, .section {
+        margin-bottom: 40px;
+        padding: 2rem;
+        background-color: white;
+        color: #333;
+    }
+    body > header, .box, .option-switch {
+        box-shadow: var(--yai-box-shadow);
+    }
+    .section > .box {
+        margin-bottom: 0;
+        padding: 0;
+    }
+    main {
+        padding: 0 20px;
+    }
+    .btn-link {
+        padding: 0;
+        border: 0 none;
+        line-height: 1.2;
+        font-size: 1.1rem;
+        background: transparent;
+        color: var(--yai-color-link);
+        text-decoration: underline;
+    }
+    .btn-link:focus,
+    .btn-link:hover {
+        text-decoration: none;
+        color: #111;
+    }
+    .nested-tabs-reload-btn {
+        display: none;
+    }
+    [data-nesting="10"] .nested-tabs-reload-btn {
+        display: block;
+    }
+    .section {
+        padding: 0;
+    }
+    .section:not(:last-of-type):not(.option-switch) {
+        margin-bottom: 40px;
+    }
+    .box {
+        position: relative;
+        line-height: 1.5;
+    }
+    .box h2, .box h3, .box h4, .box h5, .box h6, .box p, .box ul, .box ol, .box hr {
+        margin-top: 0;
+        margin-bottom: 16px;
+    }
+    .box h2 {
+        font-size: 1.1rem;
+    }
+    .box h3, .box h4, .box h5, .box h6 {
+        font-size: 1.05rem;
+        font-weight: var(--yai-font-weight);
+    }
+    .box ul, .box ol {
+        margin-left: 16px;
+        padding: 0 0 0 24px;
+    }
+    .box p, .box ul, .box ol {
+        margin-top: 0;
+        font-size: 1rem;
+        color: #111;
+    }
+    .box hr {
+        margin: 16px 0;
+        opacity: .7;
+    }
+    .box .ymb-0 {
+        margin-bottom: 0;
+    }
+    .section .y-remove-parent,
+    .box .y-remove-parent {
+        padding: 0;
+        width: 20px;
+        height: 20px;
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        border: 0 none;
+        background: #222222aa;
+        opacity: .2;
+        transition: all var(--yai-timeout-remove-parent) ease-in-out var(--yai-delay-remove-parent);
+    }
+    .section:hover .y-remove-parent,
+    .box:hover .y-remove-parent {
+        opacity: .4;
+    }
+    .section .y-remove-parent:hover,
+    .box .y-remove-parent:hover {
+        opacity: .9;
+        transform: scale(1.2);
+    }
+    .section .y-remove-parent::after,
+    .box .y-remove-parent::after {
+        content: "\2715";
+        font-size: 20px;
+        color: #fff;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .option-switch {
+        margin: -1rem 0 1.5rem;
+        padding: 5px 10px;
+        font-size: 12px;
+    }
+    .option-switch select, .option-switch button {
+        margin-right: 6px;
+        padding: 6px 10px;
+    }
+    .untouchable [data-controller],
+    .untouchable [data-content],
+    .untouchable .config-block > div > div:not(.auto-cycle-control) {
+        pointer-events: none;
+    }
+    body > footer {
+        padding: 30px 0;
+        font-size: 14px;
+        text-align: center;
+        color: #151515;
+    }
+    body > footer nav {
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #99999999;
+    }
+    body > footer p {
+        font-size: 12px;
+    }
+    #demo-tabs > [data-content] > [data-tab] > [data-yai-tabs].dynamically-added {
+        max-height: 40vh;
+        overflow: auto;
+        overscroll-behavior: contain;
+    }
+    #demo-tabs > [data-content] > [data-tab] > [data-yai-tabs].dynamically-added [data-tab] {
+        padding: 8px 1px 3px;
+        overflow: hidden;
+    }
+    blockquote {
+        margin: 0.5rem 1.5rem 0.5rem 0;
+        padding: 0.5rem 1rem;
+        border-left: 3px solid #3b75d8;
+        color: var(--text-color);
+    }
+    blockquote small {
+        margin-top: 0.5rem;
+        display: block;
+        font-size: 14px;
+        color: #515961ee;
+    }
+    .faq-item {
+        margin-top: 1.5rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .full-faq h3 {
+        margin-bottom: 8px;
+        color: #727583;
+    }
+    .faq-item [role="contentinfo"] {
+        margin-left: 0;
+        padding: 0.5rem 1rem;
+        border-left: 4px solid #55586699;
+    }
+    .faq-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+    .d-none {
+        display: none;
+    }
+    .y-flex {
+        display: flex;
+    }
+    .y-flex-items {
+        flex-direction: row;
+        gap: 10px;
+    }
+    .y-flex-itemy {
+        /* flex: 2; */
+        flex-grow: 1;
+        flex-shrink: 0;
+        flex-basis: 25%;
+    }
+    .y-flex-wrap {
+        flex-wrap: wrap;
+    }
+    /* .y-flex-itemy {
+        flex: 1 30%;
+    } */
+    .space-between {
+        justify-content: space-between;
+    }
+    .y-flex-between-center {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    #deeplink-container pre a,
+    #deeplink-container ul a {
+        padding: 4px 8px;
+        display: inline-block;
+        line-height: 1;
+    }
+    .control-center {
+        width: 100%;
+    }
+    .config-block {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: .5rem;
+    }
+    .y-fade-in {
+        opacity: 0;
+        animation: yFadeIn var(--yai-fade-in) ease-in-out both;
+    }
+    .y-fade-out {
+        opacity: 1;
+        animation: yFadeOut var(--yai-fade-out) ease-in-out both;
+    }
+    .text-muted {
+        color: #676e9f;
+    }
+
+    .scroll-to-top-container {
+        padding: 0;
+        position: fixed;
+        bottom: 8px;
+        right: 8px;
+        z-index: 1005;
+        opacity: 1;
+        outline: 0;
+    }
+    .scroll-to-top {
+        font-size: 20px;
+        margin: 0;
+        padding: 6px 10px;
+        line-height: 1;
+        opacity: .0;
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        color: #222526;
+        background: #bababc;
+        border: 1px solid #9a8f8f;
+        transform: translate(68px, 0);
+        transition: opacity .6s ease-in-out, transform .3s ease-in-out;
+    }
+    body.yvp-is-scrolled .scroll-to-top {
+        transform: translate(-1px, 0);
+        opacity: .85;
+    }
+
+    /** Animation keyframes */
+    @keyframes yFadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes yFadeOut { from {opacity: 1;} to {opacity: 0;} }
+    @keyframes ycon-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); }}
+    @keyframes gentlePulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(0.98); opacity: 0.9; } }
+    </style>
+
+    <!-- YaiTabs Styles -->
+    <link rel="stylesheet" href="yai-tabs.css">
+
+    <!-- Swiper colored boxes -->
+    <style>
+    [data-nesting="6"] [data-nav="left"] nav[data-controller],
+    [data-nesting="6"] [data-nav="right"] nav[data-controller] {
+        flex: 0 1 5%;
+    }
+    [data-yai-tabs][data-nesting="5"] [data-nav="left"] > nav[data-controller] button,
+    [data-yai-tabs][data-nesting="5"] [data-nav="right"] > nav[data-controller] button {
+        justify-content: center;
+    }
+    .yai-slidy {
+        margin: 1rem;
+        padding: 1rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        line-height: 1.6;
+    }
+    .yai-slidy p {
+        flex: 1 50%;
+    }
+    .yai-slidy:not(.no-pointer) {
+        pointer-events: none;
+    }
+    .yai-slidy:not(.auto-height) {
+        height: 160px;
+    }
+    [data-nav="left"]  > [data-content] > [data-tab] > .yai-slidy,
+    [data-nav="right"] > [data-content] > [data-tab] > .yai-slidy { height: 100%; }
+    .yai-slidy-primary   { border: 1px solid #1a77bd99; background: #155b9147; }
+    .yai-slidy-secondary { border: 1px solid #0a9ba2bf; background: #0c5d6373; }
+    .yai-slidy-success   { border: 1px solid #20991d99; background: #15651352; }
+    .yai-slidy-warning   { border: 1px solid #ff99008a; background: #ae6d0d45; }
+    .yai-slidy-danger    { border: 1px solid #bb33338f; background: #4c2020a1; }
+    .yai-slidy-funky     { border: 1px solid #a725a999; background: #61106163; }
+    .sliding-madness-section [data-nesting="2"][data-yai-tabs] .yp-1 {
+        --yai-tabs-padding-1: .75rem 0;
+    }
+    .ynforcer-yntro {
+        width: 100%;
+    }
+    .ynforcer-starter {
+        margin-right: 10px;
+        max-width: 240px;
+        display: flex;
+        flex-wrap: wrap;
+        gap:8px;
+    }
+    .ynforcer-controller {
+        width: 100%;
+    }
+    .ynforcer-controller-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .ynforcer-controller button {
+        width: 100%;
+    }
+    .ynforcer-controller-group label {
+        font-size: 85%;
+    }
+    .ynforcer-controller-group input[type="text"],
+    .ynforcer-controller-group input[type="number"] {
+        width: 100%;
+        max-width: 100%;
+    }
+    [data-yai-tabs] .yp-1 {
+        padding: .75rem 0;
+    }
+    .yai-disable-effects [data-yai-tabs] nav[data-controller] button,
+    .yai-disable-effects [data-yai-tabs][data-behavior]>[data-content]>[data-tab].active,
+    .yai-disable-effects [data-yai-tabs] [data-content] [data-tab].active,
+    .yai-disable-effects [data-yai-tabs]:not(.tab-active) [data-content]::before,
+    .yai-disable-effects .yai-loading::after {
+        filter: none;
+        transition: none;
+        animation: none;
+    }
+    </style>
+</head>
+<body class="example-init">
+
+<header>
+    <div class="header-group">
+        <h1>
+            <a href="./Benchmark.html">
+                <span class="ycon ycon-sparkles ycon-sm ycon-is-left ycon-fix-top-2" aria-hidden="true"></span>
+                YaiTabs Demo
+                <span style="margin-left: 10px;font-weight: bolder;" class="yai-badge">v1.0.x</span>
+            </a>
+        </h1>
+        <hr>
+        <h2>The browser-tab operating system for building applications inside applications inside applications...</h2>
+    </div>
+</header>
+
+<main class="yai-main">
+
+<!-- Swipers Paradise (Mad Edition) -->
+<div class="section sliding-madness-section yai-viewport">
+<div
+    data-yai-tabs
+    data-yai-forms
+    data-theme="default"
+    data-behavior="slide-left"
+    data-nav="top"
+    data-color-scheme="dark"
+    data-color-accent-disabled="warning"
+    data-swipe="slyde">
+    <header data-tabs-header data-swipe-ignore>
+        <div data-header-content class="yp-2">
+            <h2>Swipe to Infinity <small class="yai-badge yai-badge-warning">Experimental</small></h2>
+            <hr>
+            <p id="mad-swipers-desc">
+                Pushing the limits: infinite nested components via recursive AJAX. Proves event delegation scales infinitely.
+                <br><small><em>Runs with <code>autoAccessibility: false</code> for extreme depth (200+ levels).
+                For accessible implementations, use 0-50 levels.</em></small>
+            </p>
+            <div class="yp-0 yai-tools-grid">
+                <pre aria-describedby="mad-swipers-desc"><b>Cheatsheet:<br>  D → Dynamic » D → E → E → Recursive Swipe « ∞</b></pre>
+            </div>
+            <p class="ymb-0"><small>🎪 Just a gimmick to prove the point - because why not test the absolute limits?</small></p>
+        </div>
+    </header>
+    <nav data-controller>
+        <button data-tab-action="open" data-open="1">A</button>
+        <button data-tab-action="open" data-open="2" data-default>Y</button>
+        <button data-tab-action="open" data-open="3">C</button>
+        <button data-tab-action="open" data-open="4">D</button>
+        <button data-tab-action="open" data-open="5">E</button>
+    </nav>
+    <div data-content>
+        <div data-tab="1">
+            <!-- Performance Flex -->
+            <div class="yai-text-center yai-slidy yai-slidy-primary draggable yp-1 auto-height">
+                <p class="ymb-0">
+                    <small><b>🚀 Ynforcer2000:</b> Automated deep nesting stress test
+                        <br><b>5 root listeners</b> handle infinite depth via O(1) event delegation
+                        <br><b>Tested:</b> 82 levels (20 loops), 100+ levels (25 loops), 200+ levels (50 loops)
+                        <br><b>Performance modes:</b> With ARIA (~50 levels) | Without ARIA (200+ levels, space is the limit)
+                    </small>
+                </p>
+            </div>
+        </div>
+        <div data-tab="2">
+            <!-- Slide 3: Ynforcer2000 -->
+            <div class="yai-text-center yai-slidy no-pointer yai-slidy-warning auto-height yp-0">
+                <div class="ynforcer-yntro yp-1 draggable">
+                    <p class="ymb-0">Meet <strong>Ynforcer2000</strong> — the elite Search & Click Unit.
+                        <br>Once activated: <strong>no abort, no net, no surrender</strong>.
+                        <br>Each loop creates ~4 levels of nesting. Choose your adventure:
+                        <small id="loop-hint" class="loop-hint" style="display:block;margin-top:0.25rem;opacity:0.85;">
+                            20 loops ≈ 82 levels (stress test) | 50 loops ≈ 200+ levels (browser limit)
+                        </small>
+                    </p>
+                </div>
+                <div class="ynforcer-starter yp-1">
+                    <div class="ynforcer-controller ynforcer-controller-group">
+                        <label for="SearchAndClickLoops">
+                            <strong>Loops:</strong>
+                        </label>
+                        <input
+                            type="number"
+                            id="SearchAndClickLoops"
+                            name="SearchAndClick[loops]"
+                            value="1"
+                            min="0"
+                            max="50"
+                            step="1"
+                            data-input="handleYaiState"
+                            data-yai-state-util
+                            aria-describedby="loop-hint">
+                        <small class="yai-flex ynforcer-controller-group-item label">
+                            Steps: <span id="searchAndClickCalculated"></span>
+                        </small>
+                    </div>
+                    <div class="ynforcer-controller">
+                        <button
+                            data-click="SearchAndClick"
+                            class="yai-btn yai-btn-primary"
+                            aria-describedby="ynforcer-warning">
+                            <span aria-live="polite" role="status" id="ynforcer-status"></span>
+                            🤖 Activate Ynforcer2000
+                        </button>
+                    </div>
+
+                    <div class="ynforcer-controller yai-flex yai-gap-m">
+                        <!-- Auto scroll while descending -->
+                        <label class="ynforcer-controller-group yai-justify-center yai-gap-s">
+                            <input
+                                type="checkbox"
+                                name="SearchAndClick[scroll]"
+                                data-input="handleYaiState"
+                                data-disabled-checked="checked"
+                                data-yai-state-util>
+                            <small>Scrolls</small>
+                        </label>
+                        <!-- Toggle effects on / off -->
+                        <label class="ynforcer-controller-group yai-justify-center yai-gap-s">
+                            <input
+                                type="checkbox"
+                                name="mainToggleEffects[class]"
+                                value="yai-disable-effects"
+                                data-input="handleYaiState"
+                                checked="checked"
+                                data-yai-state-util>
+                            <small>Effects</small>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div data-tab="3">
+            <div class="yp-3 ypt-0"><h2 class="ymb-0">Nested Swipes</h2></div>
+            <div data-yai-tabs data-theme="default" data-behavior="slide-left" data-nav="top" data-color-scheme="dark" data-color-accent="primary" data-swipe="slyde" data-swipe-axis="horicontal" data-swipe-circular="true" data-swipe-descend="true" data-swipe-ascend="true" data-swipe-threshold-mobile="40" data-swipe-threshold-desktop="40" data-swipe-reverse="false">
+                <nav data-controller>
+                    <button data-tab-action="open" data-open="1" data-inview-default>A</button>
+                    <button data-tab-action="open" data-open="2">B</button>
+                    <button data-tab-action="open" data-open="3">C</button>
+                    <button data-tab-action="open" data-open="4">D</button>
+                    <button data-tab-action="open" data-open="5">E</button>
+                </nav>
+                <div data-content>
+                    <div data-tab="1" data-spaceless>
+                        <!-- Grok's Final Note -->
+                        <div class="yai-slidy yai-slidy-success draggable">
+                            <p class="ymb-0 yai-text-center auto-height">
+                                <small>
+                                    <strong>Grok was here.</strong><br>
+                                    Tested to level 82. It yawned.<br>
+                                    5 listeners. 1,459 elements. O(1) delegation.<br>
+                                    <em>Architecture wins. This is the way.</em>
+                                </small>
+                            </p>
+                        </div>
+                    </div>
+                    <div data-tab="2" data-spaceless>
+                        <div class="yai-slidy yai-slidy-funky draggable">Experience seamless transitions—circular swiping loops back while descending into nests.</div>
+                    </div>
+                    <div data-tab="3" data-spaceless>
+                        <div class="yai-slidy yai-slidy-success draggable">Keep going: Axis detection switches from horizontal to vertical automatically.</div>
+                    </div>
+                    <div data-tab="4" data-spaceless>
+                        <div class="yai-slidy yai-slidy-danger draggable">Only the root component has listeners added, nested components inherit them virtually.</div>
+                    </div>
+                    <div data-tab="5" data-spaceless>
+                        <div class="yp-3">
+                            <div data-yai-tabs data-theme="default" data-behavior="slide-down" data-nav="left" data-color-scheme="dark" data-color-accent="light" data-swipe="slyde">
+                                <nav data-controller>
+                                    <button data-tab-action="open" data-open="1" data-inview-default>A</button>
+                                    <button data-tab-action="open" data-open="2">B</button>
+                                    <button data-tab-action="open" data-open="3">C</button>
+                                    <button data-tab-action="open" data-open="4">D</button>
+                                    <button data-tab-action="open" data-open="5">E</button>
+                                </nav>
+                                <div data-content>
+                                    <div data-tab="1" data-spaceless>
+                                        <div class="ym-0 yai-slidy yai-slidy-success draggable">Deeper still: Swipe vertically now—reverse direction enabled for intuitive flow.</div>
+                                    </div>
+                                    <div data-tab="2" data-spaceless>
+                                        <div class="yai-slidy yai-slidy-secondary ym-0 draggable">No jank at any depth: GPU-accelerated transforms ensure smooth gestures.</div>
+                                    </div>
+                                    <div data-tab="3" data-spaceless>
+                                        <div class="yai-slidy yai-slidy-warning ym-0 draggable">Hit boundaries? Ascend or descend automatically with configurable delays.</div>
+                                    </div>
+                                    <div data-tab="4" data-spaceless>
+                                        <div class="yai-slidy yai-slidy-danger ym-0 draggable">Copy-paste magic: Nest components endlessly, all inheriting root listeners.</div>
+                                    </div>
+                                    <div data-tab="5" data-spaceless>
+                                        <div data-yai-tabs data-theme="default" data-behavior="slide-down" data-nav="right" data-color-scheme="dark" data-color-accent="light" data-swipe="slyde">
+                                            <nav data-controller>
+                                                <button data-tab-action="open" data-open="1" data-inview-default>A</button>
+                                                <button data-tab-action="open" data-open="2">B</button>
+                                                <button data-tab-action="open" data-open="3">C</button>
+                                                <button data-tab-action="open" data-open="4">D</button>
+                                                <button data-tab-action="open" data-open="5">E</button>
+                                            </nav>
+                                            <div data-content>
+                                                <div data-tab="1" data-spaceless>
+                                                    <div class="ym-0 yai-slidy yai-slidy-success draggable">Infinite possibilities: Swipe loops circularly at every nesting level.</div>
+                                                </div>
+                                                <div data-tab="2" data-spaceless>
+                                                    <div class="yai-slidy yai-slidy-secondary ym-0 draggable">Seamless integration: Switch between mouse and touch mid-Swipe.</div>
+                                                </div>
+                                                <div data-tab="3" data-spaceless>
+                                                    <div class="yai-slidy yai-slidy-warning ym-0 draggable">O(1) efficiency: Zero added listeners, even at 80+ levels.</div>
+                                                </div>
+                                                <div data-tab="4" data-spaceless>
+                                                    <div class="yai-slidy yai-slidy-danger ym-0 draggable">Customizable: Tune thresholds, axes, and delays per container.</div>
+                                                </div>
+                                                <div data-tab="5" data-spaceless>
+                                                    <div class="yai-slidy yai-slidy-primary ym-0 draggable">End of this branch: Ascend to continue the Swipe adventure.</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div data-tab="4" data-spaceless>
+            <div class="yai-slidy yai-slidy-warning draggable ymb-0">
+            <h2 class="ymb-0">Welcome To Swipers Paradise</h2>
+            </div>
+            <div class="yp-3">
+            <div data-yai-tabs data-theme="default" data-behavior="slide-left" data-nav="top" data-color-scheme="dark" data-color-accent="funky" data-swipe="slyde">
+                <nav data-controller>
+                    <button data-tab-action="open" data-open="1" data-inview-default>A</button>
+                    <button data-tab-action="open" data-open="2">B</button>
+                    <button data-tab-action="open" data-open="3">C</button>
+                    <button data-tab-action="open" data-open="4">D</button>
+                    <button data-tab-action="open" data-open="5">E</button>
+                <button
+                    data-tab-action="open"
+                    data-open="6"
+                    data-delay="150"
+                    data-min-loading="250"
+                    data-url-refresh-disabled
+                    data-url="dynamic/mega-tree-full-max.html">Dynamic</button>
+                </nav>
+                <div data-content>
+                <div data-tab="1" data-spaceless>
+                    <div class="yai-grid yai-text-center yai-justify-center yai-slidy yai-slidy-funky draggable">
+                    <div>
+                        <h2><b>EAL - Event Abstraction Layer</b></h2>
+                        <hr>
+                        <p class="ymb-0">Like a Database Abstraction Layer (DBAL) for DOM events</p>
+                    </div>
+                    </div>
+                </div>
+                <div data-tab="2" data-spaceless>
+                    <div class="yai-slidy yai-slidy-success draggable yai-text-center">
+                    YEH centralizes event delegation so one listener governs entire scopes.<br>Native browser APIs keep it dependency free and future proof.
+                    </div>
+                </div>
+                <div data-tab="3" data-spaceless>
+                    <div class="yai-slidy yai-slidy-secondary draggable">
+                    <h2 class="ymb-0">Event Delegation <b>2.1</b></h2>
+                    </div>
+                    <div data-yai-tabs data-theme="default" data-behavior="slide-down" data-nav="left" data-color-scheme="dark" data-color-accent="secondary" data-swipe="slyde">
+                    <nav data-controller>
+                        <button data-tab-action="open" data-open="1" data-inview-default>A</button>
+                        <button data-tab-action="open" data-open="2">B</button>
+                        <button data-tab-action="open" data-open="3">C</button>
+                        <button data-tab-action="open" data-open="4">D</button>
+                        <button data-tab-action="open" data-open="5">E</button>
+                    </nav>
+                    <div data-content>
+                        <div data-tab="1">
+                        <div class="ym-0 yai-slidy yai-slidy-danger draggable">Automatic target resolution makes SVG buttons behave like plain DOM elements.<br>Configure throttle and debounce without importing another utility.</div>
+                        </div>
+                        <div data-tab="2">
+                        <div class="ym-0 yai-slidy yai-slidy-success draggable">Dynamic listener management lets components spawn events at runtime.</div>
+                        </div>
+                        <div data-tab="3">
+                        <div class="yp-3 ypt-0 yai-text-center">
+                            <h2 class="ymb-0">Nested Swipes. Again, but deeper.</h2>
+                        </div>
+                        <div data-yai-tabs data-theme="default" data-behavior="slide-left" data-nav="top" data-color-scheme="dark" data-color-accent="primary" data-swipe="slyde" data-swipe-reverse="false">
+                            <nav data-controller>
+                            <button data-tab-action="open" data-open="1" data-inview-default>A</button>
+                            <button data-tab-action="open" data-open="2">B</button>
+                            <button data-tab-action="open" data-open="3">C</button>
+                            <button data-tab-action="open" data-open="4">D</button>
+                            <button data-tab-action="open" data-open="5">E</button>
+                            </nav>
+                            <div data-content>
+                            <div data-tab="1" data-spaceless>
+                                <div class="ym-0 yai-slidy yai-slidy-primary draggable">Multi handler routing picks the closest match when components nest.<br>EnableStats surfaces real time counts and distance cache hits.</div>
+                            </div>
+                            <div data-tab="2" data-spaceless>
+                                <div class="ym-0 yai-slidy yai-slidy-warning draggable">Distance caching prevents repeated DOM walks in complex hierarchies.</div>
+                            </div>
+                            <div data-tab="3" data-spaceless>
+                                <div class="ym-0 yai-slidy yai-slidy-success draggable">AbortController support allows surgical cleanup of transient listeners.</div>
+                            </div>
+                            <div data-tab="4" data-spaceless>
+                                <div class="ym-0 yai-slidy yai-slidy-danger draggable">Passive event detection keeps scroll and touch handlers silky smooth.</div>
+                            </div>
+                            <div data-tab="5" data-spaceless>
+                                <div class="yp-0">
+                                <div data-yai-tabs data-theme="default" data-behavior="slide-left" data-nav="top" data-color-scheme="dark" data-color-accent="success" data-swipe="slyde">
+                                    <nav data-controller data-align="right">
+                                    <button data-tab-action="open" data-open="1" data-inview-default>A</button>
+                                    <button data-tab-action="open" data-open="2">B</button>
+                                    <button data-tab-action="open" data-open="3">C</button>
+                                    <button data-tab-action="open" data-open="4">D</button>
+                                    <button data-tab-action="open" data-open="5">E</button>
+                                    </nav>
+                                    <div data-content>
+                                    <div data-tab="1" data-spaceless>
+                                        <div class="ym-0 yai-slidy yai-slidy-warning draggable">MethodsFirst flips resolution order when external handler maps should win.<br>Global fallback mode lets legacy window handlers stay in play.</div>
+                                    </div>
+                                    <div data-tab="2" data-spaceless>
+                                        <div class="ym-0 yai-slidy yai-slidy-secondary draggable">Works offline on file:// with zero bundlers or build steps.</div>
+                                    </div>
+                                    <div data-tab="3" data-spaceless>
+                                        <div class="ym-0 yai-slidy yai-slidy-success draggable">YEH stays compatible with Chrome, Firefox, Safari, and Edge today.</div>
+                                    </div>
+                                    <div data-tab="4" data-spaceless>
+                                        <div class="ym-0 yai-slidy yai-slidy-funky draggable">TypeScript definitions ship with the package so tooling just works.</div>
+                                    </div>
+                                    <div data-tab="5" data-spaceless>
+                                        <div data-yai-tabs data-theme="default" data-behavior="slide-left" data-nav="bottom" data-color-scheme="dark" data-color-accent="danger" data-swipe="slyde">
+                                        <nav data-controller data-align="center">
+                                            <button data-tab-action="open" data-open="1" data-inview-default>A</button>
+                                            <button data-tab-action="open" data-open="2">B</button>
+                                            <button data-tab-action="open" data-open="3">C</button>
+                                            <button data-tab-action="open" data-open="4">D</button>
+                                            <button data-tab-action="open" data-open="5">E</button>
+                                        </nav>
+                                        <div data-content>
+                                            <div data-tab="1" data-spaceless>
+                                            <div class="ym-0 yai-slidy yai-slidy-success draggable">Event delegation 2.1 scopes handlers with neat :scope selectors.<br>YaiTabs scales to seventy plus nested components without new listeners.</div>
+                                            </div>
+                                            <div data-tab="2" data-spaceless>
+                                            <div class="ym-0 yai-slidy yai-slidy-secondary draggable">Hash based routing preserves tab state even when URLs change.</div>
+                                            </div>
+                                            <div data-tab="3" data-spaceless>
+                                            <div class="ym-0 yai-slidy yai-slidy-warning draggable">Two root listeners coordinate every click, key, and form event.</div>
+                                            </div>
+                                            <div data-tab="4" data-spaceless>
+                                            <div class="ym-0 yai-slidy yai-slidy-funky draggable">Nested containers inherit listeners automatically for effortless depth.</div>
+                                            </div>
+                                            <div data-tab="5" class="yp-1" data-spaceless>
+                                            <div data-yai-tabs data-theme="default" data-behavior="slide-down" data-nav="left" data-color-scheme="dark" data-color-accent="light" data-swipe="slyde">
+                                                <nav data-controller>
+                                                <button data-tab-action="open" data-open="1" data-inview-default>A</button>
+                                                <button data-tab-action="open" data-open="2">B</button>
+                                                <button data-tab-action="open" data-open="3">C</button>
+                                                <button data-tab-action="open" data-open="4">D</button>
+                                                <button data-tab-action="open" data-open="5">E</button>
+                                                </nav>
+                                                <div data-content>
+                                                <div data-tab="1" data-spaceless>
+                                                    <div class="ym-0 yai-slidy yai-slidy-success draggable">Animation options cover fade, slide, zoom, flip, warp, and instant changes.</div>
+                                                </div>
+                                                <div data-tab="2" data-spaceless>
+                                                    <div class="ym-0 yai-slidy yai-slidy-secondary draggable">ARIA wiring delivers WCAG 2.1 AA compliance out of the box.</div>
+                                                </div>
+                                                <div data-tab="3" data-spaceless>
+                                                    <div class="ym-0 yai-slidy yai-slidy-warning draggable">data-nav lets you dock controllers on any side of the layout.</div>
+                                                </div>
+                                                <div data-tab="4" data-spaceless>
+                                                    <div class="ym-0 yai-slidy yai-slidy-danger draggable">data-behavior toggles nine animation personalities without custom CSS.</div>
+                                                </div>
+                                                <div data-tab="5" data-spaceless>
+                                                    <div class="ym-0 yai-slidy yai-slidy-primary draggable">CSS custom properties unlock brand level theming in minutes.</div>
+                                                </div>
+                                                </div>
+                                            </div>
+                                            </div>
+                                        </div>
+                                        </div>
+                                    </div>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                        </div>
+                        <div data-tab="4">
+                        <div data-yai-tabs data-theme="default" data-behavior="slide-left" data-nav="top" data-color-scheme="dark" data-color-accent="primary" data-swipe="slyde">
+                            <nav data-controller data-align="right">
+                            <button data-tab-action="open" data-open="1" data-inview-default>A</button>
+                            <button data-tab-action="open" data-open="2">B</button>
+                            <button data-tab-action="open" data-open="3">C</button>
+                            <button data-tab-action="open" data-open="4">D</button>
+                            <button data-tab-action="open" data-open="5">E</button>
+                            </nav>
+                            <div data-content>
+                            <div data-tab="1" data-spaceless>
+                                <div class="ym-0 yai-slidy yai-slidy-primary draggable">Themes ship as default, minimal, and pills for quick swaps.<br>data-color-accent flips palettes between primary, secondary, success, warning, danger, funky, or dark.</div>
+                            </div>
+                            <div data-tab="2" data-spaceless>
+                                <div class="ym-0 yai-slidy yai-slidy-funky draggable">Buttons prefetch remote content with data-url, data-delay, and refresh flags.</div>
+                            </div>
+                            <div data-tab="3" data-spaceless>
+                                <div class="ym-0 yai-slidy yai-slidy-success draggable">data-min-loading guarantees a consistent loading shimmer while fetching.</div>
+                            </div>
+                            <div data-tab="4" data-spaceless>
+                                <div class="ym-0 yai-slidy yai-slidy-danger draggable">data-spaceless removes padding when you nest other layouts inside.</div>
+                            </div>
+                            <div data-tab="5" data-spaceless>
+                                <div class="yp-0">
+                                <div data-yai-tabs data-theme="default" data-behavior="slide-down" data-nav="left" data-color-scheme="dark" data-color-accent="light" data-swipe="slyde">
+                                    <nav data-controller>
+                                    <button data-tab-action="open" data-open="1" data-inview-default>A</button>
+                                    <button data-tab-action="open" data-open="2">B</button>
+                                    <button data-tab-action="open" data-open="3">C</button>
+                                    <button data-tab-action="open" data-open="4">D</button>
+                                    <button data-tab-action="open" data-open="5">E</button>
+                                    </nav>
+                                    <div data-content>
+                                    <div data-tab="1" data-spaceless>
+                                        <div class="ym-0 yai-slidy yai-slidy-warning draggable">Hashchange listeners keep deep links synced during swipe navigation.<br>Hooks setLoading and removeLoading coordinate loading indicators.</div>
+                                    </div>
+                                    <div data-tab="2" data-spaceless>
+                                        <div class="ym-0 yai-slidy yai-slidy-secondary draggable">setInstance returns the Swipe helper so chaining setup calls feels natural.</div>
+                                    </div>
+                                    <div data-tab="3" data-spaceless>
+                                        <div class="ym-0 yai-slidy yai-slidy-success draggable">afterLoad fires once remote content settles, ready for animations.</div>
+                                    </div>
+                                    <div data-tab="4" data-spaceless>
+                                        <div class="ym-0 yai-slidy yai-slidy-danger draggable">eventSubmit lets you intercept forms and reroute them before default.</div>
+                                    </div>
+                                    <div data-tab="5" data-spaceless>
+                                        <div data-yai-tabs data-theme="default" data-behavior="slide-right" data-nav="bottom" data-color-scheme="dark" data-color-accent="light" data-swipe="slyde">
+                                        <nav data-controller data-align="right">
+                                            <button data-tab-action="open" data-open="1" data-inview-default>A</button>
+                                            <button data-tab-action="open" data-open="2">B</button>
+                                            <button data-tab-action="open" data-open="3">C</button>
+                                            <button data-tab-action="open" data-open="4">D</button>
+                                            <button data-tab-action="open" data-open="5">E</button>
+                                        </nav>
+                                        <div data-content>
+                                            <div data-tab="1" data-spaceless>
+                                            <div class="ym-0 yai-slidy yai-slidy-success draggable">eventInput delivers live search with debounce baked in.</div>
+                                            </div>
+                                            <div data-tab="2" data-spaceless>
+                                            <div class="ym-0 yai-slidy yai-slidy-secondary draggable">eventFocus is ideal for inline validation hints on activation.</div>
+                                            </div>
+                                            <div data-tab="3" data-spaceless>
+                                            <div class="ym-0 yai-slidy yai-slidy-warning draggable">Two listeners replace dozens of scattered inline handlers across apps.</div>
+                                            </div>
+                                            <div data-tab="4" data-spaceless>
+                                            <div class="ym-0 yai-slidy yai-slidy-danger draggable">Dynamic content attaches instantly without reinitializing components.</div>
+                                            </div>
+                                            <div data-tab="5" data-spaceless>
+                                            <div class="ym-0 yai-slidy yai-slidy-primary draggable">data-yai-ref-path creates deep linking breadcrumbs across nested tabs.</div>
+                                            </div>
+                                        </div>
+                                        </div>
+                                    </div>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                        </div>
+                        <div data-tab="5" data-spaceless>
+                        <div class="active">
+                            <div class="yai-slidy yai-slidy-primary">YaiJS sits on the Ypsilon Event Scoping System for deterministic routing.</div>
+                            <div class="yai-slidy yai-slidy-secondary">Each container keeps a single listener no matter how deep the tree grows.</div>
+                            <div class="yai-slidy yai-slidy-success">Scope selectors ensure sibling components never leak events.</div>
+                            <div class="yai-slidy yai-slidy-warning">Selective registration cuts listener counts by roughly fifty two percent.</div>
+                            <div class="yai-slidy yai-slidy-danger">Automatic cleanup removes listeners the moment a container leaves the DOM.</div>
+                            <div class="yai-slidy yai-slidy-funky">Works alongside React, Vue, Angular, or plain Vanilla without wrappers.</div>
+                        </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                <div data-tab="4" data-spaceless>
+                    <div class="yai-slidy yai-slidy-danger draggable">Pure ES module builds keep bundlers optional for every project.</div>
+                </div>
+                <div data-tab="5" data-spaceless>
+                    <div class="yp-3">
+                    <div data-yai-tabs data-theme="default" data-behavior="slide-down" data-nav="left" data-color-scheme="dark" data-color-accent="light" data-swipe="slyde">
+                        <nav data-controller>
+                        <button data-tab-action="open" data-open="1" data-inview-default>A</button>
+                        <button data-tab-action="open" data-open="2">B</button>
+                        <button data-tab-action="open" data-open="3">C</button>
+                        <button data-tab-action="open" data-open="4">D</button>
+                        <button data-tab-action="open" data-open="5">E</button>
+                        </nav>
+                        <div data-content>
+                        <div data-tab="1" data-spaceless>
+                            <div class="ym-0 yai-slidy yai-slidy-warning draggable">Keyboard support covers arrow keys, Home, End, Enter, and Space.</div>
+                        </div>
+                        <div data-tab="2" data-spaceless>
+                            <div class="ym-0 yai-slidy yai-slidy-secondary draggable">AbortController powered loaders cancel pending fetches instantly.</div>
+                        </div>
+                        <div data-tab="3" data-spaceless>
+                            <div class="ym-0 yai-slidy yai-slidy-success draggable">Container IDs stay unique so nested components never collide.</div>
+                        </div>
+                        <div data-tab="4" data-spaceless>
+                            <div class="ym-0 yai-slidy yai-slidy-danger draggable">data-closable lets each container decide whether close buttons appear.</div>
+                        </div>
+                        <div data-tab="5" data-spaceless>
+                            <div data-yai-tabs data-theme="default" data-behavior="slide-down" data-nav="right" data-color-scheme="dark" data-color-accent="light" data-swipe="slyde">
+                            <nav data-controller>
+                                <button data-tab-action="open" data-open="1" data-inview-default>A</button>
+                                <button data-tab-action="open" data-open="2">B</button>
+                                <button data-tab-action="open" data-open="3">C</button>
+                                <button data-tab-action="open" data-open="4">D</button>
+                                <button data-tab-action="open" data-open="5">E</button>
+                            </nav>
+                            <div data-content>
+                                <div data-tab="1" data-spaceless>
+                                <div class="ym-0 yai-slidy yai-slidy-success draggable">Swipe thresholds split touch and mouse distances for precise gestures.</div>
+                                </div>
+                                <div data-tab="2" data-spaceless>
+                                <div class="ym-0 yai-slidy yai-slidy-secondary draggable">Axis detection reads aria-orientation whenever you set axis to auto.</div>
+                                </div>
+                                <div data-tab="3" data-spaceless>
+                                <div class="ym-0 yai-slidy yai-slidy-warning draggable">axisLockThreshold prevents diagonal drifts and isDragging tells you when a gesture is active.</div>
+                                </div>
+                                <div data-tab="4" data-spaceless>
+                                <div class="ym-0 yai-slidy yai-slidy-danger draggable">Boundary behavior can loop across siblings or descend into nested tabs, even when reverseDirection flips controls.</div>
+                                </div>
+                                <div data-tab="5" data-spaceless>
+                                <div class="ym-0 yai-slidy yai-slidy-primary draggable">transitionDelay gives parent tab chains time to animate while SwipeMove, AfterSwitch, and DragCancelled feed analytics ready context.</div>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                <div data-tab="6" data-spaceless></div>
+                </div>
+            </div>
+            </div>
+        </div>
+        <div data-tab="5">
+            <div class="yai-slidy yai-slidy-funky draggable">BeforeSwitch context includes the originating container, watchHooks wires every swipe hook, and resetDraggingState clears stuck drags.</div>
+        </div>
+    </div>
+</div>
+</div>
+
+
+<div class="box levelling-up-section" data-viewport-once>
+    <div class="yeo-needs-to-level-up" data-label-quote="Yatrix Reloaded">
+        <blockquote>
+            "We're going to need... more advanced techniques."
+            <small>— Ypsipheus</small>
+        </blockquote>
+        <blockquote>
+            "Like what?"
+            <small>— Yeo</small>
+        </blockquote>
+        <blockquote>
+            "Hash routing. Component systems. Advanced state management."
+            <small>— Ypsipheus</small>
+        </blockquote>
+        <blockquote>
+            "downloads framework knowledge directly to brain" <i>(Yeo)</i>
+        </blockquote>
+        <blockquote>
+            "I know Kung Vue..."
+            <small>— Yeo</small>
+        </blockquote>
+        <blockquote>
+            "Show me."
+            <small>— Ypsipheus</small>
+        </blockquote>
+    </div>
+</div>
+
+</main>
+
+<footer>
+    <nav>
+        <a href="https://github.com/yaijs/yai">YAI</a>
+        <small class="ycon ycon-katakana-letter ycon-xs ycon-is-left ycon-is-right"></small>
+        <a href="https://github.com/yaijs/yeh">YEH</a>
+    </nav>
+    <p><b>© <span title="DOM pun intended">Claude Van DOM</span> &amp; Engin Ypsilon</b></p>
+</footer>
+
+<div class="scroll-to-top-container">
+    <button type="button" class="scroll-to-top" data-action="scrollToTop">▲</button>
+</div>
+
+<script type="module" src="../dist/yai-bundle-full.js"></script>
+
+<script type="module">
+    import YaiTabsAnalyzer from '../utils/debug/yai-tabs-analyzer.js';
+
+    const {
+        YaiCore,
+        YaiTabs,
+        YaiTabsSwipe,
+        YaiSearchAndClick,
+        YaiViewport
+    } = window.YaiJS;
+
+    const YaiState = {
+        util: {
+            mainToggleEffecs: {
+                class: 'yai-enable-effects'
+            },
+            SearchAndClick: {
+                loops: 5,
+                scroll: false,
+                timeouts: {
+                    // init: 500, ajax: 400, goIn: 600, loop: 800,
+                    init: 500, ajax: 100, goIn: 500, loop: 300,
+                },
+                roadMap: {
+                    goIn: [{ open: '4' }, { open: '6' }],
+                    loop: [{ open: '4' }, { open: '5' }, { open: '5' }, { open: '6' }],
+                }
+            },
+        },
+
+        /**
+         * Parse state from HTML elements with data-yai-state-util
+         * Supports name format: "UtilName[property]"
+         */
+        parseFromDOM() {
+            const stateElements = document.querySelectorAll('[data-yai-state-util]');
+
+            stateElements.forEach(element => {
+                const name = element.name || element.id;
+                if (!name) return;
+
+                // Parse: "SearchAndClick[loops]" -> util: "SearchAndClick", prop: "loops"
+                const match = name.match(/^(\w+)\[(\w+)\]$/);
+                if (!match) return;
+
+                const [, utilName, propName] = match;
+
+                // Check if this util exists in state
+                if (!this.util[utilName]) return;
+
+                // Get typed value based on input type
+                let value = element.value;
+                switch (element.type) {
+                    case 'number':   value = parseInt(value, 10) || 0; break;
+                    case 'checkbox': value = element.checked; break;
+                    case 'radio':
+                        if (!element.checked) return; // Skip unchecked radios
+                        break;
+                }
+
+                // Update state
+                this.util[utilName][propName] = value;
+            });
+        },
+
+        /**
+         * Update a specific state value and sync to DOM if element exists
+         */
+        set(utilName, propName, value) {
+            if (!this.util[utilName]) {
+                console.warn(`YaiState: util "${utilName}" not found`);
+                return;
+            }
+
+            this.util[utilName][propName] = value;
+
+            // Sync back to DOM element if it exists
+            const element = document.querySelector(`[name="${utilName}[${propName}]"]`);
+            if (element) {
+                if (element.type === 'checkbox') {
+                    element.checked = value;
+                } else {
+                    element.value = value;
+                }
+            }
+        },
+
+        get(utilName, propName) {
+            return this.util[utilName]?.[propName];
+        }
+    };
+
+    YaiState.parseFromDOM();
+
+    /**
+     * Init Viewport Tracker
+     */
+    const yViewport = new YaiViewport({
+        throttle:  { resize: 500, scroll: 150, scrollend: 150 },
+        threshold: { pageTop: 50, pageEnd: 50, pageScrolled: 50 },
+    });
+
+    /**
+     * Enhanced YaiTabs Configuration
+     */
+    const tabs = new YaiTabs({
+        autoAccessibility: false,
+        autoDisambiguate: false,
+        lazyNestedComponents: true,
+        autoFocusNested: false,
+        autoFocus: false,
+        events: {
+            enableDistanceCache: true,
+            enableStats: false,
+            enableHandlerValidation: false,
+            setListener: {
+                '[data-yai-tabs]': [
+                    'click', 'keydown', 'input',
+                    'mousedown', 'mousemove', 'mouseup',
+                ],
+            },
+            customAttributes: ['data-swipe'],
+        },
+    });
+
+    /**
+     * YaiSwype
+     * Orbital UI Navigation
+     */
+    const yaiSwype = new YaiTabsSwipe({
+        axis: 'auto',
+        boundaryBehavior: {
+            circular: true,            // Loop from last to first
+            descendIntoNested: true,   // Auto-open nested tabs at boundary
+            ascendFromNested: true,    // Switch parent tab when nested boundary reached
+        }
+    })
+    .setInstance(tabs)
+    .watchHooks();
+
+    const countComponents = (validate = false) => {
+        let collect;
+
+        // Global selectors (scoped to entire document)
+        const globalSelectors = {
+            swypables:              '[data-yai-tabs][data-swipe]',
+            inert:                  '[data-yai-tabs] [inert]',
+            ariaHiddenContent:      '[data-yai-tabs] div[aria-hidden="true"]',
+            buttonsActive:          '[data-yai-tabs] [data-controller] button[data-open].active',
+            buttonsDefault:         '[data-yai-tabs] [data-controller] button[data-default]',
+            buttonsDefaultIfInView: '[data-yai-tabs] [data-controller] button[data-inview-default]',
+            buttonsNotFocusable:    '[data-yai-tabs] button[tabindex="-1"]',
+            componentsRoots:        '[data-yai-tabs][data-root]',
+            componentsInRoots:      '[data-yai-tabs][data-in-root]',
+            componentsActive:       '[data-yai-tabs].tab-active',
+            contentsActive:         '[data-yai-tabs] [data-content] [data-tab].active',
+            tabButtons:             '[data-yai-tabs] [data-controller] button[data-open]',
+            tabContents:            '[data-yai-tabs] [data-content] [data-tab]',
+        };
+
+        const components = document.querySelectorAll('[data-yai-tabs]');
+
+        const params = new URLSearchParams(location.hash.substring(1));
+
+        // Collect global stats
+        collect = {
+            elements: { components },
+            count: {
+                hash: params.size,
+                components: components.length,
+            },
+            hash: {
+                size: params.size,
+                params: Object.fromEntries(params),
+                stringified: JSON.stringify(Object.fromEntries(params), null, 2),
+                locationHash: location.hash,
+            },
+            roots: []
+        };
+
+        // Global counts (entire document)
+        for (const key in globalSelectors) {
+            const selector = globalSelectors[key];
+            const getElements = document.querySelectorAll(`${selector}`);
+            collect.elements[key] = getElements;
+            collect.count[key] = getElements.length;
+        }
+
+        // Per-root component analytics
+        const rootComponents = document.querySelectorAll(globalSelectors.componentsRoots);
+        rootComponents.forEach((root, index) => {
+            const rootData = {
+                index,
+                element: root,
+                id: root.id || `root-${index}`,
+                class: root.className || null,
+                refPath: root.dataset.refPath || null,
+                nesting: root.dataset.nesting || '0',
+                count: {},
+                deepestNesting: 0,
+                deepestLevel: 0,
+                activePath: []
+            };
+
+            // Count metrics scoped to this root
+            for (const key in globalSelectors) {
+                const selector = globalSelectors[key];
+                const elements = root.querySelectorAll(selector);
+                rootData.count[key] = elements.length;
+            }
+
+            // Find deepest nesting level in this root
+            const allNested = root.querySelectorAll('[data-yai-tabs][data-nesting]');
+            allNested.forEach(nested => {
+                const depth = parseInt(nested.dataset.nesting) || 0;
+                if (depth > rootData.deepestNesting) {
+                    rootData.deepestNesting = depth;
+                }
+            });
+            rootData.deepestLevel = rootData.deepestNesting + 1;
+
+            // Find active path in this root
+            const activeComponents = root.querySelectorAll('[data-yai-tabs].tab-active');
+            rootData.activePath = Array.from(activeComponents).map(comp => ({
+                nesting: comp.dataset.nesting || '0',
+                refPath: comp.dataset.refPath || null,
+                lastActive: comp.dataset.lastActive || null
+            }));
+
+            rootData.count.nestedComponents = root.querySelectorAll('[data-yai-tabs]').length;
+            rootData.count.activeDepth = rootData.activePath.length;
+
+            collect.roots.push(rootData);
+        });
+
+        // Summary stats across all roots
+        collect.summary = {
+            totalRoots: rootComponents.length,
+            deepestNesting: Math.max(...collect.roots.map(r => r.deepestNesting), 0),
+            totalNestedComponents: collect.roots.reduce((sum, r) => sum + r.count.nestedComponents, 0),
+            averageComponentsPerRoot: collect.roots.length > 0
+                ? Math.round(collect.roots.reduce((sum, r) => sum + r.count.nestedComponents, 0) / collect.roots.length)
+                : 0
+        };
+        collect.summary.deepestLevel = collect.summary.deepestNesting + 1;
+
+        if (validate) { // always: true
+            tabs.validateTabStates();
+        }
+
+        return collect;
+    }
+
+
+    /**
+     * Search and Click Unit Y (5 loops = level 22)
+     */
+    const SearchAndClick = ((useInstance, loopXtimes) => {
+        const methodState = YaiState.util.SearchAndClick;
+        const loops = YaiState.get('SearchAndClick', 'loops') || 3;
+
+        const seacrhAndCkickInstance = new YaiSearchAndClick({
+            scrollIntoView: YaiState.get('SearchAndClick', 'scroll') || false,
+            targetRoot: '.sliding-madness-section > [data-yai-tabs]',
+            containerSelector: '[data-yai-tabs]',
+            tabOpenAttribute: useInstance.tabOpenAttribute,
+            tabTabAttribute: useInstance.tabTabAttribute,
+            collectMetrics: true,
+        })
+        .setInstance(useInstance)
+        .run(loopXtimes || loops || 5, methodState.roadMap, methodState.timeouts);
+    });
+
+    // Get metrics for steps and depth
+    const searchAndClickMetrics = (context => {
+        const getMetric = YaiSearchAndClick.calculateEstimatedMetrics(
+            YaiState.util.SearchAndClick.roadMap,
+            YaiState.util.SearchAndClick.loops
+        );
+        const getStepInfo = document.getElementById('searchAndClickCalculated');
+        if (getStepInfo)
+            getStepInfo.textContent = getMetric.steps;
+    });
+
+    // Toggle effetcs
+    const toggleEffects = (doFn, reasoning) => {
+        const getMain = document.querySelector('.yai-main');
+        if (getMain && doFn) {
+            if (doFn === 'add' && getMain.classList.contains('yai-disable-effects')) {
+                return;
+            }
+            getMain.classList[doFn]('yai-disable-effects');
+            if (reasoning) console.log(reasoning);
+        }
+    };
+
+    /**
+     * Event hooks
+     * event, target, container, action, context
+     */
+    tabs.hook('afterInit', ({ context }) => searchAndClickMetrics(context))
+    .hook('contentReady', ({ html, url, targetSelector, container, append, target, content }) => {
+        const nestingDepth = parseInt(container.dataset.nesting, 10);
+        // only on dynamic content load
+        if (nestingDepth && url) {
+            if (nestingDepth > 30) {
+                toggleEffects('add', `Disabled effects, current nesting depth: ${nestingDepth}`)
+            }
+            const getAjaxMarked = container.querySelector('.ajax-content-loaded');
+            const getNestedTabs = content.querySelector('[data-yai-tabs]')
+
+            if (getAjaxMarked && getNestedTabs) {
+                getAjaxMarked.innerHTML = tabs._sanitizeHtml(`Level: ${nestingDepth + 1}<br>Nested: ${nestingDepth}`);
+            }
+        }
+    })
+    /** Hook click event **/
+    .hook('eventClick', ({ event, target, container, action, context }) => {
+        if (!action) return;
+        searchAndClickMetrics(context);
+        switch(action) {
+            // We add a new button functionality (<button data-click="reload">)
+            // and use it immediately in SearchAndClick
+            case 'reload': location.reload(); break;
+            case 'SearchAndClick':
+                SearchAndClick(context);
+                const getStarter = target.closest('.ynforcer-starter');
+                if (getStarter) {
+                    getStarter.classList.add('yai-fade-in', 'yp-2');
+                    getStarter.classList.remove('yp-1');
+                    getStarter.innerHTML = `<button data-click="reload">Reload</button>`;
+                }
+                break;
+            case 'countComponents': countComponents(); break;
+        }
+    })
+    /** Hook input event **/
+    .hook('eventInput', ({ event, target, container, action, context }) => {
+        if (!action) return;
+        switch(action) {
+            case 'handleYaiState': YaiState.parseFromDOM(); break;
+        }
+        searchAndClickMetrics(context);
+        if (target.name === 'mainToggleEffects[class]') {
+            toggleEffects('toggle', `Toggle effects, current state: ${target.checked}`)
+        }
+    })
+    /** Custom hook searchAndClick run is done event **/
+    .hook('searchAndClickFinished', ({ event, target, container, action, context }) => {
+        const collect = countComponents();
+        console.log(JSON.stringify(collect?.count, null, 2), tabs);
+    });
+</script>
+</body>
+</html>

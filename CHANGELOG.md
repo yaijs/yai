@@ -10,19 +10,19 @@
 
 
 ### Added
-- **YaiTabsSwype**: Now included in main bundle by default (previously optional) - touch/swipe gestures now available out of the box! 🎉
+- **YaiTabsSwipe**: Now included in main bundle by default (previously optional) - touch/swipe gestures now available out of the box! 🎉
 
 ### Fixed - Critical Bug Fixes
 - **YaiTabs CSS**: Fixed critical 30-second transition delay typo (was `visibility 30s`, now `0.3s`)
 - **YaiTabs CSS**: Fixed typo in CSS variable naming (`elemets` → `elements`)
-- **YaiTabsSwype**: Removed duplicate `isDragging()` method definition that was causing unpredictable behavior
-- **YaiTabsSwype**: Added null safety checks for `event.touches[0]` to prevent crashes on malformed touch events
-- **YaiTabsSwype**: Fixed race condition in boundary behavior setTimeout (now properly tracked and cancellable)
+- **YaiTabsSwipe**: Removed duplicate `isDragging()` method definition that was causing unpredictable behavior
+- **YaiTabsSwipe**: Added null safety checks for `event.touches[0]` to prevent crashes on malformed touch events
+- **YaiTabsSwipe**: Fixed race condition in boundary behavior setTimeout (now properly tracked and cancellable)
 - **YEH**: Fixed passive event support detection to always return boolean (was returning undefined in edge cases)
 
 ### Changed
-- **YaiTabsSwype**: Added `_pendingTimeout` tracking for proper cleanup on user interruption
-- **YaiTabsSwype**: Timeout validation now checks if DOM element still exists before delayed operations
+- **YaiTabsSwipe**: Added `_pendingTimeout` tracking for proper cleanup on user interruption
+- **YaiTabsSwipe**: Timeout validation now checks if DOM element still exists before delayed operations
 
 ## [1.0.2] - 2025-10-18
 

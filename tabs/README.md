@@ -1,25 +1,26 @@
 # YaiTabs
 
-Enterprise-grade tab component with O(1) event scaling, unlimited nesting, and hash-based deep linking. Built on [YpsilonEventHandler](https://github.com/yaijs/yeh) architecture.
+Enterprise-grade tab component with O(1) event delegation, deep nesting support, and hash-based deep linking. Built on [YpsilonEventHandler](https://github.com/yaijs/yeh) architecture.
 
-**🎯 More Than Tabs - It's an Event Bus!**
-YaiTabs doubles as a powerful application event bus. Add listeners for ANY event type (`click`, `input`, `change`, `submit`, etc.) and handle them through hooks - all with just 2 root listeners. Perfect for building complete SPAs within a single tab component.
+**🎯 More Than Tabs - It's an Event Hub!**
+YaiTabs doubles as a powerful application event hub. Add listeners for ANY event type (`click`, `input`, `change`, `submit`, etc.) and handle them through hooks - all with just 2 root listeners. Perfect for building complete SPAs within a single tab component.
 
 ## Features
 
 **🚀 Performance**
-- O(1) listener scaling (2 listeners per root, 0 for nested)
-- Handles 70+ nested components without degradation
-- ~350KB memory footprint for deep hierarchies
+- O(1) event delegation (6 listeners constant, regardless of depth)
+- Tested to 409 nesting levels (1,530 components, 15,504 elements)
+- Production use: 3-20 levels (native-like performance)
+- Bottleneck: Browser rendering at 60+ levels, not framework
 
 **🎯 Tab Component Capabilities**
-- Unlimited nesting depth
+- Deep nesting support (tested to 409 levels)
 - Hash-based URL routing with state preservation
 - Dynamic content loading with abort control
 - 8 animation behaviors + instant mode
 - Full ARIA/WCAG 2.1 AA compliance
 
-**⚡ Event Bus Superpowers**
+**⚡ Event Hub Superpowers**
 - Handle ANY event type within tab containers
 - Single event system for entire application
 - Built-in debouncing and throttling
@@ -33,8 +34,8 @@ YaiTabs doubles as a powerful application event bus. Add listeners for ANY event
 - Component-level scheme inheritance
 
 **🎮 Try It Now**
-- **[Live Example →](https://yaijs.github.io/yai/tabs/Example.html)** - Full-featured demo with nested tabs, animations, and event bus
-- **[JSFiddle Playground →](https://jsfiddle.net/w6je4ck1/)** - Interactive editor to experiment with code
+- **[Live Example →](https://yaijs.github.io/yai/tabs/Example.html)** - Full-featured demo with nested tabs, animations, and event hub
+- **[JSFiddle Playground →](https://jsfiddle.net/ymzjkonf/)** - Interactive editor to experiment with code
 - **[Advanced Patterns →](./ADVANCED.md)** - Real-world examples and architectural deep-dives
 
 ## Quick Start
@@ -43,7 +44,7 @@ YaiTabs doubles as a powerful application event bus. Add listeners for ANY event
 <!DOCTYPE html>
 <html>
 <head>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@yaijs/core@1.0.1/tabs/yai-tabs.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@yaijs/core@latest/tabs/yai-tabs.css">
 </head>
 <body>
     <div data-yai-tabs>
@@ -57,9 +58,8 @@ YaiTabs doubles as a powerful application event bus. Add listeners for ANY event
         </div>
     </div>
 
-    <!-- YaiJS -->
-    <script src="https://cdn.jsdelivr.net/npm/@yaijs/yeh"></script>
-    <script type="module" src="https://cdn.jsdelivr.net/npm/@yaijs/core@1.0.1/dist/yai-bundle.js"></script>
+    <!-- YaiJS (pure ESM) -->
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@yaijs/core@latest/dist/yai-bundle.js"></script>
 
     <script type="module">
         const { YaiTabs } = window.YaiJS;
@@ -68,27 +68,58 @@ YaiTabs doubles as a powerful application event bus. Add listeners for ANY event
             defaultBehavior: 'fade',
             autoAccessibility: true
         });
+
+        // Optional: Hook into default events (click and keydown already listening!)
+        tabs.hook('eventClick', ({ target }) => {
+            console.log('Clicked:', target);
+        });
     </script>
 </body>
 </html>
 ```
+
+**🎯 Default events:** `click` and `keydown` are already listening on all tab containers. The `eventClick` and `eventKeydown` hooks work immediately - no configuration needed!
 
 ## Architecture
 
 ### Event Delegation Hierarchy
 ```
 Root Component      → 2 listeners (click, keydown)
-  ├─ Nested L2      → 0 listeners (inherits)
-  │  ├─ Nested L3   → 0 listeners (inherits)
-  │  └─ Dynamic     → 0 listeners (inherits)
-  └─ Sibling        → 0 listeners (inherits)
+  ├─ Nested L2      → 0 listeners (shares root's)
+  │  ├─ Nested L3   → 0 listeners (shares root's)
+  │  └─ Dynamic     → 0 listeners (shares root's)
+  └─ Sibling        → 0 listeners (shares root's)
 ```
 
 **Key Benefits:**
-- Nested components inherit parent's event listeners
+- Nested components share the root's event listeners via delegation
+- **Out-of-the-box hooks:** `eventClick` and `eventKeydown` ready to use immediately
+- **Auto-generated data-attributes:** YaiCore automatically generates `data-click`, `data-input`, `data-change`, `data-submit` for registered events
 - Dynamic content requires no re-initialization
 - Performance remains constant regardless of depth
 - Automatic cleanup on component removal
+
+**Auto-generation & Custom Attributes:**
+YaiCore skips 30 naturally-captured events that don't need data-attributes (mouse, touch, keyboard, focus, window events).
+
+**YaiTabsSwipe attributes:**
+- `data-swipe` - Enable swipe gesture detection on a container
+- `data-orientation-hint` - Show visual orientation hints (← Swipe horizontally → or ↑ Swipe vertically ↓) for nested navigation
+- `data-swipe-ignore` - Exclude specific elements from swipe detection
+
+Add custom attributes without losing auto-generated ones:
+```javascript
+const tabs = new YaiTabs({
+    events: {
+        customAttributes: ['data-swipe', 'data-orientation-hint']
+        // Auto-generated attributes are preserved and merged
+    }
+});
+
+// Check what's being skipped:
+console.log(YaiCore.getSkipAutoGenerateEvents());
+// Returns 30 passive events: ['scroll', 'touchstart', 'mousedown', 'touchmove', ...]
+```
 
 ### Lifecycle
 
@@ -251,9 +282,9 @@ tabs.hook('eventSubmit', ({ content, url }) => {
 });
 ```
 
-## Event Bus System
+## Event Hub System
 
-**The Game Changer:** YaiTabs is also a complete application event bus!
+**The Game Changer:** YaiTabs is also a complete application event hub!
 
 Add listeners for any event type and handle them through hooks. All events are scoped to their container and work seamlessly with nested tabs and dynamic content.
 
@@ -403,7 +434,7 @@ tabs.hook('eventSubmit', ({ event, target }) => {
 
 ### Programmatic URLs
 ```js
-// Generate URL for specific tab combination
+// Generate hash URL for specific tab combination
 const url = YaiTabs.reconstructUrlFromRef('s-m-dark', 1);
 // Returns: #styles=1&s-mixed=1&s-m-dark=1
 
@@ -411,16 +442,6 @@ const url = YaiTabs.reconstructUrlFromRef('s-m-dark', 1);
 const pathData = YaiTabs.getRefPath('s-2-r');
 // Returns: { fullPath: ['styles', 's-mixed', 's-m-dark', 's-2-r'], ... }
 ```
-
-<details>
-<summary>Description</summary>
-</details>
-
-"&lt;details&gt;",
-"&lt;summary&gt; $1 &lt;/summary&gt;",
-"&lt;/details&gt;",
-
-
 
 ## Theming
 
@@ -587,7 +608,7 @@ Create complete visual overrides:
 
 See [ADVANCED.md](./ADVANCED.md) for:
 - Single-tab applications
-- Event bus patterns
+- Event hub patterns
 - Analytics integration
 - Dynamic form handling
 - Breadcrumb navigation

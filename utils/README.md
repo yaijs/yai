@@ -4,13 +4,13 @@ Standalone utilities that enhance YaiTabs with advanced features.
 
 ## Table of Contents
 
-- [YaiTabsSwype](#yaitabsswype) - Touch/swipe navigation with boundary behaviors
+- [YaiTabsSwipe](#YaiTabsSwipe) - Touch/swipe navigation with boundary behaviors
 - [YaiAutoSwitch Testing Utility](#yaiautoswitch-testing-utility) - Automated tab switching for demos
 - [YaiViewport — Advanced Viewport Tracking](#yaiviewport--advanced-viewport-tracking-observer-free) - Observer-free viewport tracking
 
 ---
 
-## YaiTabsSwype
+## YaiTabsSwipe
 
 Swipe/drag navigation utility for YaiTabs that provides mobile-first touch gestures and desktop drag navigation. Works seamlessly at every nesting level with automatic container scoping.
 
@@ -29,13 +29,13 @@ Swipe/drag navigation utility for YaiTabs that provides mobile-first touch gestu
 
 ```javascript
 import YaiTabs from './yai/tabs/yai-tabs.js';
-import YaiTabsSwype from './yai/utils/yai-tabs-swype.js';
+import YaiTabsSwipe from './yai/utils/yai-tabs-swipe.js';
 
 // Initialize tabs with swipe events
 const tabs = new YaiTabs({
     events: {
         setListener: {
-            '.yai-tabs-swype[data-mousedown]': [
+            '.yai-tabs-swipe[data-mousedown]': [
                 { type: 'mousedown', debounce: 1 },
                 { type: 'mousemove', debounce: 1 },
                 { type: 'mouseup', debounce: 1 },
@@ -47,8 +47,8 @@ const tabs = new YaiTabs({
     }
 });
 
-// Initialize swype utility
-const swype = new YaiTabsSwype()
+// Initialize swipe utility
+const swipe = new YaiTabsSwipe()
     .setInstance(tabs)
     .watchHooks();
 ```
@@ -56,7 +56,7 @@ const swype = new YaiTabsSwype()
 ### Configuration
 
 ```javascript
-const swype = new YaiTabsSwype({
+const swipe = new YaiTabsSwipe({
     // Swipe distance thresholds
     threshold: {
         mobile: 30,   // Pixels for touch devices
@@ -206,7 +206,7 @@ The `axis: 'auto'` option automatically detects swipe direction from the `aria-o
 Control swipe behavior with lifecycle hooks:
 
 ```javascript
-swype
+swipe
     .hook('swipeStart', ({ panel, moveType, startX, startY }) => {
         console.log('Swipe started:', moveType);
     })
@@ -245,8 +245,8 @@ Connect to YaiTabs' `globalMouseWatch` hook to reset dragging state when the mou
 
 ```javascript
 tabs.hook('globalMouseWatch', ({ event, target }) => {
-    if (swype.isDragging()) {
-        swype.resetDraggingState();
+    if (swipe.isDragging()) {
+        swipe.resetDraggingState();
     }
 });
 ```
@@ -255,10 +255,10 @@ tabs.hook('globalMouseWatch', ({ event, target }) => {
 
 ### `.setInstance(tabs)`
 
-Attach the swype utility to a YaiTabs instance.
+Attach the swipe utility to a YaiTabs instance.
 
 ```javascript
-swype.setInstance(tabs);
+swipe.setInstance(tabs);
 ```
 
 ### `.watchHooks()`
@@ -266,7 +266,7 @@ swype.setInstance(tabs);
 Activate swipe navigation by attaching event listeners.
 
 ```javascript
-swype.watchHooks();
+swipe.watchHooks();
 ```
 
 ### `.hook(hookName, callback)`
@@ -274,7 +274,7 @@ swype.watchHooks();
 Register a lifecycle callback hook.
 
 ```javascript
-swype.hook('afterSwitch', ({ switched }) => {
+swipe.hook('afterSwitch', ({ switched }) => {
     console.log('Tab switched:', switched);
 });
 ```
@@ -284,7 +284,7 @@ swype.hook('afterSwitch', ({ switched }) => {
 Check if a drag/swipe is currently in progress.
 
 ```javascript
-if (swype.isDragging()) {
+if (swipe.isDragging()) {
     console.log('Currently dragging');
 }
 ```
@@ -294,14 +294,14 @@ if (swype.isDragging()) {
 Reset all dragging state and clean up DOM.
 
 ```javascript
-swype.resetDraggingState();
+swipe.resetDraggingState();
 ```
 
 ### Complete Example
 
 ```javascript
 import YaiTabs from './yai/tabs/yai-tabs.js';
-import YaiTabsSwype from './yai/utils/yai-tabs-swype.js';
+import YaiTabsSwipe from './yai/utils/yai-tabs-swipe.js';
 
 const YaiDevice = YaiCore.getUserPreferences();
 
@@ -324,16 +324,16 @@ const tabs = new YaiTabs({
             // For swypable tabs:
             // Select components only once, nesting components don't need listeners
             // YEH will set listeners passive automatically, if device supports it
-            '.yai-tabs-swype[data-mousedown]': YaiDevice.hasTouch
+            '.yai-tabs-swipe[data-mousedown]': YaiDevice.hasTouch
                 ? ['touchstart', 'touchmove', 'touchend'] // Touch devices
                 : ['mousedown',  'mousemove', 'mouseup'], // Mouse devices
         }
     }
 });
 
-// Initialize swype with advanced features
-const swype = new YaiTabsSwype({
-    // How many pixel in any direction to count as swype
+// Initialize swipe with advanced features
+const swipe = new YaiTabsSwipe({
+    // How many pixel in any direction to count as swipe
     threshold: { mobile: 30, desktop: 40 },
     axis: 'auto',  // Auto-detect from aria-orientation
     reverseDirection: false,
@@ -351,8 +351,8 @@ const swype = new YaiTabsSwype({
 
 // Global mouse watch for boundary cleanup
 tabs.hook('globalMouseWatch', ({ event, target }) => {
-    if (swype.isDragging()) {
-        swype.resetDraggingState();
+    if (swipe.isDragging()) {
+        swipe.resetDraggingState();
     }
 });
 ```
@@ -371,8 +371,11 @@ tabs.hook('globalMouseWatch', ({ event, target }) => {
 #### ES Module
 
 ```html
-<!-- YEH class, included once, re-used everywhere -->
-<script src="https://cdn.jsdelivr.net/npm/@yaijs/yeh@latest/yeh.min.js"></script>
+<!-- YEH class (pure ESM), included once, re-used everywhere -->
+<script type="module">
+    import YEH from 'https://cdn.jsdelivr.net/npm/@yaijs/yeh@latest/yeh.js';
+    window.YEH = YEH;
+</script>
 ```
 
 ```js
@@ -446,8 +449,11 @@ YaiViewport is a lightweight, IntersectionObserver-free viewport tracker that ru
 #### ES Module
 
 ```html
-<!-- YEH class, included once, re-used everywhere -->
-<script src="https://cdn.jsdelivr.net/npm/@yaijs/yeh@latest/yeh.min.js"></script>
+<!-- YEH class (pure ESM), included once, re-used everywhere -->
+<script type="module">
+    import YEH from 'https://cdn.jsdelivr.net/npm/@yaijs/yeh@latest/yeh.js';
+    window.YEH = YEH;
+</script>
 ```
 
 ```js
@@ -606,13 +612,13 @@ viewport
 
 ### TypeScript Support
 
-Full TypeScript definitions are included in `yai-tabs-swype.d.ts`:
+Full TypeScript definitions are included in `yai-tabs-swipe.d.ts`:
 
 ```typescript
-import YaiTabsSwype, { SwypeConfig, BoundaryBehavior } from './yai/utils/yai-tabs-swype.js';
+import YaiTabsSwipe, { SwipeConfig, BoundaryBehavior } from './yai/utils/yai-tabs-swipe.js';
 
-const config: SwypeConfig = {
-    // How many pixel in any direction to count as swype
+const config: SwipeConfig = {
+    // How many pixel in any direction to count as swipe
     threshold: { mobile: 30, desktop: 40 },
     axis: 'auto',
     boundaryBehavior: {
@@ -622,12 +628,12 @@ const config: SwypeConfig = {
     }
 };
 
-const swype = new YaiTabsSwype(config);
+const swipe = new YaiTabsSwipe(config);
 ```
 
 ### Performance
 
-YaiTabsSwype uses event delegation through YaiTabs' orchestration system for optimal performance:
+YaiTabsSwipe uses event delegation through YaiTabs' orchestration system for optimal performance:
 
 - **O(1) scaling** - Performance doesn't degrade with nesting depth
 - **Single listener per event type** - No listener proliferation

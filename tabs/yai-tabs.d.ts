@@ -22,7 +22,7 @@
  * - Memory Footprint: ~460 LOC, minimal runtime overhead
  * - Scalability: O(1) regardless of component complexity or nesting level
  *
- * @version 1.0.0-beta.1
+ * @version 1.0.3
  * @author YaiJS Team - Advanced component architecture
  * @license MIT
  * @see https://github.com/yaijs/yai/tree/main/tabs
@@ -133,6 +133,8 @@ export interface TabButtonAttributes {
   'data-default'?: boolean;
   /** Dynamic content URL for fetch-based loading */
   'data-url'?: string;
+  /** Append content instead of replacing (default: false) */
+  'data-append'?: string;
   /** Pre-fetch delay in milliseconds */
   'data-delay'?: string;
   /** Post-fetch delay in milliseconds */
@@ -141,6 +143,8 @@ export interface TabButtonAttributes {
   'data-min-loading'?: string;
   /** Always reload content (bypass cache) */
   'data-url-refresh'?: boolean;
+  /** Marker set after content is loaded (internal use) */
+  'data-url-loaded'?: boolean;
   /** Text to restore after loading completes */
   'data-restore-text'?: string;
 }
@@ -766,6 +770,59 @@ export declare class YaiTabs extends YaiCore {
    * ```
    */
   hook(hookName: keyof TabLifecycleCallbacks, callback: TabLifecycleCallbacks[keyof TabLifecycleCallbacks]): this;
+
+  // === Static Utility Methods ===
+
+  /**
+   * 🔗 **Reconstruct URL from Reference Path**
+   *
+   * Static utility to build URL hash from a target reference path.
+   * Reconstructs the complete navigation state including all parent levels.
+   *
+   * @param targetRef - Reference path of the target container (data-ref-path value)
+   * @param targetValue - Optional explicit value for the target level
+   * @param containerElement - Root element to search within (default: document)
+   * @returns Reconstructed hash URL string (e.g., "#main-tabs=2&nested-tabs=1")
+   *
+   * @example
+   * ```typescript
+   * // Reconstruct URL for a specific tab state
+   * const url = YaiTabs.reconstructUrlFromRef('nested-tabs', '3');
+   * // Returns: "#main-tabs=2&nested-tabs=3" (includes parent state)
+   *
+   * // Get current active state
+   * const currentUrl = YaiTabs.reconstructUrlFromRef('nested-tabs');
+   * // Returns URL reflecting currently active tabs
+   * ```
+   */
+  static reconstructUrlFromRef(targetRef: string, targetValue?: string | Element, containerElement?: Element | Document): string;
+
+  /**
+   * 🗺️ **Get Reference Path Data**
+   *
+   * Static utility to retrieve the full hierarchical path for a reference.
+   * Returns ancestor chain from root to target for proper URL reconstruction.
+   *
+   * @param targetRef - Reference path to look up
+   * @param scope - Root element to search within (default: document)
+   * @returns Object containing full path array and any errors
+   *
+   * @example
+   * ```typescript
+   * const pathData = YaiTabs.getRefPath('nested-tabs');
+   * // Returns: { fullPath: ['main-tabs', 'nested-tabs'], error: null }
+   *
+   * // Handle errors
+   * const result = YaiTabs.getRefPath('invalid-ref');
+   * if (result.error) {
+   *   console.error('Reference not found:', result.error);
+   * }
+   * ```
+   */
+  static getRefPath(targetRef: string, scope?: Element | Document): {
+    fullPath: string[];
+    error: string | null;
+  };
 }
 
 /**

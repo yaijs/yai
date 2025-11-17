@@ -1,7 +1,7 @@
 "use strict";
 
 /**
- * @fileoverview YaiTabsSwype - Swipe/drag navigation utility for YaiTabs
+ * @fileoverview YaiTabsSwipe - Swipe/drag navigation utility for YaiTabs
  * @version 1.0.0
  * @license MIT
  */
@@ -29,7 +29,7 @@
  */
 
 /**
- * YaiTabsSwype - Add swipe/drag navigation to YaiTabs
+ * YaiTabsSwipe - Add swipe/drag navigation to YaiTabs
  *
  * Provides mobile-first swipe gestures and desktop drag navigation for tab switching.
  * Works at every nesting level with automatic container scoping.
@@ -50,24 +50,25 @@
  *     }
  * });
  *
- * const swype = new YaiTabsSwype({ threshold: { mobile: 50, desktop: 100 } })
+ * const swype = new YaiTabsSwipe({ threshold: { mobile: 50, desktop: 100 } })
  *     .setInstance(tabs)
  *     .watchHooks();
  */
-class YaiTabsSwype {
+class YaiTabsSwipe {
     /**
-     * Creates a new YaiTabsSwype instance
+     * Creates a new YaiTabsSwipe instance
      * @param {Partial<SwypeConfig>} [customConfig={}] - Custom configuration options
      */
     constructor(customConfig = {}) {
-        const swypeConfig = {
+        const swipeConfig = {
             threshold: {
                 mobile: 30,
                 desktop: 40,
             },
-            // Used to configure YaiTabsSwype using data-attributes expected in [datai-yai-tabs]
-            // @example: data-swype-axis="auto"
-            dataConfigKey: 'data-swype',
+            // Used to configure YaiTabsSwipe using data-attributes expected in [datai-yai-tabs]
+            // @example: data-swipe-axis="auto"
+            dataConfigKey: 'data-swipe',
+            customAttributes: ['data-swipe'],
             // Allowed swipe directions (can be 'horizontal', 'vertical', or 'both', or 'auto' to detect from aria-orientation)
             axis: 'auto',
             // Minimum movement to determine axis lock (prevents accidental diagonal swipes)
@@ -102,7 +103,7 @@ class YaiTabsSwype {
          * @type {SlideState}
          * @private
          */
-        this.slideState = {
+        this.swipeState = {
             isDragging: false,
             startX: 0,
             currentX: 0,
@@ -133,15 +134,15 @@ class YaiTabsSwype {
          * @type {SwypeConfig}
          * @private
          */
-        this.config = swypeConfig;
+        this.config = swipeConfig;
     }
 
     /**
      * Set the YaiTabs instance to attach swipe handlers to
      * @param {YaiTabs} tabsInstance - YaiTabs instance
-     * @returns {YaiTabsSwype} Returns this for chaining
+     * @returns {YaiTabsSwipe} Returns this for chaining
      * @example
-     * const swype = new YaiTabsSwype().setInstance(tabs);
+     * const swype = new YaiTabsSwipe().setInstance(tabs);
      */
     setInstance(tabsInstance) {
         this.tabs = tabsInstance;
@@ -155,7 +156,7 @@ class YaiTabsSwype {
      * @private
      */
     getTabsContainer(target) {
-        const container = target.closest('[data-yai-tabs][data-mousedown]');
+        const container = target.closest('[data-yai-tabs][data-swipe]');
         // Check if container has active tab instead of relying on container class
         return container && container.querySelector('[data-open].active') ? container : null;
     }
@@ -167,7 +168,7 @@ class YaiTabsSwype {
      * @private
      */
     getTabsPanel(target) {
-        const container = target.closest('[data-yai-tabs][data-mousedown]');
+        const container = target.closest('[data-yai-tabs][data-swipe]');
         if (!container) return null;
 
         // Check if this container has active navigation (buttons with active class)
@@ -197,14 +198,15 @@ class YaiTabsSwype {
         if (target.matches('input, textarea, select, button:not([data-open])')) return true;
 
         const ignoredElement = target.closest(
-            '[data-mousedown-ignore], [data-tabs-header], [data-tabs-footer]'
+            '[data-swipe-ignore], [data-tabs-header], [data-tabs-footer]'
         );
-        if (ignoredElement && !ignoredElement.hasAttribute('data-mousedown-allow')) {
+        if (ignoredElement && !ignoredElement.hasAttribute('data-swipe-allow')) {
             return true;
         }
 
         return false;
     }
+
     /**
      * Switch to a relative tab (next/previous)
      * @param {HTMLElement} container - Tabs container element
@@ -260,7 +262,7 @@ class YaiTabsSwype {
 
         // Collect all parent containers up to root
         while (current) {
-            const parent = current.parentElement?.closest('[data-yai-tabs][data-mousedown]');
+            const parent = current.parentElement?.closest('[data-yai-tabs][data-swipe]');
             if (parent) {
                 parentContainers.push(parent);
                 current = parent;
@@ -306,7 +308,8 @@ class YaiTabsSwype {
      * @private
      */
     handleBoundaryBehavior(container, offset, direction, originContainer = null) {
-        const behavior = this.config.boundaryBehavior;
+        const effectiveConfig = this.getEffectiveConfig();
+        const behavior = effectiveConfig.boundaryBehavior;
 
         // Track the origin container if this is the first call
         if (!originContainer) {
@@ -314,7 +317,7 @@ class YaiTabsSwype {
         }
 
         // Check if we're in a nested component
-        const parentTabContainer = container.parentElement?.closest('[data-yai-tabs][data-mousedown]');
+        const parentTabContainer = container.parentElement?.closest('[data-yai-tabs][data-swipe]');
         const isNested = !!parentTabContainer;
 
         // 1. Ascend from nested component (recursively)
@@ -364,7 +367,7 @@ class YaiTabsSwype {
                             this._pendingTimeout = setTimeout(() => {
                                 // Validate element still exists and is valid
                                 if (targetTab && document.contains(targetTab)) {
-                                    console.log('[YaiTabsSwype] Delay complete, switching tab');
+                                    console.log('[YaiTabsSwipe] Delay complete, switching tab');
                                     targetTab.click();
                                     this.clearSelection();
                                 }
@@ -412,7 +415,7 @@ class YaiTabsSwype {
         if (!this.config.orientationAware) return;
 
         // Find the root component
-        const getRoot = container.closest('[data-yai-tabs][data-root]');
+        const getRoot = container.closest('[data-yai-tabs][data-orientation-hint]');
         if (!getRoot) return;
 
         // Find the content container in root (simple, stable location)
@@ -426,9 +429,6 @@ class YaiTabsSwype {
             // Create hint only once and append to root's content container
             hint = document.createElement('div');
             hint.className = 'yai-orientation-hint';
-            // hint.setAttribute('role', 'status');
-            // hint.setAttribute('aria-live', 'polite');
-            // hint.setAttribute('aria-label', 'Swipe gesture hint');
             hint.dataset.mousedownIgnore = true;
             contentContainer.appendChild(hint);
         }
@@ -461,7 +461,7 @@ class YaiTabsSwype {
         }
         // Touch event - validate touches exist
         if (!event.touches || event.touches.length === 0) {
-            console.warn('[YaiTabsSwype] Touch event has no touches');
+            console.warn('[YaiTabsSwipe] Touch event has no touches');
             return 0;
         }
         return event.touches[0].clientX;
@@ -480,7 +480,7 @@ class YaiTabsSwype {
         }
         // Touch event - validate touches exist
         if (!event.touches || event.touches.length === 0) {
-            console.warn('[YaiTabsSwype] Touch event has no touches');
+            console.warn('[YaiTabsSwipe] Touch event has no touches');
             return 0;
         }
         return event.touches[0].clientY;
@@ -540,9 +540,11 @@ class YaiTabsSwype {
      * @private
      */
     detectAxisFromContainer(container) {
+        const effectiveConfig = this.getEffectiveConfig();
+
         // If config axis is not 'auto', use config value
-        if (this.config.axis !== 'auto') {
-            return this.config.axis;
+        if (effectiveConfig.axis !== 'auto') {
+            return effectiveConfig.axis;
         }
 
         // Try to get aria-orientation from nav element or container
@@ -561,7 +563,7 @@ class YaiTabsSwype {
     }
 
     /**
-     * Handle drag/swipe start event, ignore elements in "data-mousedown-ignore"
+     * Handle drag/swipe start event, ignore elements in "data-swipe-ignore"
      * @param {'mouse'|'touch'} moveType - Event type
      * @param {MouseEvent|TouchEvent} event - DOM event
      * @param {HTMLElement} target - Target element
@@ -573,45 +575,50 @@ class YaiTabsSwype {
         const panel = this.getTabsPanel(target);
         if (!panel) return;
 
+        const container = panel.closest('[data-yai-tabs]');
+        if (!container) return;
+
         // Cancel any pending boundary transition
         if (this._pendingTimeout) {
             clearTimeout(this._pendingTimeout);
             this._pendingTimeout = null;
         }
 
-        if (!this.slideState.attributesParsed) {
-            this.slideState.attributesParsed = true;
-            this.config = this.getMergedConfig(target);
+        // Parse per-container config on first interaction (store in slideState, don't mutate this.config)
+        if (!this.swipeState.attributesParsed) {
+            this.swipeState.attributesParsed = true;
+            this.swipeState.currentConfig = this.getMergedConfig(container);
         }
 
         const startX = this.mouseGetXCoords(moveType, event);
         const startY = this.mouseGetYCoords(moveType, event);
 
-        this.slideState.isDragging = true;
-        this.slideState.startX = startX;
-        this.slideState.currentX = startX;
-        this.slideState.startY = startY;
-        this.slideState.currentY = startY;
-        this.slideState.startTime = Date.now();
-        this.slideState.lockedAxis = null;  // Reset axis lock
+        this.swipeState.isDragging = true;
+        this.swipeState.startX = startX;
+        this.swipeState.currentX = startX;
+        this.swipeState.startY = startY;
+        this.swipeState.currentY = startY;
+        this.swipeState.startTime = Date.now();
+        this.swipeState.lockedAxis = null;  // Reset axis lock
 
-        const container = panel.closest('[data-yai-tabs]');
+        // Get effective config (merged with container attributes)
+        const effectiveConfig = this.getEffectiveConfig();
 
         // Auto-detect axis if set to 'auto'
-        if (container && this.config.axis === 'auto') {
+        if (container && effectiveConfig.axis === 'auto') {
             const detectedAxis = this.detectAxisFromContainer(container);
             // Temporarily store detected axis for this swipe
             this._currentAxis = detectedAxis;
         } else {
-            this._currentAxis = this.config.axis;
+            this._currentAxis = effectiveConfig.axis;
         }
 
         if (container && container.dataset.inRoot && container.id) {
-            if (this.slideState.isDraggingNested === null) {
-                this.slideState.isDraggingNested = {};
+            if (this.swipeState.isDraggingNested === null) {
+                this.swipeState.isDraggingNested = {};
             }
-            if (!this.slideState.isDraggingNested?.[container.id]) {
-                this.slideState.isDraggingNested[container.id] = true;
+            if (!this.swipeState.isDraggingNested?.[container.id]) {
+                this.swipeState.isDraggingNested[container.id] = true;
             }
         }
 
@@ -639,22 +646,25 @@ class YaiTabsSwype {
         const panel = this.getTabsPanel(target);
         if (!panel) return;
 
-        if (this.slideState.isDragging) {
-            this.slideState.currentX = this.mouseGetXCoords(moveType, event);
-            this.slideState.currentY = this.mouseGetYCoords(moveType, event);
+        if (this.swipeState.isDragging) {
+            this.swipeState.currentX = this.mouseGetXCoords(moveType, event);
+            this.swipeState.currentY = this.mouseGetYCoords(moveType, event);
 
-            const deltaX = this.slideState.currentX - this.slideState.startX;
-            const deltaY = this.slideState.currentY - this.slideState.startY;
+            const deltaX = this.swipeState.currentX - this.swipeState.startX;
+            const deltaY = this.swipeState.currentY - this.swipeState.startY;
+
+            // Get effective config for threshold checks
+            const effectiveConfig = this.getEffectiveConfig();
 
             // Determine axis lock on first significant movement
-            if (!this.slideState.lockedAxis) {
+            if (!this.swipeState.lockedAxis) {
                 const absX = Math.abs(deltaX);
                 const absY = Math.abs(deltaY);
-                const lockThreshold = this.config.axisLockThreshold || 10;
+                const lockThreshold = effectiveConfig.axisLockThreshold || 10;
 
                 if (absX > lockThreshold || absY > lockThreshold) {
                     // Lock to the axis with more movement
-                    this.slideState.lockedAxis = absX > absY ? 'x' : 'y';
+                    this.swipeState.lockedAxis = absX > absY ? 'x' : 'y';
                 }
             }
 
@@ -662,10 +672,10 @@ class YaiTabsSwype {
             let transform = '';
             let semanticDirection = this.getSemanticDirection(deltaX, deltaY);
 
-            if (this.slideState.lockedAxis === 'x' && (this._currentAxis === 'horizontal' || ['horizontal', 'both'].includes(this.config.axis))) {
+            if (this.swipeState.lockedAxis === 'x' && (this._currentAxis === 'horizontal' || ['horizontal', 'both'].includes(effectiveConfig.axis))) {
                 transform = `translateX(${deltaX * .5}px)`;
             }
-            else if (this.slideState.lockedAxis === 'y' && (this._currentAxis === 'vertical' || ['vertical', 'both'].includes(this.config.axis))) {
+            else if (this.swipeState.lockedAxis === 'y' && (this._currentAxis === 'vertical' || ['vertical', 'both'].includes(effectiveConfig.axis))) {
                 transform = `translateY(${deltaY * .5}px)`;
             }
             else {
@@ -681,7 +691,7 @@ class YaiTabsSwype {
                 deltaX,
                 deltaY,
                 semanticDirection,
-                lockedAxis: this.slideState.lockedAxis,
+                lockedAxis: this.swipeState.lockedAxis,
                 event,
                 target
             });
@@ -699,18 +709,21 @@ class YaiTabsSwype {
         const panel = this.getTabsPanel(target);
         if (!panel) return;
 
-        if (this.slideState.isDragging) {
-            const deltaX = this.slideState.currentX - this.slideState.startX;
-            const deltaY = this.slideState.currentY - this.slideState.startY;
+        if (this.swipeState.isDragging) {
+            const deltaX = this.swipeState.currentX - this.swipeState.startX;
+            const deltaY = this.swipeState.currentY - this.swipeState.startY;
             const semanticDirection = this.getSemanticDirection(deltaX, deltaY);
 
+            // Get effective config for threshold checks
+            const effectiveConfig = this.getEffectiveConfig();
+
             // Determine which delta to use based on locked axis
-            const primaryDelta = this.slideState.lockedAxis === 'y' ? deltaY : deltaX;
+            const primaryDelta = this.swipeState.lockedAxis === 'y' ? deltaY : deltaX;
             const absDistance = Math.abs(primaryDelta);
 
             const threshold = moveType === 'mouse'
-                ? this.config.threshold.desktop
-                : this.config.threshold.mobile;
+                ? effectiveConfig.threshold.desktop
+                : effectiveConfig.threshold.mobile;
 
             // Reset visual state
             panel.classList.remove('dragging');
@@ -719,9 +732,9 @@ class YaiTabsSwype {
             let switched = false;
 
             // Switch tab if threshold exceeded and movement is on allowed axis
-            const currentAxis = this._currentAxis || this.config.axis;
-            const isHorizontalSwipe = this.slideState.lockedAxis === 'x' && (currentAxis === 'horizontal' || currentAxis === 'both');
-            const isVerticalSwipe = this.slideState.lockedAxis === 'y' && (currentAxis === 'vertical' || currentAxis === 'both');
+            const currentAxis = this._currentAxis || effectiveConfig.axis;
+            const isHorizontalSwipe = this.swipeState.lockedAxis === 'x' && (currentAxis === 'horizontal' || currentAxis === 'both');
+            const isVerticalSwipe = this.swipeState.lockedAxis === 'y' && (currentAxis === 'vertical' || currentAxis === 'both');
 
             if (absDistance > threshold && (isHorizontalSwipe || isVerticalSwipe)) {
                 const container = this.getTabsContainer(panel);
@@ -751,10 +764,10 @@ class YaiTabsSwype {
                 }
             }
 
-            this.slideState.isDragging = false;
-            this.slideState.lockedAxis = null;
-            this.slideState.isDraggingNested = null;
-            this.slideState.attributesParsed = false;
+            this.swipeState.isDragging = false;
+            this.swipeState.lockedAxis = null;
+            this.swipeState.isDraggingNested = null;
+            this.swipeState.attributesParsed = false;
 
             // Execute swipeEnd hook
             this._executeHook('swipeEnd', {
@@ -794,7 +807,7 @@ class YaiTabsSwype {
      * @param {string} hookName - Name of the callback hook
      * @param {Function} callback - Callback function to execute
      * @param {Object} [instance] - Optional instance to set hook on (defaults to this)
-     * @returns {YaiTabsSwype} Returns instance for chaining
+     * @returns {YaiTabsSwipe} Returns instance for chaining
      * @example
      * swype.hook('swipeStart', ({ panel, moveType }) => {
      *     console.log('Swipe started:', moveType);
@@ -816,34 +829,40 @@ class YaiTabsSwype {
      * Registers handlers for mouse (desktop) and touch (mobile) events.
      * Must be called after setInstance() to activate swipe navigation.
      *
-     * @returns {YaiTabsSwype} Returns this for chaining
+     * @returns {YaiTabsSwipe} Returns this for chaining
      * @throws {Error} If tabs instance is not set
      * @example
-     * const swype = new YaiTabsSwype()
+     * const swype = new YaiTabsSwipe()
      *     .setInstance(tabs)
      *     .hook('swipeStart', ({ panel }) => console.log('Started!'))
      *     .watchHooks();
      */
     watchHooks() {
         if (!this.tabs) {
-            throw new Error('YaiTabsSwype: tabs instance not set. Call setInstance() first.');
+            throw new Error('YaiTabsSwipe: tabs instance not set. Call setInstance() first.');
         }
 
         // Mouse events (desktop)
         this.tabs.hook('eventMousedown', ({ event, target }) => {
             this.mouseIsDown('mouse', event, target);
-        }).hook('eventMousemove', ({ event, target }) => {
+        })
+        .hook('eventMousemove', ({ event, target }) => {
+            if (!this.swipeState.isDragging) return;
             this.mouseIsMoving('mouse', event, target);
-        }).hook('eventMouseup', ({ event, target }) => {
+        })
+        .hook('eventMouseup', ({ event, target }) => {
             this.mouseGoesUp('mouse', event, target);
         });
 
         // Touch events (mobile)
         this.tabs.hook('eventTouchstart', ({ event, target }) => {
             this.mouseIsDown('touch', event, target);
-        }).hook('eventTouchmove', ({ event, target }) => {
+        })
+        .hook('eventTouchmove', ({ event, target }) => {
+            if (!this.swipeState.isDragging) return;
             this.mouseIsMoving('touch', event, target);
-        }).hook('eventTouchend', ({ event, target }) => {
+        })
+        .hook('eventTouchend', ({ event, target }) => {
             this.mouseGoesUp('touch', event, target);
         });
 
@@ -904,6 +923,15 @@ class YaiTabsSwype {
     }
 
     /**
+     * Get the effective config for the current gesture (merged container config or default)
+     * @returns {Object} Configuration object
+     * @private
+     */
+    getEffectiveConfig() {
+        return this.swipeState.currentConfig || this.config;
+    }
+
+    /**
      * Get merged configuration for a specific container
      * @param {HTMLElement} container - Tabs container element
      * @returns {Object} Merged configuration
@@ -927,7 +955,7 @@ class YaiTabsSwype {
 
     /**
      * Completely reset dragging state and clean up DOM
-     * @returns {YaiTabsSwype} Returns this for chaining
+     * @returns {YaiTabsSwipe} Returns this for chaining
      */
     resetDraggingState() {
         // Cancel any pending boundary transition
@@ -937,18 +965,18 @@ class YaiTabsSwype {
         }
 
         // Reset internal state
-        this.slideState.isDragging = false;
-        this.slideState.startX = 0;
-        this.slideState.currentX = 0;
-        this.slideState.startY = 0;
-        this.slideState.currentY = 0;
-        this.slideState.startTime = 0;
-        this.slideState.lockedAxis = null;
-        this.slideState.attributesParsed = false;
+        this.swipeState.isDragging = false;
+        this.swipeState.startX = 0;
+        this.swipeState.currentX = 0;
+        this.swipeState.startY = 0;
+        this.swipeState.currentY = 0;
+        this.swipeState.startTime = 0;
+        this.swipeState.lockedAxis = null;
+        this.swipeState.attributesParsed = false;
 
         // Clean up DOM - find ALL elements that might have transforms
-        // Target [data-tab] elements inside [data-mousedown] containers
-        const allTabPanels = document.querySelectorAll('[data-mousedown] [data-tab]');
+        // Target [data-tab] elements inside [data-swipe] containers
+        const allTabPanels = document.querySelectorAll('[data-swipe] [data-tab]');
 
         allTabPanels.forEach(element => {
             // Remove dragging class if present
@@ -964,8 +992,8 @@ class YaiTabsSwype {
         });
 
         // Also clean up any nested dragging state tracking
-        if (typeof this.slideState.isDraggingNested?.yaiArray !== 'undefined') {
-            this.slideState.isDraggingNested.yaiArray.forEach(id => {
+        if (typeof this.swipeState.isDraggingNested?.yaiArray !== 'undefined') {
+            this.swipeState.isDraggingNested.yaiArray.forEach(id => {
                 const element = document.getElementById(id);
                 if (element) {
                     const getTab = element.matches('[data-tab]') ? element : element.closest('[data-tab]');
@@ -973,7 +1001,7 @@ class YaiTabsSwype {
                         getTab.classList.remove('dragging');
                         getTab.style.transform = '';
                         getTab.style.transition = '';
-                        delete this.slideState.isDraggingNested[id];
+                        delete this.swipeState.isDraggingNested[id];
                     }
                 }
             });
@@ -995,16 +1023,16 @@ class YaiTabsSwype {
      * @returns {boolean} True if dragging is in progress
      */
     isDragging() {
-        if (this.slideState.isDraggingNested !== null) {
-            const draggedNested = Object.keys(this.slideState.isDraggingNested);
+        if (this.swipeState.isDraggingNested !== null) {
+            const draggedNested = Object.keys(this.swipeState.isDraggingNested);
             if (draggedNested.length) {
-                this.slideState.isDraggingNested.yaiArray = draggedNested || [];
-                this.slideState.isDragging = true;
+                this.swipeState.isDraggingNested.yaiArray = draggedNested || [];
+                this.swipeState.isDragging = true;
             }
         }
-        return this.slideState.isDragging;
+        return this.swipeState.isDragging;
     }
 }
 
-export {YaiTabsSwype};
-export default YaiTabsSwype;
+export {YaiTabsSwipe};
+export default YaiTabsSwipe;

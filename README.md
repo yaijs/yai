@@ -1,6 +1,6 @@
 # 🎯 YaiJS Component Library
 
-**Advanced VanillaJS web components built on YEH (YpsilonEventHandler) - the world's first DOM Event Scoping System**
+**Advanced VanillaJS web components built on YEH (Yai Event Hub) - the world's first DOM Event Scoping System**
 
 YaiJS delivers enterprise-grade UI components with mathematical O(1) scaling performance. Each component uses a single event listener per container with perfect isolation, enabling infinite nesting without listener proliferation.
 
@@ -10,7 +10,7 @@ YaiJS delivers enterprise-grade UI components with mathematical O(1) scaling per
 
 ## Framework Overview
 
-**Built on YEH (YpsilonEventHandler) Foundation**
+**Built on YEH (Yai Event Hub) Foundation**
 - **O(1) Performance:** Single listener per container regardless of complexity
 - **Perfect Isolation:** Container-scoped event handling using `:scope >` selectors
 - **EventListener Orchestration:** 52% fewer listeners via selective registration
@@ -38,16 +38,18 @@ For YaiTabs:
 - ✅ **4 Navigation Positions** - Top, left, right, bottom placement
 - ✅ **WCAG 2.1 AA Compliance** - Full ARIA implementation with screen reader support
 - ✅ **Keyboard Navigation** - Arrow keys, Home/End, Enter/Space support
-- ✅ **Touch/Swipe Navigation** - Mobile-first swipe gestures with YaiTabsSwype utility
+- ✅ **Touch/Swipe Navigation** - Mobile-first swipe gestures with YaiTabsSwipe utility
 - ✅ **Dynamic Content Loading** - Fetch remote content via `data-url` with abort controllers
 - ✅ **Container Isolation** - Unique IDs prevent cross-contamination
 - ✅ **Infinite Nesting** - Dynamically loaded nested components instantly become swipable
 
 **[View YaiTabs Documentation →](./tabs/README.md)**
 
-**[View YaiTabsSwype Documentation →](./utils/README.md)**
+**[View YaiTabsSwipe Documentation →](./utils/README.md)**
 
-**[Try Live Demo →](https://yaijs.github.io/yai/tabs/Example.html)** (43 components with recursive AJAX loading)
+**[Try Live Demo →](https://yaijs.github.io/yai/tabs/Example.html)** (60 components with recursive AJAX loading)
+
+**[📦 View All Import Options →](./example-imports.html)** (NPM, CDN, bundles, granular imports)
 
 **Quick Start via CDN**
 
@@ -55,7 +57,7 @@ For YaiTabs:
 <!DOCTYPE html>
 <html>
 <head>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@yaijs/core@1.0.1/tabs/yai-tabs.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@yaijs/core@latest/tabs/yai-tabs.css">
 </head>
 <body>
     <div data-yai-tabs>
@@ -67,11 +69,14 @@ For YaiTabs:
         </div>
     </div>
 
-    <!-- Load YEH (required peer dependency) -->
-    <script src="https://cdn.jsdelivr.net/npm/@yaijs/yeh@1/yeh.js"></script>
+    <!-- Load YEH (required peer dependency, now pure ESM) -->
+    <script type="module">
+        import YEH from 'https://cdn.jsdelivr.net/npm/@yaijs/yeh@latest/yeh.js';
+        window.YEH = YEH;
+    </script>
 
     <!-- Load YaiJS bundle (exposes window.YaiJS) -->
-    <script type="module" src="https://cdn.jsdelivr.net/npm/@yaijs/core@1.0.1/dist/yai-bundle.js"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@yaijs/core@latest/dist/yai-bundle.js"></script>
 
     <script type="module">
         // Access components from window.YaiJS
@@ -113,11 +118,11 @@ Override global settings on individual containers using data attributes:
 **Available Data Attributes:**
 - `data-closable="true|false"` - Override closable setting per container
 
-## YaiTabsSwype - Touch/Swipe Navigation
+## YaiTabsSwipe - Touch/Swipe Navigation
 
 **🎯 Mobile-first swipe gestures with advanced boundary behaviors**
 
-YaiTabsSwype adds fluid touch/swipe navigation to YaiTabs with support for infinite nesting and intelligent boundary handling.
+YaiTabsSwipe adds fluid touch/swipe navigation to YaiTabs with support for infinite nesting and intelligent boundary handling.
 
 ### Key Features
 
@@ -133,7 +138,7 @@ YaiTabsSwype adds fluid touch/swipe navigation to YaiTabs with support for infin
 
 ```javascript
 import YaiTabs from './yai/tabs/yai-tabs.js';
-import YaiTabsSwype from './yai/utils/yai-tabs-swype.js';
+import YaiTabsSwipe from './yai/utils/yai-tabs-swipe.js';
 
 // Initialize tabs with swipe events
 const tabs = new YaiTabs({
@@ -152,8 +157,8 @@ const tabs = new YaiTabs({
     }
 });
 
-// Initialize swype with advanced features
-const swype = new YaiTabsSwype({
+// Initialize swipe with advanced features
+const swipe = new YaiTabsSwipe({
     axis: 'auto',  // Auto-detect from aria-orientation
     boundaryBehavior: {
         circular: true,            // Loop from last to first tab
@@ -169,8 +174,8 @@ const swype = new YaiTabsSwype({
 
 // Global mouse watch for boundary cleanup
 tabs.hook('globalMouseWatch', ({ event, target }) => {
-    if (swype.isDragging()) {
-        swype.resetDraggingState();
+    if (swipe.isDragging()) {
+        swipe.resetDraggingState();
     }
 });
 ```
@@ -181,14 +186,14 @@ Configure swipe behavior per container:
 
 ```html
 <div data-yai-tabs
-     data-mousedown="slyde"
-     data-swype-axis="horizontal"
-     data-swype-circular="true"
-     data-swype-descend="true"
-     data-swype-ascend="true"
-     data-swype-threshold-mobile="40"
-     data-swype-threshold-desktop="40">
-    <!-- Tabs with custom swipe config -->
+    data-mousedown="slyde"
+    data-swipe-axis="horizontal"
+    data-swipe-circular="true"
+    data-swipe-descend="true"
+    data-swipe-ascend="true"
+    data-swipe-threshold-mobile="40"
+    data-swipe-threshold-desktop="40">
+        <!-- Tabs with custom swipe config -->
 </div>
 ```
 
@@ -201,16 +206,16 @@ A → B → C → D → E → (loops back to) A
 
 **Descend into Nested:**
 ```
-Root:  A  B  C  D  [E]  ← Swiping right at E
-                    ↓
-Nested:             F  G  H  I  ← Opens F automatically
+Root:  A  B  C  D  [E]  F            ← Swiping right at [E] (contains nested tabs)
+                            ↓
+Nested:               [U]  V  W  Y  ← Opens [U] automatically
 ```
 
 **Ascend from Nested:**
 ```
-Root:  A  B  [C]  D  E  ← Switches to C when nested boundary reached
-           ↑
-Nested:    F  G  H  [I]  ← Swiping right at I (last nested tab)
+Root:  A  B  C  D  [E]  F  ← Switches back to the button the nested tree originally belongs too
+                           ↑
+             U  V  W  [Y]     ← Swiping right at [Y] (last nested)
 ```
 
 **Combined with Dynamic Content Loading:**
@@ -222,17 +227,17 @@ Nested:    F  G  H  [I]  ← Swiping right at I (last nested tab)
 - Configurable transition delay for smooth UX
 
 **Example Flow:**
-1. Static page has 43 components
+1. Static page has 60 components
 2. Swipe through tabs until you reach one with `data-url="dynamic/mega-tree-full.html"`
 3. Click loads massive nested tree via AJAX
 4. New nested components are **instantly swipable** (no re-initialization needed)
 5. Swipe through infinite levels seamlessly
 
-**[View Full YaiTabsSwype Documentation →](./utils/README.md)**
+**[View Full YaiTabsSwipe Documentation →](./utils/README.md)**
 
-## Event Bus System
+## Event Hub System
 
-**🎯 YaiTabs is more than tabs - it's a complete application event bus!**
+**🎯 YaiTabs is more than tabs - it's a complete application event hub!**
 
 ### Automatic Event Tunneling
 
@@ -242,7 +247,7 @@ YaiCore automatically generates event handlers for **ANY** event type you add. N
 const tabs = new YaiTabs({
     events: {
         setListener: {
-            window: [
+            'window': [
                 { type: 'hashchange', debounce: 500 } // ✅ Built-in (required)
             ],
             '[data-yai-tabs]': [
@@ -282,7 +287,7 @@ tabs.hook('eventMyCustomEvent', ({ event, target, container, action, context }) 
 
 ### Multiple Hooks Support
 
-**🎯 NEW: Register multiple callbacks for the same event!**
+**🎯 Register multiple callbacks for the same event!**
 
 YEH's hook system uses array-based callback storage, allowing you to attach multiple handlers to any hook:
 
@@ -368,7 +373,13 @@ async function loadView(name) {
     const area = document.getElementById('app-content');
     const html = await (await fetch(`/views/${name}.html`)).text();
     area.innerHTML = html;
-    // Re-init if dynamic content contains nested tabs
+    // Re-init if dynamic content contains nested tabs. This is for ARIA related stuff, not to add listeners,
+    // nor refreshing existing ones or else. You can throw HTML triggering elements in
+    // and delete them without any "register-unregister-requirements", because there is nothing, we
+    // could unregister to begin with. Only the parent wrapper gets registered (gets the listeners added
+    // you configured for your YaiTabs), and only on initialization. Once added, you can focus on methods
+    // and functionalities in your tab components, dynamically nest tab components into nest components, they will
+    // work immediately. And if you delete any nested components, it's like they were never there.
     tabs.initializeAllContainers(area);
 }
 </script>
@@ -443,7 +454,7 @@ const tabs = new YaiTabs({
             '[data-yai-tabs]': ['click', 'keydown'],
 
             // Swipe events - only swipeable tabs (optional harmony)
-            '[data-swipe]': [
+            '[data-mousedown]': [
                 'mousedown', 'mousemove', 'mouseup',
                 'touchstart', 'touchmove', 'touchend'
             ]
@@ -454,19 +465,19 @@ const tabs = new YaiTabs({
 
 ### Performance Results
 
-**Real-world benchmark:** 43 nested tab components with infinite recursive AJAX loading
+**Real-world benchmark:** 60 nested tab components with infinite recursive AJAX loading (242 buttons, 242 content panels)
 
 | Approach | Elements | Listeners | Reduction |
 |----------|----------|-----------|-----------|
-| Without orchestration | 43 | 352+ | baseline |
-| **With orchestration** | **10** | **35** | **🎯 90%** |
+| Without orchestration | 60 | 484+ | baseline |
+| **With orchestration** | **12** | **45** | **🎯 91%** |
 
 **Current Setup** (includes body: 3, window: 6 listeners):
-- 📊 Total Elements with Listeners: **10**
-- 🔥 Total Event Listeners Found: **35**
-- 📈 Average Listeners per Element: **3.50**
+- 📊 Total Elements with Listeners: **12**
+- 🔥 Total Event Listeners Found: **45**
+- 📈 Average Listeners per Element: **3.75**
 
-**Result:** 317+ fewer event listeners while supporting infinite nesting and dynamic content loading!
+**Result:** 439+ fewer event listeners while supporting infinite nesting and dynamic content loading!
 
 ### How It Works
 
@@ -491,7 +502,7 @@ const tabs = new YaiTabs({
 '[data-yai-forms]': ['change', 'input', 'submit'],
 
 // Swipe events only where needed
-'.yai-tabs-swype[data-mousedown]': [
+'.yai-tabs-swipe[data-mousedown]': [
     'mousedown', 'mousemove', 'mouseup',
     'touchstart', 'touchmove', 'touchend'
 ]
@@ -571,7 +582,7 @@ sorted.forEach((item, i) => {
 </div>
 
 <!-- Swipeable tab (adds mouse/touch events) -->
-<div data-yai-tabs data-swipe>
+<div data-yai-tabs data-mousedown="slyde">
     <nav data-controller>
         <button data-open="tab1">Tab 1</button>
         <button data-open="tab2">Tab 2</button>
@@ -595,15 +606,24 @@ sorted.forEach((item, i) => {
 npm install @yaijs/yeh @yaijs/core
 ```
 
-**Individual Components**
+**Individual Components (ESM)**
 ```html
-<!-- YEH Foundation -->
-<script src="https://unpkg.com/@yaijs/yeh@1.0.2/yeh.js"></script>
+<!-- Import YEH Foundation (pure ESM) -->
+<script type="module">
+    import YEH from 'https://cdn.jsdelivr.net/npm/@yaijs/yeh@latest/yeh.js';
+    window.YEH = YEH;
+</script>
 
-<!-- Individual Components -->
-<script src="https://unpkg.com/@yaijs/core@1.0.0-beta.1/yai-core.js"></script>
-<script src="https://unpkg.com/@yaijs/core@1.0.0-beta.1/tabs/yai-tabs.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/@yaijs/core@1.0.0-beta.1/tabs/yai-tabs.css">
+<!-- Import Individual Components (pure ESM) -->
+<script type="module">
+    import { YaiCore } from 'https://cdn.jsdelivr.net/npm/@yaijs/core@latest/yai-core.js';
+    import { YaiTabs } from 'https://cdn.jsdelivr.net/npm/@yaijs/core@latest/tabs/yai-tabs.js';
+
+    // Initialize
+    const tabs = new YaiTabs();
+</script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@yaijs/core@latest/tabs/yai-tabs.css">
 ```
 
 **ES6 Module Import (Modern Development)**
@@ -624,9 +644,9 @@ import YEH from '@yaijs/yeh';
 
 ## YaiJS Utilities
 
-Powerful standalone utilities that enhance YaiTabs:
+Powerful utilities that enhance YaiTabs:
 
-- **[YaiTabsSwype](./utils/README.md#yaitabsswype)** - Touch/swipe navigation with boundary behaviors
+- **[YaiTabsSwipe](./utils/README.md#YaiTabsSwipe)** - Touch/swipe navigation with boundary behaviors
 - **[YaiAutoSwitch](./utils/README.md#yaiautoswitch-testing-utility)** - Automated tab switching for demos and testing
 - **[YaiViewport](./utils/README.md#yaiviewport--advanced-viewport-tracking-observer-free)** - Observer-free viewport tracking
 
@@ -687,7 +707,7 @@ yai/                         // Published at github.com/yaijs/Yai
 
 **YaiCore Foundation**
 - High-performance DOM element caching with statistics
-- Event handler factory with YpsilonEventHandler integration
+- Event handler factory with Yai Event Hub integration
 - Shared utilities (debounce, throttle, deepMerge, etc.)
 - Hook system for lifecycle management
 - Accessibility utilities and unique ID generation

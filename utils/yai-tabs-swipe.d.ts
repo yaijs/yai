@@ -1,6 +1,6 @@
 /**
- * YaiTabsSwype - Swipe/drag navigation utility for YaiTabs
- * @module yai-tabs-swype
+ * YaiTabsSwipe - Swipe/drag navigation utility for YaiTabs
+ * @module yai-tabs-swipe
  * @version 1.0.0
  * @license MIT
  */
@@ -22,17 +22,17 @@ export interface SwypeThreshold {
  */
 export interface SwypeCallable {
     /** Called when swipe/drag starts */
-    swipeStart: ((context: SwipeStartContext, instance: YaiTabsSwype) => void) | null;
+    swipeStart: ((context: SwipeStartContext, instance: YaiTabsSwipe) => void) | null;
     /** Called during swipe/drag movement */
-    swipeMove: ((context: SwipeMoveContext, instance: YaiTabsSwype) => void) | null;
+    swipeMove: ((context: SwipeMoveContext, instance: YaiTabsSwipe) => void) | null;
     /** Called when swipe/drag ends */
-    swipeEnd: ((context: SwipeEndContext, instance: YaiTabsSwype) => void) | null;
+    swipeEnd: ((context: SwipeEndContext, instance: YaiTabsSwipe) => void) | null;
     /** Called before tab switch (can return false to cancel) */
-    beforeSwitch: ((context: BeforeSwitchContext, instance: YaiTabsSwype) => boolean | void) | null;
+    beforeSwitch: ((context: BeforeSwitchContext, instance: YaiTabsSwipe) => boolean | void) | null;
     /** Called after tab switch */
-    afterSwitch: ((context: AfterSwitchContext, instance: YaiTabsSwype) => void) | null;
+    afterSwitch: ((context: AfterSwitchContext, instance: YaiTabsSwipe) => void) | null;
     /** Called when drag is cancelled (e.g., global reset) */
-    dragCancelled: ((context: DragCancelledContext, instance: YaiTabsSwype) => void) | null;
+    dragCancelled: ((context: DragCancelledContext, instance: YaiTabsSwipe) => void) | null;
 }
 
 /**
@@ -124,7 +124,7 @@ export interface DragCancelledContext {
 }
 
 /**
- * Boundary behavior configuration for YaiTabsSwype
+ * Boundary behavior configuration for YaiTabsSwipe
  */
 export interface BoundaryBehavior {
     /** Loop from last to first tab and vice versa */
@@ -138,7 +138,7 @@ export interface BoundaryBehavior {
 }
 
 /**
- * Configuration options for YaiTabsSwype
+ * Configuration options for YaiTabsSwipe
  */
 export interface SwypeConfig {
     /** Swipe distance thresholds */
@@ -185,7 +185,7 @@ export interface SlideState {
 type MoveType = 'mouse' | 'touch';
 
 /**
- * YaiTabsSwype - Add swipe/drag navigation to YaiTabs
+ * YaiTabsSwipe - Add swipe/drag navigation to YaiTabs
  *
  * Provides mobile-first swipe gestures and desktop drag navigation for tab switching.
  * Works at every nesting level with automatic container scoping.
@@ -193,7 +193,7 @@ type MoveType = 'mouse' | 'touch';
  * @example
  * ```typescript
  * import { YaiTabs } from '@yaijs/core';
- * import { YaiTabsSwype } from '@yaijs/core/utils/yai-tabs-swype';
+ * import { YaiTabsSwipe } from '@yaijs/core/utils/yai-tabs-swype';
  *
  * const tabs = new YaiTabs({
  *     events: {
@@ -209,12 +209,12 @@ type MoveType = 'mouse' | 'touch';
  *     }
  * });
  *
- * const swype = new YaiTabsSwype({ threshold: { mobile: 50, desktop: 100 } })
+ * const swype = new YaiTabsSwipe({ threshold: { mobile: 50, desktop: 100 } })
  *     .setInstance(tabs)
  *     .watchHooks();
  * ```
  */
-export declare class YaiTabsSwype {
+export declare class YaiTabsSwipe {
     /**
      * Internal state tracking for drag/swipe gestures
      * @private
@@ -240,7 +240,7 @@ export declare class YaiTabsSwype {
     private config: SwypeConfig;
 
     /**
-     * Creates a new YaiTabsSwype instance
+     * Creates a new YaiTabsSwipe instance
      * @param customConfig - Custom configuration options (partial)
      */
     constructor(customConfig?: Partial<SwypeConfig>);
@@ -251,7 +251,7 @@ export declare class YaiTabsSwype {
      * @returns Returns this for chaining
      * @example
      * ```typescript
-     * const swype = new YaiTabsSwype().setInstance(tabs);
+     * const swype = new YaiTabsSwipe().setInstance(tabs);
      * ```
      */
     setInstance(tabsInstance: YaiTabs): this;
@@ -264,7 +264,7 @@ export declare class YaiTabsSwype {
      * @returns Result from callback execution
      * @private
      */
-    private _executeHook(hookName: string, context: any, instance?: YaiTabsSwype): any;
+    private _executeHook(hookName: string, context: any, instance?: YaiTabsSwipe): any;
 
     /**
      * Set a lifecycle callback hook
@@ -284,7 +284,7 @@ export declare class YaiTabsSwype {
      * });
      * ```
      */
-    hook(hookName: keyof SwypeCallable, callback: SwypeCallable[keyof SwypeCallable], instance?: YaiTabsSwype): this;
+    hook(hookName: keyof SwypeCallable, callback: SwypeCallable[keyof SwypeCallable], instance?: YaiTabsSwipe): this;
 
     /**
      * Get the closest tabs container element
@@ -417,7 +417,7 @@ export declare class YaiTabsSwype {
      * @throws {Error} If tabs instance is not set
      * @example
      * ```typescript
-     * const swype = new YaiTabsSwype()
+     * const swype = new YaiTabsSwipe()
      *     .setInstance(tabs)
      *     .hook('swipeStart', ({ panel }) => console.log('Started!'))
      *     .watchHooks();
@@ -452,4 +452,4 @@ export declare class YaiTabsSwype {
     isDragging(): boolean;
 }
 
-export default YaiTabsSwype;
+export default YaiTabsSwipe;

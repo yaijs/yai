@@ -1,14 +1,5 @@
 "use strict";
 
-/**
- * YaiViewport - Advanced Viewport Tracking System
- * High-performance viewport visibility tracking with spatial optimization for elements.
- *
- * @requires YEH - Expects YEH (YpsilonEventHandler) to be globally available
- * Load via: <script src="https://unpkg.com/@yaijs/yeh@1.0.0/yeh.js"></script>
- * Or ensure YEH is imported before this module
- */
-
 // Ensure YEH is available (for better error messages)
 if (typeof YEH === 'undefined') {
     throw new Error('YaiViewport requires YEH (YpsilonEventHandler) to be loaded. ' +

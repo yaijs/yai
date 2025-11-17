@@ -23,6 +23,7 @@
 
     /* Loader */
     --yai-tabs-loader-speed: 1.1s;
+    --yai-transition-short: 0.2s;
     --yai-tabs-loader-thickness: 1px;
     --yai-tabs-loader-button-thickness: 3px;
     --yai-tabs-loader-content-thickness: 4px;
@@ -33,11 +34,17 @@
     --yai-tabs-form-input-elements-padding: .6rem 1rem;
     --yai-tabs-form-input-elements-border-radius: var(--yai-tabs-form-border-radius, 5px);
     --yai-tabs-form-input-elements-box-shadow: var(--yai-tabs-shadow-subtle);
+
+    /* Alternative minimal-theme colors */
+    --yai-minimal-light-color: #ecf0f1;
+    --yai-minimal-primary-color: #0b68a6;
+    --yai-minimal-tabs-content-inactive-background: #e3e5e777;
+    --yai-minimal-tabs-content-inactive-color-muted: #555555;
 }
 
 /* =========================
-    SEMANTIC COLOR SYSTEM
-    ========================= */
+   SEMANTIC COLOR SYSTEM
+   ========================= */
 :root,
 [data-color-scheme="light"] {
     /* Core Colors - Used for text, backgrounds, and states */
@@ -87,17 +94,22 @@
     --yai-loader-color: var(--yai-tabs-color-accent);
 
     /* Shadows & Borders */
-    --yai-tabs-shadow-subtle-color: rgba(74, 55, 55, 0.2);
+    --yai-tabs-shadow-subtle-color: rgba(127, 97, 97, 0.2);
     --yai-tabs-shadow-medium-color: rgba(0, 33, 33, 0.2);
-    --yai-tabs-shadow-subtle: 0 0 4px 1px var(--yai-tabs-shadow-subtle-color);
-    --yai-tabs-shadow-medium: 0 1px 6px 1px var(--yai-tabs-shadow-medium-color);
     --yai-tabs-shadow-accent: rgba(220, 38, 38, 0.4);
+    --yai-tabs-shadow-subtle: 0 3px 3px -1px var(--yai-tabs-shadow-subtle-color),
+        -1px 0 2px -1px var(--yai-tabs-shadow-subtle-color),
+        1px 0 2px -1px var(--yai-tabs-shadow-subtle-color);
+    --yai-tabs-shadow-medium:
+        0 4px 3px -1px var(--yai-tabs-shadow-medium-color),
+        -1px 0 3px -1px var(--yai-tabs-shadow-medium-color),
+        1px 0 3px -1px var(--yai-tabs-shadow-medium-color);
 
     /* Navigation-specific shadows */
-    --yai-tabs-shadow-nav-top: 0 2px 7px 0;
-    --yai-tabs-shadow-nav-bottom: 0 -1px 6px 1px;
-    --yai-tabs-shadow-nav-left: 2px 1px 7px 2px;
-    --yai-tabs-shadow-nav-right: -2px 1px 7px 2px;
+    --yai-tabs-shadow-nav-top: 0 2px 5px 0;
+    --yai-tabs-shadow-nav-bottom: 0 -1px 5px 1px;
+    --yai-tabs-shadow-nav-left: 2px 1px 6px 2px;
+    --yai-tabs-shadow-nav-right: -2px 1px 5px 2px;
     --yai-tabs-nav-button-transition: all 0.3s ease-in-out;
 
     /* Component-specific variables */
@@ -106,6 +118,7 @@
     --yai-tabs-nav-button-active-color: var(--yai-tabs-color-accent);
     --yai-tabs-nav-button-active-background: var(--yai-tabs-color-background);
     --yai-tabs-content-background: var(--yai-tabs-color-background);
+    --yai-tabs-orientation-hint-color: var(--yai-tabs-color-text-muted);
 }
 
 [data-color-scheme="dark"] {
@@ -119,7 +132,7 @@
     --yai-tabs-content-inactive-color-muted: #c7ccd3;
 
     /* Brand Colors */
-    --yai-tabs-color-primary: #3b82f6;
+    --yai-tabs-color-primary: #3B37EC;
 
     --yai-tabs-color-secondary: #8b5cf6;
 
@@ -160,8 +173,21 @@
     --yai-tabs-nav-button-active-background: #121c31;
     --yai-tabs-content-background: #0c1528;
     --yai-tabs-nav-button-hover-background: #334155;
+    --yai-tabs-orientation-hint-color: var(--yai-tabs-color-dark);
 }
 
+/**
+ * Complete theme override
+ */
+ [data-theme="minimal"] {
+    --yai-loader-color: var(--yai-minimal-primary-color);
+    --yai-tabs-content-background: #fff;
+    --yai-tabs-color-text: #3e3535;
+    --yai-tabs-nav-button-active-background: #fff;
+    --yai-tabs-nav-border-bottom: #d5d5d573;
+    --yai-tabs-nav-box-shadow: #d5d5d573;
+    --yai-minimal-box-shadow: rgba(102, 96, 96, 0.5);
+}
 
 /* Base component styles */
 [data-yai-tabs] {
@@ -576,6 +602,10 @@
     box-shadow: var(--yai-tabs-shadow-subtle);
 }
 
+[data-yai-tabs][data-nav="bottom"] > nav[data-controller] {
+    --yai-tabs-shadow-subtle: 0 0 4px var(--yai-tabs-shadow-medium-color);
+}
+
 [data-theme="default"] nav[data-controller] button {
     color: var(--yai-tabs-color-text-muted);
     background-color: var(--yai-tabs-nav-button-background);
@@ -625,11 +655,16 @@
 .yai-orientation-hint {
     padding: 14px;
     text-align: center;
+    background: var(--yai-tabs-nav-background);
+    color: var(--yai-tabs-color-text-muted);
     box-shadow: inset -1px 5px 5px 0px #5f51518b;
-    color: var(--yai-tabs-orientation-hint-color, #e9e2e2);
     font-size: 14px;
     user-select: none;
     cursor: default;
+    display: none;
+}
+.tab-active .yai-orientation-hint {
+    display: block;
 }
 
 /* Semantic Variants for Active Buttons */
@@ -750,6 +785,108 @@
     --yai-tabs-shadow-accent: rgba(181, 207, 230, 0.649);
 }
 
+
+[data-theme="minimal"] {
+    box-shadow: 0 4px 6px 0px var(--yai-minimal-box-shadow);
+}
+[data-theme="minimal"] [data-content] {
+    --yai-tabs-content-inactive-background: var(--yai-minimal-tabs-content-inactive-background);
+    --yai-tabs-content-inactive-color-muted: var(--yai-minimal-tabs-content-inactive-color-muted);
+}
+[data-theme="minimal"] [data-content] {
+    background-color: var(--yai-tabs-content-inactive-background);
+}
+[data-theme="minimal"] [data-tab].active {
+    color: var(--yai-tabs-color-text);
+    background-color: var(--yai-tabs-content-background);
+}
+[data-theme="minimal"] nav[data-controller] {
+    box-shadow: none;
+    background: transparent;
+    display: flex;
+    background-color: var(--yai-minimal-light-color);
+    box-shadow: inset 0 -3px 0 var(--yai-tabs-nav-box-shadow);
+}
+[data-theme="minimal"][data-nav="bottom"] nav[data-controller] {
+    box-shadow: inset 0 3px 0 var(--yai-tabs-nav-box-shadow);
+}
+[data-theme="minimal"][data-nav="left"] nav[data-controller] {
+    box-shadow: inset -3px 0 0 var(--yai-tabs-nav-box-shadow);
+}
+[data-theme="minimal"][data-nav="right"] nav[data-controller] {
+    box-shadow: inset 3px 0 0 var(--yai-tabs-nav-box-shadow);
+}
+[data-yai-tabs][data-theme="minimal"] nav[data-controller] button {
+    padding: 14px 20px;
+}
+[data-theme="minimal"] nav[data-controller] button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: var(--transition);
+    color: var(--text-color);
+    position: relative;
+}
+[data-theme="minimal"] nav[data-controller] button,
+[data-theme="minimal"] nav[data-controller] button.active:before {
+    transition: all var(--yai-transition-short) ease-in-out;
+}
+[data-theme="minimal"] nav[data-controller] button.active {
+    border-bottom-color: inherit;
+    background-color: var(--yai-tabs-nav-button-active-background);
+    color: var(--yai-minimal-primary-color);
+    text-shadow: 0.6px 0 currentColor, -0.6px 0 currentColor;
+}
+[data-theme="minimal"] nav[data-controller] button.active::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    opacity: .8;
+    width: 100%;
+    height: 3px;
+    background-color: var(--yai-minimal-primary-color);
+}
+[data-theme="minimal"][data-nav="bottom"] > nav[data-controller] button.active::before {
+    top: 0;
+}
+[data-theme="minimal"][data-nav="left"] > nav[data-controller] button.active::before,
+[data-theme="minimal"][data-nav="right"] > nav[data-controller] button.active::before {
+    top: unset;
+    bottom: unset;
+    left: unset;
+    right: 0;
+    width: 3px;
+    height: 100%;
+}
+[data-theme="minimal"][data-nav="right"] > nav[data-controller] button.active::before {
+    top: unset;
+    bottom: unset;
+    left: 0;
+    right: unset;
+}
+[data-theme="minimal"] nav[data-controller] button.yai-loading {
+    --yai-loader-color: var(--yai-minimal-primary-color);
+    color: transparent;
+}
+
+@media (max-width: 740px) {
+    [data-theme="minimal"][data-nav] nav[data-controller] button.active::before,
+    [data-theme="minimal"][data-nav="left"] nav[data-controller] button.active::before,
+    [data-theme="minimal"][data-nav="right"] nav[data-controller] button.active::before,
+    [data-theme="minimal"][data-nav="bottom"] nav[data-controller] button.active::before,
+    [data-theme="minimal"][data-nav="top"] nav[data-controller] button.active::before {
+        width: 100%;
+        height: 3px;
+        top: unset;
+        left: 0;
+        right: unset;
+        bottom: 0;
+    }
+}
+
 [data-color-apply="primary"] { color: var(--yai-tabs-color-primary); }
 [data-color-apply="secondary"] { color: var(--yai-tabs-color-secondary); }
 [data-color-apply="success"] { color: var(--yai-tabs-color-success); }
@@ -760,14 +897,14 @@
 [data-color-apply="light"] { color: var(--yai-tabs-color-light); }
 
 /* .yai-btns */
-[data-yai-tabs] .yai-btn-primary { background-color: var(--yai-tabs-color-primary); color: var(--yai-tabs-color-primary-contrast) }
-[data-yai-tabs] .yai-btn-secondary { background-color: var(--yai-tabs-color-secondary); color: var(--yai-tabs-color-secondary-contrast) }
-[data-yai-tabs] .yai-btn-success { background-color: var(--yai-tabs-color-success); color: var(--yai-tabs-color-success-contrast) }
-[data-yai-tabs] .yai-btn-warning { background-color: var(--yai-tabs-color-warning); color: var(--yai-tabs-color-warning-contrast) }
-[data-yai-tabs] .yai-btn-danger { background-color: var(--yai-tabs-color-danger); color: var(--yai-tabs-color-danger-contrast) }
-[data-yai-tabs] .yai-btn-funky { background-color: var(--yai-tabs-color-funky); color: var(--yai-tabs-color-funky-contrast) }
-[data-yai-tabs] .yai-btn-dark { background-color: var(--yai-tabs-color-dark); color: var(--yai-tabs-color-dark-contrast) }
-[data-yai-tabs] .yai-btn-light { background-color: var(--yai-tabs-color-light); color: var(--yai-tabs-color-light-contrast) }
+[data-yai-tabs] .yai-btn-primary { --yai-loader-color: var(--yai-tabs-color-primary-contrast); background-color: var(--yai-tabs-color-primary); color: var(--yai-tabs-color-primary-contrast); }
+[data-yai-tabs] .yai-btn-secondary { --yai-loader-color: var(--yai-tabs-color-secondary-contrast); background-color: var(--yai-tabs-color-secondary); color: var(--yai-tabs-color-secondary-contrast) }
+[data-yai-tabs] .yai-btn-success { --yai-loader-color: var(--yai-tabs-color-success-contrast); background-color: var(--yai-tabs-color-success); color: var(--yai-tabs-color-success-contrast) }
+[data-yai-tabs] .yai-btn-warning { --yai-loader-color: var(--yai-tabs-color-warning-contrast); background-color: var(--yai-tabs-color-warning); color: var(--yai-tabs-color-warning-contrast) }
+[data-yai-tabs] .yai-btn-danger { --yai-loader-color: var(--yai-tabs-color-danger-contrast); background-color: var(--yai-tabs-color-danger); color: var(--yai-tabs-color-danger-contrast) }
+[data-yai-tabs] .yai-btn-funky { --yai-loader-color: var(--yai-tabs-color-funky-contrast); background-color: var(--yai-tabs-color-funky); color: var(--yai-tabs-color-funky-contrast) }
+[data-yai-tabs] .yai-btn-dark { --yai-loader-color: var(--yai-tabs-color-dark-contrast); background-color: var(--yai-tabs-color-dark); color: var(--yai-tabs-color-dark-contrast) }
+[data-yai-tabs] .yai-btn-light { --yai-loader-color: var(--yai-tabs-color-light-contrast); background-color: var(--yai-tabs-color-light); color: var(--yai-tabs-color-light-contrast) }
 
 /* --- YAI form elements --- */
 [data-yai-tabs] .yai-input,
@@ -777,7 +914,6 @@
     box-shadow: var(--yai-tabs-form-input-elements-box-shadow);
     border-radius: var(--yai-tabs-form-input-elements-border-radius);
 }
-
 [data-yai-tabs] .yai-input,
 [data-yai-tabs] .yai-select {
     display: block;
@@ -785,25 +921,21 @@
     border: var(--yai-tabs-form-input-elements-border);
     background: var(--yai-tabs-form-input-elements-background);
 }
-
 [data-yai-tabs] .yai-input:focus,
 [data-yai-tabs] .yai-select:focus {
     outline: 2px solid var(--yai-tabs-color-focus);
     box-shadow: 0 0 0 3px var(--yai-tabs-color-focus-ring);
     cursor: default;
 }
-
 [data-yai-tabs] .yai-input,
 [data-yai-tabs] .yai-select,
 [data-yai-tabs] .yai-btn {
     cursor: pointer;
     appearance: auto;
 }
-
 [data-yai-tabs] .yai-btn {
     border: 0 none;
 }
-
 /* checkbox */
 [data-yai-tabs] .yai-checkbox {
     display: inline-flex;
@@ -812,7 +944,6 @@
     cursor: pointer;
     user-select: none;
 }
-
 [data-yai-tabs] .yai-checkbox input {
     width: 1.1rem;
     height: 1.1rem;
@@ -870,19 +1001,16 @@
 }
 
 /**
-* YaiTabsSwype - Orbital UI Navigation */
-/* [data-mousedown] [data-content] {
-    transition: all .1s ease-in-out;
-} */
-[data-mousedown] [data-tab].dragging {
+* YaiTabsSwipe - Orbital UI Navigation */
+[data-swipe] [data-tab].dragging {
     cursor: grab;
     z-index: 1000;
     user-select: none;
     -webkit-touch-callout: none;
     -webkit-tap-highlight-color: transparent;
 }
-[data-mousedown] > [data-content] { overflow: hidden; }
-[data-mousedown] .draggable { cursor: grab; }
+[data-swipe] > [data-content] { overflow: hidden; }
+[data-swipe] .draggable { cursor: grab; }
 
 /**
  * Loading states */
@@ -907,6 +1035,11 @@
     background: conic-gradient(transparent, var(--yai-loader-color));
     mask: radial-gradient(farthest-side, transparent calc(100% - var(--yai-tabs-loader-thickness)), var(--yai-loader-color, #022031) 0);
 }
+
+[data-content].yai-loading {
+    width: 100%;
+}
+
 button.yai-loading::after {
     --yai-tabs-loader-thickness: var(--yai-tabs-loader-button-thickness, 34px);
     top: 50%;
@@ -937,14 +1070,14 @@ div[data-content].yai-loading::after {
 /**
  * Misc
  */
-.yai-fade-in { animation: yai-fade-in .4s ease-in-out; }
+.yai-fade-in { animation: yai-fade-in .3s ease-in-out; }
 
 @keyframes yai-spin {
     to { transform: rotate(360deg); }
 }
 @keyframes yai-fade-in {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    0%, 60% { opacity: 0; transform: translateY(15px); }
+    100% { opacity: 1; transform: translateY(0); }
 }
 @keyframes yai-placeholder-in {
     0%, 35% { opacity: 0; }
@@ -998,12 +1131,15 @@ div[data-content].yai-loading::after {
         padding: 16px 8px;
     }
 }
+
 @media (prefers-reduced-motion: reduce) {
     [data-yai-tabs] nav[data-controller] button,
     [data-yai-tabs][data-behavior]>[data-content]>[data-tab].active,
+    [data-yai-tabs] [data-content] [data-tab],
     [data-yai-tabs] [data-content] [data-tab].active,
     [data-yai-tabs]:not(.tab-active) [data-content]::before,
     .yai-loading::after {
+        --yai-transition-short: 0s;
         filter: none;
         transition: none;
         animation: none;

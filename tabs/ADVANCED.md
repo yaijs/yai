@@ -8,7 +8,7 @@ Advanced patterns, real-world examples, and architectural deep-dives for YaiTabs
 - [Keyboard Navigation API](#keyboard-navigation-api) 🎹 NEW
 - [Swipe/Drag Navigation](#swipedrag-navigation) 🎯 NEW
 - [Single-Tab Applications](#single-tab-applications)
-- [Event Bus Patterns](#event-bus-patterns)
+- [Event Hub Patterns](#event-hub-patterns)
 - [Analytics Integration](#analytics-integration)
 - [Dynamic Content Management](#dynamic-content-management)
 - [Breadcrumb Navigation](#breadcrumb-navigation)
@@ -718,7 +718,7 @@ async function loadView(viewName) {
 
 ---
 
-## Event Bus Patterns
+## Event Hub Patterns
 
 **Super Subscriber**
 

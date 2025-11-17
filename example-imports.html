@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YaiJS Import Examples</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .import-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .import-section h3 {
+            margin-top: 0;
+            color: #2563eb;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .import-section .badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .badge.recommended { background: #10b981; color: white; }
+        .badge.minimal { background: #6366f1; color: white; }
+        .badge.complete { background: #f59e0b; color: white; }
+        .badge.granular { background: #8b5cf6; color: white; }
+        .badge.legacy { background: #6b7280; color: white; }
+
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 16px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        code {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+        }
+        .comment {
+            color: #94a3b8;
+        }
+        .keyword {
+            color: #c792ea;
+        }
+        .string {
+            color: #c3e88d;
+        }
+        .function {
+            color: #82aaff;
+        }
+        p {
+            color: #64748b;
+            line-height: 1.6;
+        }
+        .size-info {
+            background: #f1f5f9;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            color: #475569;
+            margin-top: 10px;
+        }
+        h2 {
+            color: #1e293b;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>📦 YaiJS Import Examples</h1>
+    <p style="font-size: 1.1rem; color: #475569;">
+        YaiJS offers flexible import strategies to match your project needs.
+        Choose from bundles for convenience or granular imports for optimal tree-shaking.
+    </p>
+
+    <div class="import-section" style="background: #fef3c7; border-left: 4px solid #f59e0b;">
+        <h3 style="color: #92400e;">ℹ️ About YEH & Bundles</h3>
+        <p style="color: #78350f;">
+            <strong>YEH (Yai Event Hub)</strong> is a standalone library published separately as
+            <code style="background: #fbbf24; color: #78350f; padding: 2px 6px; border-radius: 3px;">@yaijs/yeh</code>.
+            It's the foundation for YaiJS but can be used independently in any project.
+        </p>
+        <p style="color: #78350f;">
+            <strong>Bundles are CDN-only:</strong> The bundle files (<code>yai-bundle.js</code>, etc.) are designed for
+            CDN usage and include YEH automatically. For NPM installations, install both
+            <code>@yaijs/yeh</code> and <code>@yaijs/core</code> separately.
+        </p>
+        <p style="color: #78350f; margin-bottom: 0;">
+            <strong>ESM-only:</strong> YaiJS is built with modern ES modules. Browser usage requires
+            <code>&lt;script type="module"&gt;</code> - standard script tags won't work.
+            Supports all modern browsers (Chrome 61+, Firefox 60+, Safari 11+, Edge 79+).
+        </p>
+    </div>
+
+    <!-- NPM Package Imports -->
+    <h2>📦 NPM Package Imports</h2>
+
+    <div class="import-section">
+        <h3>
+            NPM Install (Recommended)
+            <span class="badge recommended">Recommended</span>
+        </h3>
+        <p>
+            Install both YEH and YaiJS packages, then import what you need.
+            Perfect for production builds with tree-shaking.
+        </p>
+        <pre><code><span class="comment">// Install both packages</span>
+<span class="comment">// npm install @yaijs/yeh @yaijs/core</span>
+
+<span class="comment">// Import YEH foundation</span>
+<span class="keyword">import</span> { YEH } <span class="keyword">from</span> <span class="string">'@yaijs/yeh'</span>;
+
+<span class="comment">// Import YaiJS components (granular)</span>
+<span class="keyword">import</span> { YaiTabs } <span class="keyword">from</span> <span class="string">'@yaijs/core/tabs'</span>;
+<span class="keyword">import</span> { YaiTabsSwipe } <span class="keyword">from</span> <span class="string">'@yaijs/core/swype'</span>;
+<span class="keyword">import</span> { YaiViewport } <span class="keyword">from</span> <span class="string">'@yaijs/core/viewport'</span>;
+
+<span class="comment">// Auto-initialized on instantiation</span>
+<span class="keyword">const</span> tabs = <span class="keyword">new</span> <span class="function">YaiTabs</span>();
+<span class="keyword">const</span> swype = <span class="keyword">new</span> <span class="function">YaiTabsSwipe</span>().<span class="function">setInstance</span>(tabs).<span class="function">watchHooks</span>();</code></pre>
+        <div class="size-info">
+            📦 Install: <code>npm install @yaijs/yeh @yaijs/core</code>
+        </div>
+    </div>
+
+
+    <div class="import-section">
+        <h3>
+            Granular Imports (Tree-Shakeable)
+            <span class="badge granular">Optimal</span>
+        </h3>
+        <p>
+            Import only what you need. Perfect for custom builds and optimal bundle sizes.
+            <strong>Note:</strong> When using granular imports, you'll need to install YEH separately.
+        </p>
+        <pre><code><span class="comment">// YEH must be installed separately for granular imports</span>
+<span class="keyword">import</span> { YEH } <span class="keyword">from</span> <span class="string">'@yaijs/yeh'</span>;
+
+<span class="comment">// Import individual YaiJS components</span>
+<span class="keyword">import</span> { YaiCore } <span class="keyword">from</span> <span class="string">'@yaijs/core/core'</span>;
+<span class="keyword">import</span> { YaiTabs } <span class="keyword">from</span> <span class="string">'@yaijs/core/tabs'</span>;
+<span class="keyword">import</span> { YaiTabsSwipe } <span class="keyword">from</span> <span class="string">'@yaijs/core/swype'</span>;
+<span class="keyword">import</span> { YaiAutoSwitch } <span class="keyword">from</span> <span class="string">'@yaijs/core/autoswitch'</span>;
+<span class="keyword">import</span> { YaiViewport } <span class="keyword">from</span> <span class="string">'@yaijs/core/viewport'</span>;
+<span class="keyword">import</span> { YaiSearchAndClick } <span class="keyword">from</span> <span class="string">'@yaijs/core/search-and-click'</span>;
+
+<span class="comment">// Components auto-initialize - only what you import gets bundled</span>
+<span class="keyword">const</span> tabs = <span class="keyword">new</span> <span class="function">YaiTabs</span>();</code></pre>
+        <div class="size-info">
+            ⚡ Best for tree-shaking - your bundler only includes what you use
+        </div>
+    </div>
+
+    <div class="import-section">
+        <h3>
+            YEH Only (Standalone)
+            <span class="badge granular">Foundation</span>
+        </h3>
+        <p>
+            Use YEH without YaiJS components. Perfect when you only need the event delegation system
+            for your own custom components.
+        </p>
+        <pre><code><span class="comment">// Install: npm install @yaijs/yeh</span>
+<span class="keyword">import</span> { YEH } <span class="keyword">from</span> <span class="string">'@yaijs/yeh'</span>;
+
+<span class="comment">// Use YEH for your own event delegation</span>
+<span class="keyword">const</span> hub = <span class="keyword">new</span> <span class="function">YEH</span>();
+hub.<span class="function">on</span>(<span class="string">'.my-button'</span>, <span class="string">'click'</span>, (event) => {
+    console.<span class="function">log</span>(<span class="string">'Button clicked!'</span>, event.target);
+});</code></pre>
+        <div class="size-info">
+            📦 YEH standalone: ~8 KB uncompressed, ~3 KB gzipped
+        </div>
+    </div>
+
+    <!-- CDN Imports -->
+    <h2>🌐 CDN Imports (Direct Browser Usage)</h2>
+
+    <div class="import-section">
+        <h3>
+            ESM Import from CDN
+            <span class="badge recommended">Recommended</span>
+        </h3>
+        <p>
+            Import directly from JSDelivr CDN. Perfect for quick prototypes and no-build setups.
+        </p>
+        <pre><code><span class="comment">// ESM import from CDN (auto-gzipped by JSDelivr)</span>
+<span class="keyword">import</span> { YaiTabs, YaiTabsSwipe, YEH }
+    <span class="keyword">from</span> <span class="string">'https://cdn.jsdelivr.net/npm/@yaijs/core/dist/yai-bundle.js'</span>;
+
+<span class="comment">// Or full bundle</span>
+<span class="keyword">import</span> { YaiTabs, YaiAutoSwitch, YEH }
+    <span class="keyword">from</span> <span class="string">'https://cdn.jsdelivr.net/npm/@yaijs/core/dist/yai-bundle-full.js'</span>;
+
+<span class="comment">// Components auto-initialize on instantiation</span>
+<span class="keyword">const</span> tabs = <span class="keyword">new</span> <span class="function">YaiTabs</span>();
+<span class="keyword">const</span> autoSwitch = <span class="keyword">new</span> <span class="function">YaiAutoSwitch</span>().<span class="function">start</span>();</code></pre>
+        <div class="size-info">
+            🚀 JSDelivr provides automatic Brotli/gzip compression and global CDN caching
+        </div>
+    </div>
+
+    <div class="import-section">
+        <h3>
+            Script Tag with window.YaiJS Global
+            <span class="badge legacy">Browser</span>
+        </h3>
+        <p>
+            Use script tags to load YaiJS and access via window.YaiJS global.
+            Works in any browser without build tools.
+        </p>
+        <pre><code><span class="comment">&lt;!-- Load bundle via script tag --&gt;</span>
+<span class="keyword">&lt;script</span> type=<span class="string">"module"</span> src=<span class="string">"https://cdn.jsdelivr.net/npm/@yaijs/core/dist/yai-bundle.js"</span><span class="keyword">&gt;&lt;/script&gt;</span>
+
+<span class="keyword">&lt;script</span> type=<span class="string">"module"</span><span class="keyword">&gt;</span>
+    <span class="comment">// Access via window.YaiJS global - components auto-initialize</span>
+    <span class="keyword">const</span> { YaiTabs, YaiTabsSwipe, YEH } = window.YaiJS;
+
+    <span class="keyword">const</span> tabs = <span class="keyword">new</span> <span class="function">YaiTabs</span>();
+    <span class="keyword">const</span> swype = <span class="keyword">new</span> <span class="function">YaiTabsSwipe</span>().<span class="function">setInstance</span>(tabs).<span class="function">watchHooks</span>();
+<span class="keyword">&lt;/script&gt;</span></code></pre>
+        <div class="size-info">
+            🌍 Works everywhere - no build tools required, all browsers supported
+        </div>
+    </div>
+
+    <div class="import-section">
+        <h3>
+            Direct File Access via GitHub CDN
+            <span class="badge legacy">Advanced</span>
+        </h3>
+        <p>
+            Access individual files directly from GitHub via JSDelivr.
+            Useful for custom setups and experimentation.
+        </p>
+        <pre><code><span class="comment">// Direct file access from GitHub repo</span>
+<span class="keyword">import</span> { YaiTabs }
+    <span class="keyword">from</span> <span class="string">'https://cdn.jsdelivr.net/gh/yaijs/yai/tabs/yai-tabs.js'</span>;
+
+<span class="keyword">import</span> { YaiTabsSwipe }
+    <span class="keyword">from</span> <span class="string">'https://cdn.jsdelivr.net/gh/yaijs/yai/utils/yai-tabs-swipe.js'</span>;
+
+<span class="comment">// Auto-initialized</span>
+<span class="keyword">const</span> tabs = <span class="keyword">new</span> <span class="function">YaiTabs</span>();</code></pre>
+        <div class="size-info">
+            🔧 Direct GitHub access - useful for testing unreleased versions
+        </div>
+    </div>
+
+    <!-- Bundle Comparison -->
+    <h2>📊 Bundle Comparison</h2>
+
+    <div class="import-section">
+        <h3>Which Bundle Should I Use?</h3>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+            <thead>
+                <tr style="background: #f1f5f9;">
+                    <th style="padding: 12px; text-align: left; border: 1px solid #e2e8f0;">Bundle</th>
+                    <th style="padding: 12px; text-align: left; border: 1px solid #e2e8f0;">Size (gzipped)</th>
+                    <th style="padding: 12px; text-align: left; border: 1px solid #e2e8f0;">Includes</th>
+                    <th style="padding: 12px; text-align: left; border: 1px solid #e2e8f0;">Best For</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="padding: 12px; border: 1px solid #e2e8f0;"><strong>yai-bundle-core.js</strong></td>
+                    <td style="padding: 12px; border: 1px solid #e2e8f0;">~12-15 KB</td>
+                    <td style="padding: 12px; border: 1px solid #e2e8f0;">YEH, YaiCore, YaiTabs</td>
+                    <td style="padding: 12px; border: 1px solid #e2e8f0;">Minimal production builds</td>
+                </tr>
+                <tr style="background: #f0fdf4;">
+                    <td style="padding: 12px; border: 1px solid #e2e8f0;"><strong>yai-bundle.js</strong> ⭐</td>
+                    <td style="padding: 12px; border: 1px solid #e2e8f0;">~16-20 KB</td>
+                    <td style="padding: 12px; border: 1px solid #e2e8f0;">+ YaiTabsSwipe, YaiViewport</td>
+                    <td style="padding: 12px; border: 1px solid #e2e8f0;"><strong>Most production apps</strong></td>
+                </tr>
+                <tr>
+                    <td style="padding: 12px; border: 1px solid #e2e8f0;"><strong>yai-bundle-full.js</strong></td>
+                    <td style="padding: 12px; border: 1px solid #e2e8f0;">~22-28 KB</td>
+                    <td style="padding: 12px; border: 1px solid #e2e8f0;">+ YaiAutoSwitch, YaiSearchAndClick</td>
+                    <td style="padding: 12px; border: 1px solid #e2e8f0;">Development & testing</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="import-section" style="background: #f0f9ff; border-left: 4px solid #0ea5e9;">
+        <h3 style="color: #0c4a6e;">💡 Pro Tips</h3>
+        <ul style="color: #0c4a6e; line-height: 1.8;">
+            <li><strong>ESM-only architecture:</strong> All files use ES modules - requires <code>&lt;script type="module"&gt;</code> in browsers</li>
+            <li><strong>YEH + YaiJS relationship:</strong> YEH (<code>@yaijs/yeh</code>) is standalone, YaiJS builds on it</li>
+            <li><strong>NPM users:</strong> Install both packages: <code>npm install @yaijs/yeh @yaijs/core</code></li>
+            <li><strong>CDN users:</strong> Use bundles (<code>yai-bundle.js</code>) - YEH is included automatically</li>
+            <li><strong>Bundles are CDN-only:</strong> Bundle files only work via CDN, not via npm install</li>
+            <li><strong>Tree-shaking:</strong> Use granular imports (<code>@yaijs/core/tabs</code>, etc.)</li>
+            <li><strong>Just event delegation:</strong> Install only <code>@yaijs/yeh</code> if you don't need tabs</li>
+            <li><strong>No build tools:</strong> Use CDN bundles with script tags (must be <code>type="module"</code>)</li>
+            <li><strong>TypeScript:</strong> All packages include full type definitions (.d.ts files)</li>
+            <li><strong>Browser support:</strong> Chrome 61+, Firefox 60+, Safari 11+, Edge 79+ (ESM requirement)</li>
+        </ul>
+    </div>
+
+</body>
+</html>

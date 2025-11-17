@@ -1,16 +1,51 @@
 {
   "name": "@yaijs/core",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Advanced web components built on YpsilonEventHandler - the world's first DOM Event Scoping System",
   "type": "module",
-  "main": "dist/yai-bundle.js",
-  "types": "yai-core.d.ts",
+  "main": "./dist/yai-bundle.js",
+  "types": "./dist/yai-bundle.d.ts",
   "exports": {
-    ".": "./dist/yai-bundle.js",
-    "./core": "./yai-core.js",
-    "./tabs": "./tabs/yai-tabs.js",
-    "./autoswitch": "./utils/yai-auto-switch.js",
-    "./viewport": "./utils/yai-viewport.js"
+    ".": {
+      "types": "./dist/yai-bundle.d.ts",
+      "default": "./dist/yai-bundle.js"
+    },
+    "./bundle": {
+      "types": "./dist/yai-bundle.d.ts",
+      "default": "./dist/yai-bundle.js"
+    },
+    "./bundle-core": {
+      "types": "./dist/yai-bundle-core.d.ts",
+      "default": "./dist/yai-bundle-core.js"
+    },
+    "./bundle-full": {
+      "types": "./dist/yai-bundle-full.d.ts",
+      "default": "./dist/yai-bundle-full.js"
+    },
+    "./core": {
+      "types": "./yai-core.d.ts",
+      "default": "./yai-core.js"
+    },
+    "./tabs": {
+      "types": "./tabs/yai-tabs.d.ts",
+      "default": "./tabs/yai-tabs.js"
+    },
+    "./swipe": {
+      "types": "./utils/yai-tabs-swipe.d.ts",
+      "default": "./utils/yai-tabs-swipe.js"
+    },
+    "./autoswitch": {
+      "types": "./utils/yai-auto-switch.d.ts",
+      "default": "./utils/yai-auto-switch.js"
+    },
+    "./viewport": {
+      "types": "./utils/yai-viewport.d.ts",
+      "default": "./utils/yai-viewport.js"
+    },
+    "./search-and-click": {
+      "types": "./utils/yai-search-and-click.d.ts",
+      "default": "./utils/yai-search-and-click.js"
+    }
   },
   "files": [
     "dist/",
@@ -74,7 +109,7 @@
   },
   "dependencies": {},
   "peerDependencies": {
-    "@yaijs/yeh": "^1.0.0"
+    "@yaijs/yeh": "^1.0.3"
   },
   "engines": {
     "node": ">=14.0.0"

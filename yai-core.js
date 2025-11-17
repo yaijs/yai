@@ -98,7 +98,7 @@ class YaiCore {
 
             // Lifecycle callback hooks for eventListeners
             callable: {
-                // Event bus, configurable listeners
+                // Event hub, configurable listeners
                 // in tabs, where devs can hook in
                 eventClick: null,
                 eventKeydown: null,
@@ -115,6 +115,7 @@ class YaiCore {
                 globalMouseWatch: null, // Hook for Mouse events on defined element
                 afterInit: null,
                 contentLoading: null,   // When dynamic content fetch starts (show loading UI)
+                contentPostLoading: null, // After Dynamic content is injected, but still is loading
                 contentLoaded: null,    // When dynamic content fetch completes (hide loading UI)
                 validateUrl: null,      // Custom URL validation for dynamic content loading
                 sanitizeHtml: null,     // Custom HTML sanitization for dynamic content
@@ -124,6 +125,26 @@ class YaiCore {
                 removingActiveContent: null,
             },
         };
+    }
+
+    /**
+     * Static list of events that don't need data-attributes for auto-generation
+     * These events are naturally captured through event delegation
+     * Based on YEH's passiveEvents list + keyboard/mouse/focus events
+     */
+    static getSkipAutoGenerateEvents() {
+        return [
+            // Window/passive events
+            'scroll', 'touchstart', 'touchmove', 'touchend', 'touchcancel',
+            'wheel', 'mousewheel', 'pointermove', 'pointerenter', 'pointerleave',
+            'resize', 'orientationchange', 'load', 'beforeunload', 'unload', 'hashchange',
+            // Keyboard events (naturally captured)
+            'keydown', 'keyup', 'keypress',
+            // Mouse events (naturally captured)
+            'mousedown', 'mousemove', 'mouseup', 'mouseover', 'mouseout', 'mouseenter', 'mouseleave',
+            // Focus events (naturally captured)
+            'focus', 'blur', 'focusin', 'focusout'
+        ];
     }
 
     /**
@@ -184,8 +205,8 @@ class YaiCore {
         // Default event types required for tabs functionality
         const defaultEvents = ['click', 'keydown', 'hashchange'];
 
-        // Extract event types from setListener configuration
-        const configuredEvents = this._extractEventTypes(eventOptions.setListener);
+        // Extract event types from selectors (first parameter, not eventOptions!)
+        const configuredEvents = this._extractEventTypes(selectors);
 
         // Find custom events
         const customEvents = configuredEvents.filter(event => !defaultEvents.includes(event));
@@ -195,6 +216,9 @@ class YaiCore {
 
         // Auto-generate method handlers for custom events if not provided
         this._generateMethodHandlers(customEvents, options);
+
+        // Auto-generate data-attributes for all configured events
+        this._autoGenerateActionableAttributes(configuredEvents, eventOptions);
 
         const methods = {
             click:      { handleClick: (...args) => this.handleEventProxy(...args) },
@@ -211,7 +235,10 @@ class YaiCore {
         }
 
         const finalOptions = {
-            ...eventOptions, ...options,
+            ...eventOptions,
+            ...options,
+            // Ensure auto-generated actionableAttributes are preserved
+            actionableAttributes: eventOptions.actionableAttributes,
             methods: methods,
             enableHandlerValidation: true
         };
@@ -286,11 +313,35 @@ class YaiCore {
                     const context = this;
                     const action = target.dataset[eventType] || null;
 
-                    // console.log( event, target, container )
                     this._executeHook(`event${this._capitalize(eventType)}`, { event, target, container, action, context });
                 };
             }
         });
+    }
+
+    // Auto-generate data-attributes for configured events
+    _autoGenerateActionableAttributes(configuredEvents, eventOptions) {
+        // Get skip list from static method (can be checked via YaiCore.getSkipAutoGenerateEvents())
+        const skipEvents = YaiCore.getSkipAutoGenerateEvents();
+
+        const autoAttributes = configuredEvents
+            .filter(eventType => !skipEvents.includes(eventType))
+            .map(eventType => `data-${eventType}`);
+
+        // Merge: manual actionableAttributes + auto-generated + customAttributes
+        if (!eventOptions.actionableAttributes) {
+            eventOptions.actionableAttributes = [];
+        }
+
+        const customAttributes = eventOptions.customAttributes || [];
+
+        eventOptions.actionableAttributes = [
+            ...new Set([
+                ...eventOptions.actionableAttributes,
+                ...autoAttributes,
+                ...customAttributes
+            ])
+        ];
     }
 
     // Utility to capitalize event names (mouseenter -> Mouseenter)
@@ -708,9 +759,6 @@ class YaiCore {
                 }
             }
         }
-        else {
-            window.location.hash = newHash;
-        }
     }
 
     /**
@@ -805,9 +853,6 @@ class YaiCore {
 
             const html = await response.text();
 
-            // Apply post-fetch delays (data-post-delay, data-min-loading)
-            await this._applyPostFetchDelays(target);
-
             // Sanitize HTML before injecting
             const sanitizedHtml = this._sanitizeHtml(html);
 
@@ -815,17 +860,26 @@ class YaiCore {
                 content.insertAdjacentHTML('beforeend', sanitizedHtml);
             } else {
                 content.innerHTML = sanitizedHtml;
-
-                // Remove load trigger attributes for DOM caching only if content was viewed
-                if (triggerElement && !triggerElement.hasAttribute('data-url-refresh')) {
-                    triggerElement.removeAttribute('data-url');
-                    triggerElement.removeAttribute('data-target');
-                    triggerElement.removeAttribute('data-append');
-                }
             }
 
             // Initialize any nested YaiTabs components in the loaded content
             this._initializeNestedComponents(content);
+
+            // Process content while loading post injection in a hook
+            this._executeHook('contentPostLoading', { html, url, targetSelector, container: content, target });
+
+            // Process content async while loading indicator is still visible
+            await this._processWhileLoading(content, target, triggerElement);
+
+            // Apply post-fetch delays (data-post-delay, data-min-loading)
+            await this._applyPostFetchDelays(target);
+
+            // Remove load trigger attributes for DOM caching only if content was viewed
+            if (triggerElement && !triggerElement.hasAttribute('data-url-refresh')) {
+                triggerElement.removeAttribute('data-url');
+                triggerElement.removeAttribute('data-target');
+                triggerElement.removeAttribute('data-append');
+            }
 
             // Post-process the loaded content
             this._postProcessContent(content);
@@ -1017,7 +1071,6 @@ class YaiCore {
             return true;
         } catch (e) {
             // If URL parsing fails, it might be a relative URL
-            // Do additional checks for relative URLs
             if (!url.includes('://') && !url.includes(' ')) {
                 return true;
             }
@@ -1162,6 +1215,25 @@ class YaiCore {
     _postProcessContent() {}
 
     /**
+     * Process content while loading indicator is still visible
+     * This phase runs AFTER initialization but BEFORE data-attributes are removed
+     * All original data-attributes (data-url, data-target, etc.) are still intact
+     *
+     * Override this method in subclasses to:
+     * - Transform/manipulate data-url or other attributes before cleanup
+     * - Extract metadata from data-attributes for later use
+     * - Setup observers or event listeners on fresh content
+     * - Perform any custom processing during loading phase
+     *
+     * @param {Element} _content - The content container that received the HTML
+     * @param {Element} _target - The button/element that triggered the loading
+     * @param {Element} _triggerElement - The element with data-url attribute
+     */
+    async _processWhileLoading(_content, _target, _triggerElement) {
+        // Empty hook - override in subclasses for custom processing
+    }
+
+    /**
      * Apply post-fetch delays - override in components for custom delay behavior
      * @param {Element} target - The button/element that triggered the loading
      */
@@ -1199,8 +1271,8 @@ class YaiCore {
             dataSaver:    { mediaQuery: '(prefers-reduced-data: reduce)',   fallback: false },
             darkContrast: { mediaQuery: '(prefers-color-scheme: dark) and (prefers-contrast: high)', fallback: false },
             colorScheme:  { mediaQuery: '(prefers-color-scheme: dark)', fallback: 'light', transform: (m) => m ? 'dark' : 'light' },
-            hasTouch:     { fallback: hasTouchCapability },
             touchDevice:  { mediaQuery: '(pointer: coarse)', fallback: hasTouchCapability },
+            hasTouch:     { fallback:    hasTouchCapability },
         };
 
         const prefs = {};

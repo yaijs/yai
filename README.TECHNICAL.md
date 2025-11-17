@@ -38,7 +38,7 @@ Applies all 11 event types (`click`, `keydown`, `submit`, `input`, `change`, `mo
 **When to use:** Rapid prototyping, simple apps, or when you need all features globally available.
 
 #### 2. **Lazy Components: true** (Targeted Selectors)
-Strategically targets listeners to specific selectors (`[data-yai-tabs]`, `[data-yai-forms]`, `.yai-tabs-swype[data-mousedown]`), drastically reducing listener counts while maintaining full functionality.
+Strategically targets listeners to specific selectors (`[data-yai-tabs]`, `[data-yai-forms]`, `.yai-tabs-swipe[data-mousedown]`), drastically reducing listener counts while maintaining full functionality.
 
 **Performance progression:**
 - **Non-optimized**: 88 listeners across 9 elements (9.78 avg) - All events on root elements only
@@ -90,7 +90,7 @@ const setListener = {
         { type: 'input', debounce: 500 },
         { type: 'submit' },
     ],
-    '.yai-tabs-swype[data-mousedown]': [ // Swipe-specific events
+    '.yai-tabs-swipe': [ // Swipe-specific events
         { type: 'mousemove', debounce: 1 },
         { type: 'mousedown', debounce: 1 },
         { type: 'mouseup', debounce: 1 },
@@ -117,7 +117,7 @@ YEH's delegation system provides true O(1) complexity:
 
 #### Extensibility Without Cost
 Developers can extend interactions via hooks without adding listeners:
-- **Swipe navigation** via YaiTabsSwype utility
+- **Swipe navigation** via YaiTabsSwipe utility
 - **Keyboard navigation** (1-9 keys, arrows, etc.)
 - **Form integration** with selective event targeting
 - **Custom interactions** through lifecycle hooks
