@@ -237,7 +237,6 @@ class YaiCore {
         const finalOptions = {
             ...eventOptions,
             ...options,
-            // Ensure auto-generated actionableAttributes are preserved
             actionableAttributes: eventOptions.actionableAttributes,
             methods: methods,
             enableHandlerValidation: true
@@ -282,9 +281,16 @@ class YaiCore {
         return Array.from(events);
     }
 
+    _isDangerousKey(key) {
+        const dangerous = ['__proto__', 'constructor', 'prototype'];
+        return dangerous.includes(key);
+    }
+
     // Generate callable hooks for custom events
     _generateCallableHooks(customEvents) {
         customEvents.forEach(eventType => {
+            if (this._isDangerousKey(eventType)) return;
+
             const callableName = `event${this._capitalize(eventType)}`;
 
             // Only add if not already defined
@@ -301,6 +307,8 @@ class YaiCore {
         }
 
         customEvents.forEach(eventType => {
+            if (this._isDangerousKey(eventType)) return;
+
             const methodName = `handle${this._capitalize(eventType)}`;
 
             // Only add default handler if not already provided
@@ -1297,7 +1305,7 @@ class YaiCore {
      */
     static autoFocusContent(container, setFocus = true) {
         if (setFocus) {
-            const activePanel = container.querySelector(':scope > div[data-content] > [data-tab].active');
+            const activePanel = container.querySelector(':scope > [data-content] > [data-tab].active');
             if (activePanel) {
                 const firstFocusable = activePanel.querySelector('button, [href], input, select, textarea, [tabindex="0"]');
                 if (firstFocusable) {

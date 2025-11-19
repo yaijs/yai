@@ -16,7 +16,6 @@ class YaiTabs extends YaiCore {
             autoAccessibility: true,         /** @var bool Enable comprehensive ARIA accessibility setup */
             autoDisambiguate: false,         /** @var bool Automatically make identical data-open/data-tab values unique to prevent cross-contamination */
             lazyNestedComponents: true,      /** @var bool On init, marks nested tab components as laty "data-yai-tabs-lazy" */
-            autoFocusNested: true,           /** @var bool Auto-focus first focusable in nested active tabs */
             timeout: {
                 debounce: {
                     hashchange: 500,
@@ -222,8 +221,8 @@ class YaiTabs extends YaiCore {
             // Collect button-panel pairs within this depth level ONLY
             containers.forEach(container => {
                 // Use specific selectors to only find direct children (no nested containers)
-                const buttons = container.querySelectorAll(':scope > nav[data-controller] [data-open]');
-                const panels = container.querySelectorAll(':scope > div[data-content] > [data-tab]');
+                const buttons = container.querySelectorAll(':scope > [data-controller] [data-open]');
+                const panels = container.querySelectorAll(':scope > [data-content] > [data-tab]');
 
                 // Group by ID to keep button-panel pairs together
                 const containerPairs = new Map();
@@ -348,10 +347,10 @@ class YaiTabs extends YaiCore {
                 containerId,
                 index,
                 nestingLevel: this._calculateNestingLevel(container),
-                navElement: this.find(':scope > nav[data-controller]', container),
-                buttons: Array.from(this.findAll(':scope > nav[data-controller] [data-open]', container)),
-                panels: Array.from(this.findAll(':scope > div[data-content] [data-tab]', container)),
-                defaultButton: this.find(':scope > nav[data-controller] [data-default]', container),
+                navElement: this.find(':scope > [data-controller]', container),
+                buttons: Array.from(this.findAll(':scope > [data-controller] [data-open]', container)),
+                panels: Array.from(this.findAll(':scope > [data-content] [data-tab]', container)),
+                defaultButton: this.find(':scope > [data-controller] [data-default]', container),
                 isVisible: this.isContainerVisible(container),
                 isRoot: true
             };
@@ -444,7 +443,7 @@ class YaiTabs extends YaiCore {
     _updateAriaOrientation(container) {
         if (!this._hasAccessibilityEnabled(container)) return;
 
-        const nav = this.find(':scope > nav[data-controller]', container);
+        const nav = this.find(':scope > [data-controller]', container);
         if (!nav) return;
 
         // Check computed CSS layout at interaction time (guaranteed to be accurate)
@@ -592,7 +591,7 @@ class YaiTabs extends YaiCore {
                 const parentContainer = parentTabContainer.closest(`${this.config.rootSelector}`);
                 if (parentContainer) {
                     // Focus the active button in parent container
-                    const parentActiveButton = this.find(':scope > nav[data-controller] button.active', parentContainer);
+                    const parentActiveButton = this.find(':scope > [data-controller] .active', parentContainer);
                     if (parentActiveButton) {
                         this.yaiFocus(parentActiveButton, false);
                         return;
@@ -610,14 +609,14 @@ class YaiTabs extends YaiCore {
 
         event.preventDefault();
 
-        const buttons = Array.from(this.findAll(':scope > nav[data-controller] [data-open]', container));
+        const buttons = Array.from(this.findAll(':scope > [data-controller] [data-open]', container));
         const currentIndex = buttons.indexOf(target);
 
         // Update orientation lazily before keyboard navigation (guaranteed accurate timing)
         this._updateAriaOrientation(container);
 
         // Get orientation from tablist
-        const nav = this.find(':scope > nav[data-controller]', container);
+        const nav = this.find(':scope > [data-controller]', container);
         const orientation = nav?.getAttribute('aria-orientation') || 'horizontal';
 
         let nextIndex;
@@ -690,7 +689,7 @@ class YaiTabs extends YaiCore {
             if (hidden.contains(document.activeElement)) {
                 // Move focus to nearest visible tab button
                 const visibleTabButton = this.find(
-                    ':scope > nav[data-controller] button:not([aria-hidden])',
+                    ':scope > [data-controller] [data-open]:not([aria-hidden])',
                     container.closest(`${this.config.rootSelector}`)
                 );
                 if (visibleTabButton) {
@@ -790,7 +789,7 @@ class YaiTabs extends YaiCore {
         const refPath = container.dataset.refPath;
         if (refPath) {
             // Check if any tab is still active after close (exclude the button being closed)
-            const stillActive = this.find(':scope > nav[data-controller] button.active[data-open]', container);
+            const stillActive = this.find(':scope > [data-controller] .active[data-open]', container);
 
             // Ensure we're not looking at the button being closed (it may still have .active due to animation delay)
             if (stillActive && stillActive !== target) {
@@ -848,7 +847,7 @@ class YaiTabs extends YaiCore {
 
             // Update button states
             if (autoAccessibility) {
-                this.findAll(':scope > nav[data-controller] [data-open]', container).forEach(btn => {
+                this.findAll(':scope > [data-controller] [data-open]', container).forEach(btn => {
                     btn.setAttribute('aria-selected', 'false');
                     btn.setAttribute('tabindex', '-1');
                 });
@@ -895,7 +894,7 @@ class YaiTabs extends YaiCore {
                 if (this._validateUrl(url)) {
                     const append = target.dataset.append === 'true';
                     content.classList.remove('active');
-                    this._loadContent(url, `:scope > div[data-content] > [data-tab="${tabId}"]`, container, append, target);
+                    this._loadContent(url, `:scope > [data-content] > [data-tab="${tabId}"]`, container, append, target);
                 } else {
                     // URL validation failed - treat as static content
                     console.error('YaiTabs: Dynamic content loading blocked due to invalid URL:', target.dataset.url);
@@ -1016,7 +1015,7 @@ class YaiTabs extends YaiCore {
         if (!tabContainer) return;
 
         // Get ALL navigation buttons in this tab component
-        const allNavButtons = this.findAll(':scope > nav[data-controller] [data-open]', tabContainer);
+        const allNavButtons = this.findAll(':scope > [data-controller] [data-open]', tabContainer);
 
         if (isLoading) {
             // Add loading state to container
@@ -1081,8 +1080,8 @@ class YaiTabs extends YaiCore {
         // Preserve current navigation state before stripping active classes
         this._preserveNavigationState(container);
 
-        const allPanels = container.querySelectorAll(':scope > div[data-content] > [data-tab]');
-        const activePanel = container.querySelector(':scope > div[data-content] > [data-tab].active');
+        const allPanels = container.querySelectorAll(':scope > [data-content] > [data-tab]');
+        const activePanel = container.querySelector(':scope > [data-content] > [data-tab].active');
         const autoAccessibility = this._hasAccessibilityEnabled(container);
 
         allPanels.forEach(panel => {
@@ -1093,7 +1092,7 @@ class YaiTabs extends YaiCore {
                 }
 
                 // Reset matching navigation button
-                const relatedButton = container.querySelector(`:scope > nav[data-controller] [data-open="${panel.dataset.tab}"]`);
+                const relatedButton = container.querySelector(`:scope > [data-controller] [data-open="${panel.dataset.tab}"]`);
                 if (relatedButton && relatedButton.classList.contains('active')) {
                     relatedButton.classList.remove('active');
                     if (autoAccessibility) {
@@ -1178,7 +1177,7 @@ class YaiTabs extends YaiCore {
 
                 // CRITICAL FIX: Clear .active classes from buttons and panels
                 // so _initializeNestedDefaults will re-trigger them when returning
-                const activeButtons = nestedContainer.querySelectorAll(':scope > nav[data-controller] [data-open].active');
+                const activeButtons = nestedContainer.querySelectorAll(':scope > [data-controller] [data-open].active');
                 const activePanels = nestedContainer.querySelectorAll(':scope > [data-content] > [data-tab].active');
 
                 activeButtons.forEach(btn => {
@@ -1237,7 +1236,7 @@ class YaiTabs extends YaiCore {
 
     _setLastActiveTab(container) {
         const getTabWrapper = container.matches(this.config.rootSelector) ? container : container.closest(`${this.config.rootSelector}`);
-        const activeButton = getTabWrapper.querySelector(`:scope > nav[data-controller] [${this.tabOpenAttribute}].active`);
+        const activeButton = getTabWrapper.querySelector(`:scope > [data-controller] [${this.tabOpenAttribute}].active`);
         if (activeButton) {
             getTabWrapper.dataset.lastActive = activeButton.getAttribute(this.tabOpenAttribute);
         }
@@ -1345,8 +1344,8 @@ class YaiTabs extends YaiCore {
 
         // Use :scope to target direct children within THIS container's elements
         const elements = [
-            this.find(`:scope > nav[data-controller] button.active${selectorButton[0]}`, container),
-            this.find(`:scope > div[data-content] > .active${selectorButton[1]}`, container),
+            this.find(`:scope > [data-controller] .active${selectorButton[0]}`, container),
+            this.find(`:scope > [data-content] > .active${selectorButton[1]}`, container),
         ];
 
         // For closing tabs, trigger exit animation first
@@ -1408,14 +1407,14 @@ class YaiTabs extends YaiCore {
 
             if (lastActiveId) {
                 // Find button with matching data-open value
-                targetButton = this.find(`nav[data-controller] [${this.tabOpenAttribute}="${lastActiveId}"]`, container);
+                targetButton = this.find(`[data-controller] [${this.tabOpenAttribute}="${lastActiveId}"]`, container);
             }
 
             // If no last-active state, look for data-default button
             if (!targetButton) {
                 targetButton = this.find(`
-                    nav[data-controller] [data-default],
-                    nav[data-controller] [data-inview-default]
+                    [data-controller] [data-default],
+                    [data-controller] [data-inview-default]
                 `, container);
             }
 
@@ -1444,7 +1443,7 @@ class YaiTabs extends YaiCore {
         const containerPrefix = container.id;
 
         // Find the nav element and set tablist role on it (correct ARIA pattern)
-        const nav = container.querySelector(':scope > nav[data-controller]');
+        const nav = container.querySelector(':scope > [data-controller]');
         if (nav) {
             nav.setAttribute('role', 'tablist');
 
@@ -1455,7 +1454,7 @@ class YaiTabs extends YaiCore {
         }
 
         // Setup buttons with forced safe IDs
-        const buttons = container.querySelectorAll(':scope > nav[data-controller] [data-open]');
+        const buttons = container.querySelectorAll(':scope > [data-controller] [data-open]');
         buttons.forEach((button, index) => {
             const tabId = button.dataset.open;
 
@@ -1469,7 +1468,7 @@ class YaiTabs extends YaiCore {
         });
 
         // Setup panels with forced safe IDs
-        const panels = container.querySelectorAll(':scope > div[data-content] [data-tab]');
+        const panels = container.querySelectorAll(':scope > [data-content] [data-tab]');
         panels.forEach(panel => {
             const tabId = panel.dataset.tab;
 
@@ -1723,8 +1722,8 @@ class YaiTabs extends YaiCore {
         // Check if accessibility should be applied (per-container > root > global config)
         if (!this._hasAccessibilityEnabled(container)) return;
 
-        const buttons = container.querySelectorAll(':scope > nav[data-controller] button[data-open]');
-        const panels = container.querySelectorAll(':scope > div[data-content] > [data-tab]');
+        const buttons = container.querySelectorAll(':scope > [data-controller] [data-open]');
+        const panels = container.querySelectorAll(':scope > [data-content] > [data-tab]');
 
         let hasActive = false;
         buttons.forEach(btn => {
@@ -1788,7 +1787,7 @@ class YaiTabs extends YaiCore {
             const depth = this._getContainerDepth(container);
 
             // 1. Active button state
-            const buttons = container.querySelectorAll(':scope > nav[data-controller] button[data-open]');
+            const buttons = container.querySelectorAll(':scope > [data-controller] [data-open]');
             const activeButtons = Array.from(buttons).filter(btn => btn.classList.contains('active'));
             checkedButtons += buttons.length;
 
@@ -1810,7 +1809,7 @@ class YaiTabs extends YaiCore {
             }
 
             // 2. Active panel state
-            const panels = container.querySelectorAll(':scope > div[data-content] > [data-tab]');
+            const panels = container.querySelectorAll(':scope > [data-content] > [data-tab]');
             const activePanels = Array.from(panels).filter(panel => panel.classList.contains('active'));
             checkedPanels += panels.length;
 

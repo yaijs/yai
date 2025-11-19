@@ -1487,7 +1487,8 @@
     /** Custom hook searchAndClick run is done event **/
     .hook('searchAndClickFinished', ({ event, target, container, action, context }) => {
         const collect = countComponents();
-        console.log(JSON.stringify(collect?.count, null, 2), tabs);
+        // console.log(JSON.stringify(collect?.count, null, 2), tabs);
+        console.log("%s", JSON.stringify(collect?.count, null, 2), tabs);
     });
 </script>
 </body>

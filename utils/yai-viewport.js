@@ -2,8 +2,8 @@
 
 // Ensure YEH is available (for better error messages)
 if (typeof YEH === 'undefined') {
-    throw new Error('YaiViewport requires YEH (YpsilonEventHandler) to be loaded. ' +
-                    'Load it via: <script src="https://unpkg.com/@yaijs/yeh@1.0.0/yeh.js"></script>');
+    throw new Error('YaiViewport requires YEH (Yai Event Hub) to be loaded. ' +
+                    'Load it via: <script src="https://unpkg.com/@yaijs/yeh@1.0.5/yeh.js"></script>');
 }
 
 class YaiViewport extends YEH {

@@ -1,6 +1,6 @@
 {
   "name": "@yaijs/core",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Advanced web components built on YpsilonEventHandler - the world's first DOM Event Scoping System",
   "type": "module",
   "main": "./dist/yai-bundle.js",
@@ -109,7 +109,7 @@
   },
   "dependencies": {},
   "peerDependencies": {
-    "@yaijs/yeh": "^1.0.3"
+    "@yaijs/yeh": "^1.0.5"
   },
   "engines": {
     "node": ">=14.0.0"
