@@ -80,7 +80,7 @@ class AppBus extends YEH {
 
 ### YaiTabs
 
-**[Complete Documentation →](./docs/components/tabs.md)** | **[Live Demo →](https://yaijs.github.io/yai/tabs/Example.html)**
+**[Complete Documentation →](https://yaijs.github.io/yai/docs/components/tabs.html)** | **[Live Demo →](https://yaijs.github.io/yai/tabs/Example.html)**
 
 - 9 animation behaviors (fade, slide, zoom, flip, blur, etc.) + instant mode
 - 4 navigation positions (top, right, bottom, left)
@@ -92,7 +92,7 @@ class AppBus extends YEH {
 
 ### YEH Event Hub
 
-**[Complete Documentation →](./docs/yeh/README.md)**
+**[Complete Documentation →](https://yaijs.github.io/yai/docs/yeh/)**
 
 - Scope-aware event delegation
 - Automatic target resolution for nested elements
@@ -103,7 +103,7 @@ class AppBus extends YEH {
 
 ### Utilities
 
-**[Complete Documentation →](./docs/utilities/overview.md)**
+**[Complete Documentation →](https://yaijs.github.io/yai/docs/utilities/overview.html)**
 
 - **YaiTabsSwipe** – Circular navigation, nested ascend/descend, axis locking
 - **YaiViewport** – Observer-free visibility tracking with throttled events
@@ -147,7 +147,7 @@ tabs
     .hook('tabOpened', (ctx) => loadContent(ctx));
 ```
 
-See [YaiTabs Documentation](./docs/components/tabs.md) and [YEH Documentation](./docs/yeh/README.md) for complete hook catalog.
+See [YaiTabs Documentation](https://yaijs.github.io/yai/docs/components/tabs.html) and [YEH Documentation](https://yaijs.github.io/yai/docs/yeh/) for complete hook catalog.
 
 ---
 
@@ -198,10 +198,10 @@ import { YaiTabs, YaiTabsSwipe, YaiViewport } from 'https://cdn.jsdelivr.net/npm
 
 ## Documentation
 
-- **[Documentation Hub](./docs/README.md)** – Complete framework documentation
-- **[YaiTabs Guide](./docs/components/tabs.md)** – Component reference with examples
-- **[Utilities Overview](./docs/utilities/overview.md)** – YaiTabsSwipe, YaiViewport utilities
-- **[YEH Event Hub](./docs/yeh/README.md)** – Event system foundation
+- **[Documentation Hub](https://yaijs.github.io/yai/docs/README.html)** – Complete framework documentation
+- **[YaiTabs Guide](https://yaijs.github.io/yai/docs/components/tabs.html)** – Component reference with examples
+- **[Utilities Overview](https://yaijs.github.io/yai/docs/utilities/overview.html)** – YaiTabsSwipe, YaiViewport utilities
+- **[YEH Event Hub](https://yaijs.github.io/yai/docs/yeh/)** – Event system foundation
 
 ---
 

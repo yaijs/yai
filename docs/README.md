@@ -9,17 +9,17 @@ Complete documentation for YaiJS - Advanced web components with YEH (Yai Event H
 ### Core Components
 
 #### YaiTabs
-- **[YaiTabs Guide](./components/tabs.md)** - Complete tabs component documentation
+- **[YaiTabs Guide](https://yaijs.github.io/yai/docs/components/tabs.html)** - Complete tabs component documentation
 - **[Live Demo](https://yaijs.github.io/yai/tabs/Example.html)** - Interactive demo with 20+ nested components
 - **[Stress Test](https://yaijs.github.io/yai/tabs/Benchmark.html)** - Performance benchmark with 400+ nesting levels
 
 ### Utilities
 
-- **[Utilities Overview](./utilities/overview.md)** - YaiTabsSwipe, YaiViewport, YaiAutoSwitch with working examples
+- **[Utilities Overview](https://yaijs.github.io/yai/docs/utilities/overview.html)** - YaiTabsSwipe, YaiViewport, YaiAutoSwitch with working examples
 
 ### YEH (Yai Event Hub)
 
-- **[YEH Overview](./yeh/README.md)** - Event system foundation
+- **[YEH Overview](https://yaijs.github.io/yai/docs/yeh/)** - Event system foundation
 
 ---
 
@@ -36,13 +36,13 @@ Complete documentation for YaiJS - Advanced web components with YEH (Yai Event H
 
 **New to YaiJS?**
 1. Start with the [Main README](../README.md)
-2. Check out the [YaiTabs Guide](./components/tabs.md)
+2. Check out the [YaiTabs Guide](https://yaijs.github.io/yai/docs/components/tabs.html)
 
 **Need specific utilities?**
-- All utilities with working examples → [Utilities Overview](./utilities/overview.md)
+- All utilities with working examples → [Utilities Overview](https://yaijs.github.io/yai/docs/utilities/overview.html)
 
 **Want to understand the event system?**
-- Event hub foundation → [YEH Overview](./yeh/README.md)
+- Event hub foundation → [YEH Overview](https://yaijs.github.io/yai/docs/yeh/)
 
 ---
 

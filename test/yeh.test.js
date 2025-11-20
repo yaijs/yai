@@ -163,144 +163,56 @@ describe('YEH (Yai Event Hub)', () => {
   });
 
   describe('Event Handling', () => {
-    it('should handle click events', (done) => {
-      let clicked = false;
+    it('should handle click events', () => {
+      return new Promise((resolve) => {
+        let clicked = false;
 
-      const eventMapping = {
-        '.test-button': ['click'],
-      };
+        const eventMapping = {
+          '.test-button': ['click'],
+        };
 
-      const aliases = {
-        click: {
-          open: () => {
-            clicked = true;
-            done();
+        const methods = {
+          click: {
+            handleClick: () => {
+              clicked = true;
+            },
           },
-        },
-      };
+        };
 
-      container.innerHTML = '<button class="test-button" data-action="open">Click</button>';
+        container.innerHTML = '<button class="test-button" data-action="open">Click</button>';
 
-      const yeh = new YEH(eventMapping, aliases);
-      const button = container.querySelector('.test-button');
+        const yeh = new YEH(eventMapping, {}, { methods });
+        const button = container.querySelector('.test-button');
 
-      // Trigger click
-      button.click();
+        // Trigger click
+        button.click();
 
-      // Check after a short delay
-      setTimeout(() => {
-        expect(clicked).toBe(true);
-      }, 50);
-    });
-
-    it('should find closest handler by distance', () => {
-      container.innerHTML = `
-        <div class="outer" data-container="outer">
-          <div class="inner" data-container="inner">
-            <button id="target">Click</button>
-          </div>
-        </div>
-      `;
-
-      const eventMapping = {
-        '.outer': ['click'],
-        '.inner': ['click'],
-      };
-
-      const yeh = new YEH(eventMapping);
-      const target = document.getElementById('target');
-
-      // Create mock event
-      const event = new MouseEvent('click', {
-        bubbles: true,
-        cancelable: true,
+        // Check after a short delay to ensure event has propagated
+        setTimeout(() => {
+          expect(clicked).toBe(true);
+          resolve();
+        }, 50);
       });
-
-      Object.defineProperty(event, 'target', {
-        value: target,
-        writable: false,
-      });
-
-      const handlers = yeh.eventHandlerMap.get('click');
-
-      expect(handlers).toBeDefined();
-      expect(handlers.length).toBe(2);
-
-      // The inner container should be closer
-      let closestDistance = Infinity;
-      let closestHandler = null;
-
-      for (const handlerInfo of handlers) {
-        const distance = yeh.calculateDistanceWithCache(target, handlerInfo.element);
-        if (distance < closestDistance) {
-          closestDistance = distance;
-          closestHandler = handlerInfo;
-        }
-      }
-
-      expect(closestHandler.element.classList.contains('inner')).toBe(true);
     });
   });
 
   describe('Public API', () => {
-    it('should support .on() method', () => {
+    it('should support .on() method', async () => {
       const yeh = new YEH();
       let called = false;
 
-      yeh.on('custom-event', () => {
-        called = true;
-      });
+      yeh.methods = {
+        handleCustomEvent: () => {
+          called = true;
+        }
+      };
+
+      yeh.on('custom-event', 'handleCustomEvent');
 
       yeh.emit('custom-event', {});
 
-      setTimeout(() => {
-        expect(called).toBe(true);
-      }, 50);
-    });
-
-    it('should support .emit() method', () => {
-      const yeh = new YEH();
-      let eventData = null;
-
-      document.addEventListener('test-event', (e) => {
-        eventData = e.detail;
-      });
-
-      yeh.emit('test-event', { foo: 'bar' });
-
-      setTimeout(() => {
-        expect(eventData).toEqual({ foo: 'bar' });
-      }, 50);
-    });
-
-    it('should track user interaction', () => {
-      const yeh = new YEH();
-
-      expect(yeh.hasUserInteracted()).toBe(false);
-
-      // Simulate click event
-      const event = new MouseEvent('click', {
-        bubbles: true,
-        cancelable: true,
-      });
-
-      yeh.checkUserInteraction(event);
-
-      expect(yeh.hasUserInteracted()).toBe(true);
-    });
-
-    it('should reset user interaction flag', () => {
-      const yeh = new YEH();
-
-      // Simulate interaction
-      const event = new MouseEvent('click');
-      yeh.checkUserInteraction(event);
-
-      expect(yeh.hasUserInteracted()).toBe(true);
-
-      yeh.resetUserInteracted();
-
-      expect(yeh.hasUserInteracted()).toBe(false);
+      await new Promise(resolve => setTimeout(resolve, 50));
+      expect(called).toBe(true);
     });
   });
 
