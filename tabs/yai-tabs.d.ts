@@ -1,7 +1,7 @@
 /**
  * 🎯 **YaiTabs 3.0 - Advanced Tab Component System**
  *
- * Built on YpsilonEventHandler's O(1) event delegation architecture, YaiTabs provides
+ * Built on YEH's (Yai Event Hub) O(1) event delegation architecture, YaiTabs provides
  * enterprise-grade tab functionality with mathematical O(1) performance scaling,
  * infinite nesting capabilities, and comprehensive accessibility compliance.
  *
@@ -241,7 +241,7 @@ export interface TabLifecycleCallbacks extends LifecycleCallbacks {
 /**
  * 🏗️ **YaiTabs Class - Advanced Tab Component**
  *
- * Advanced tab system built on YpsilonEventHandler's O(1) architecture.
+ * Advanced tab system built on YEH's O(1) architecture.
  * Provides enterprise-grade functionality with infinite scalability.
  *
  * **🎯 Core Architecture:**
@@ -480,7 +480,7 @@ export declare class YaiTabs extends YaiCore {
   /**
    * 🖱️ **Handle Click Events**
    *
-   * Main click event handler using YpsilonEventHandler's delegation system.
+   * Main click event handler using YEH's delegation system.
    * Routes clicks to appropriate action handlers based on data attributes.
    *
    * @param event - Click event object

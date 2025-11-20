@@ -618,9 +618,9 @@ events: {
 
 ## Resources
 
-- **[YaiTabs Guide](./tabs.md)** - Core component documentation
-- **[Utilities Overview](../utilities/overview.md)** - YaiTabsSwipe, YaiViewport
-- **[YEH Documentation](../yeh/README.md)** - Event system foundation
+- **[YaiTabs Guide](https://yaijs.github.io/yai/docs/components/tabs.html)** - Core component documentation
+- **[Utilities Overview](https://yaijs.github.io/yai/docs/utilities/overview.html)** - YaiTabsSwipe, YaiViewport
+- **[YEH Documentation](https://yaijs.github.io/yai/docs/yeh/)** - Event system foundation
 - **[Live Demo](https://yaijs.github.io/yai/tabs/Example.html)** - Interactive examples
 
 ---

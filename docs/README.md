@@ -21,6 +21,10 @@ Complete documentation for YaiJS - Advanced web components with YEH (Yai Event H
 
 - **[YEH Overview](https://yaijs.github.io/yai/docs/yeh/)** - Event system foundation
 
+### Installation & Bundles
+
+- **[Bundle Guide](https://yaijs.github.io/yai/docs/BUNDLES.html)** - Which bundle to use (core, standard, full)
+
 ---
 
 ## 📦 Quick Links
@@ -51,6 +55,7 @@ Complete documentation for YaiJS - Advanced web components with YEH (Yai Event H
 ```
 docs/
 ├── README.md (you are here)       # Documentation index
+├── BUNDLES.md                     # Bundle comparison guide
 ├── components/
 │   └── tabs.md                    # YaiTabs complete guide
 ├── utilities/

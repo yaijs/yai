@@ -1,7 +1,7 @@
 /**
  * 🎯 **YaiViewport 1.0 - Advanced Viewport Tracking System**
  *
- * Built on YpsilonEventHandler's O(1) event delegation architecture, YaiViewport provides
+ * Built on YEH's O(1) event delegation architecture, YaiViewport provides
  * high-performance viewport visibility tracking with spatial optimization for elements.
  * Designed for seamless integration with the Yai Framework, it enables visibility-driven
  * interactions like lazy loading, animations, or analytics triggers with minimal overhead.
@@ -25,7 +25,7 @@
  * @see https://github.com/yaijs/yai/blob/main/utils/yai-viewport.js
  */
 
-import { HookContext, LifecycleCallbacks, YEH, YEHConfig } from '@yaijs/yeh';
+import { HookContext, LifecycleCallbacks, YEH, YEHConfig } from '@yaijs/core/yeh';
 
 /**
  * 📏 **Viewport Threshold Configuration**
@@ -139,7 +139,7 @@ export interface ViewportLifecycleCallbacks extends LifecycleCallbacks {
 /**
  * 🏗️ **YaiViewport Class - Advanced Viewport Tracking**
  *
- * High-performance viewport tracking system built on YpsilonEventHandler's O(1) architecture.
+ * High-performance viewport tracking system built on YEH's O(1) architecture.
  * Provides efficient element visibility detection with spatial optimization and hook-based extensibility.
  *
  * **🎯 Core Architecture:**

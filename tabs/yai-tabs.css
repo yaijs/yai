@@ -1137,7 +1137,6 @@ button.yai-loading::after {
         background: var(--yai-tabs-content-inactive-background);
     }
     [data-yai-tabs] [data-controller] [data-open] {
-        /* min-height: 52px; */
         box-shadow: 0 2px 4px 1px var(--yai-tabs-shadow-medium-color),
             0 0px 4px 1px var(--yai-tabs-shadow-medium-color);
     }

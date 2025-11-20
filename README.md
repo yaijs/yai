@@ -4,7 +4,7 @@
 
 Build deeply nested, event-heavy interfaces with constant-time listener delegation and zero manual lifecycle handling. Everything you need in one package.
 
-[![NPM version](https://img.shields.io/npm/v/@yaijs/core.svg)](https://npmjs.org/package/@yaijs/core)
+[![NPM version](https://img.shields.io/npm/v/@yaijs/core)](https://npmjs.org/package/@yaijs/core)
 [![Tests](https://github.com/yaijs/yai/actions/workflows/test.yml/badge.svg)](https://github.com/yaijs/yai/actions/workflows/test.yml)
 [![License](https://img.shields.io/npm/l/@yaijs/core.svg)](https://github.com/yaijs/yai/blob/main/LICENSE)
 
@@ -198,7 +198,7 @@ import { YaiTabs, YaiTabsSwipe, YaiViewport } from 'https://cdn.jsdelivr.net/npm
 
 ## Documentation
 
-- **[Documentation Hub](https://yaijs.github.io/yai/docs/README.html)** – Complete framework documentation
+- **[Documentation Hub](https://yaijs.github.io/yai/docs/)** – Complete framework documentation
 - **[YaiTabs Guide](https://yaijs.github.io/yai/docs/components/tabs.html)** – Component reference with examples
 - **[Utilities Overview](https://yaijs.github.io/yai/docs/utilities/overview.html)** – YaiTabsSwipe, YaiViewport utilities
 - **[YEH Event Hub](https://yaijs.github.io/yai/docs/yeh/)** – Event system foundation

@@ -1,6 +1,6 @@
 # YaiTabs
 
-Enterprise-grade tab component with O(1) event delegation, deep nesting support, and hash-based deep linking. Built on [Yai Event Hub](../yeh/README.md) architecture.
+Enterprise-grade tab component with O(1) event delegation, deep nesting support, and hash-based deep linking. Built on [Yai Event Hub](https://yaijs.github.io/yai/docs/yeh/) architecture.
 
 **🎯 More Than Tabs - It's an Event Hub!**
 YaiTabs doubles as a powerful application event hub. Add listeners for ANY event type (`click`, `input`, `change`, `submit`, etc.) and handle them through hooks. All listeners are internally delegated and shared from root level as well. Perfect for building complete SPAs within a single tab component. You can throw needed elements into the tab, and remove them without headache. No manual register/unregister - That's the power of Event Delegation - zero manual lifecycle management while providing max flexibility!
@@ -378,7 +378,7 @@ Check the CSS for all available variables: [tabs/yai-tabs.css](https://cdn.jsdel
 - **[Live Demo](https://yaijs.github.io/yai/tabs/Example.html)** - Interactive examples with 50+ nested components
 - **[GitHub Repository](https://github.com/yaijs/yai)** - Source code and documentation
 - **[NPM Package](https://www.npmjs.com/package/@yaijs/core)** - Install via npm
-- **[Next: YaiTabs Advanced Usage](./tabs.advanced.md)** - Advanced patterns and real-world examples
+- **[Next: YaiTabs Advanced Usage](https://yaijs.github.io/yai/docs/components/tabs.advanced.html)** - Advanced patterns and real-world examples
 
 ## Authors
 - **Engin Ypsilon** - Architecture & concept

@@ -195,11 +195,11 @@ class YaiCore {
     }
 
     /**
-     * Factory method to create YpsilonEventHandler with component-specific config
+     * Factory method to create Yai Event Hub with component-specific config
      * @param {Object} selectors - Event listener selectors
      * @param {Object} aliases - Event method aliases
      * @param {Object} options - Additional event handler options
-     * @returns {YpsilonEventHandler} Configured event handler instance
+     * @returns {YEH} Configured event handler instance
      */
     createEventHandler(selectors, aliases, options = {}) {
         const eventOptions = this.deepMerge(this.config.events, options);
@@ -615,7 +615,7 @@ class YaiCore {
     }
 
     /**
-     * Resolve alias to method name using YpsilonEventHandler's built-in resolver
+     * Resolve alias to method name using YEH's built-in resolver
      */
     resolveAlias(alias, eventType) {
         return this.events ? this.events.resolveMethodName(alias, eventType) : null;
@@ -658,7 +658,7 @@ class YaiCore {
             return;
         }
 
-        // Dispatch with YpsilonEventHandler
+        // Dispatch with YEH
         if (this.events) {
             if (!details.container) {
                 details.container = document

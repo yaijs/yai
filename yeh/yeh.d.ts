@@ -10,7 +10,7 @@ interface AddEventListenerOptions {
 }
 
 /**
- * 🚀 YEH (YpsilonEventHandler) - Advanced Multi-Handler Event System
+ * 🚀 YEH (Yai Event Hub) - Advanced Multi-Handler Event System
  *
  * The most advanced event delegation library for modern web applications.
  * Features the world's only multi-handler system with closest-match DOM resolution.
@@ -443,7 +443,7 @@ export interface HandlerConfig {
 }
 
 /**
- * YEH (YpsilonEventHandler) - Advanced multi-handler event delegation system
+ * YEH (Yai Event Hub) - Advanced multi-handler event delegation system
  *
  * Core Features:
  * - Multiple handlers per event type with closest-match DOM resolution

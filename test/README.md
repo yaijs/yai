@@ -26,7 +26,7 @@ npm run test:coverage:ui
 ```
 test/
 ├── setup.js           # Global test setup & utilities
-├── yeh.test.js        # YEH (YpsilonEventHandler) tests
+├── yeh.test.js        # YEH (Yai Event Hub) tests
 ├── yai-core.test.js   # YaiCore foundation tests
 └── yai-tabs.test.js   # YaiTabs component tests
 ```
