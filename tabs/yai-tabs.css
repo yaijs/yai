@@ -411,6 +411,9 @@
     margin: var(--yai-tabs-content-element-hr-margin, 16px 0);
     opacity: .7;
 }
+[data-yai-tabs] pre {
+    overflow: auto;
+}
 [data-yai-tabs] .yp-3 { padding: var(--yai-tabs-padding-3); }
 [data-yai-tabs] .yp-2 { padding: var(--yai-tabs-padding-2); }
 [data-yai-tabs] .yp-1 { padding: var(--yai-tabs-padding-1); }
