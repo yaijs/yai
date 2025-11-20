@@ -6,10 +6,9 @@
  *
  * @example
  * ```javascript
- * import { YaiTabs, YaiTabsSwipe, YEH } from 'https://cdn.jsdelivr.net/npm/@yaijs/bundle/dist/yai-bundle.js';
+ * import { YEH, YaiTabs, YaiTabsSwipe } from 'https://cdn.jsdelivr.net/npm/@yaijs/core@latest/dist/yai-bundle.js';
  *
- * // Or use window.YaiJS for script tags
- * const {YaiTabs} = window.YaiJS;
+ * const tabs = new YaiTabs();
  * ```
  *
  * Bundle Strategy:
@@ -17,12 +16,10 @@
  * - yai-bundle.js: Recommended (adds YaiTabsSwipe, YaiViewport) ← You are here
  * - yai-bundle-full.js: Everything (adds YaiAutoSwitch, YaiSearchAndClick)
  */
-import {YEH} from 'https://cdn.jsdelivr.net/npm/@yaijs/yeh@1.0.4/+esm';
 import {YaiTabs} from '../tabs/yai-tabs.js';
 import {YaiTabsSwipe} from '../utils/yai-tabs-swipe.js';
 import {YaiViewport} from '../utils/yai-viewport.js';
 import {YaiCore} from '../yai-core.js';
+import {YEH} from '../yeh/yeh.js';
 
 export {YaiCore, YaiTabs, YaiTabsSwipe, YaiViewport, YEH};
-
-window.YaiJS = {YEH, YaiCore, YaiTabs, YaiTabsSwipe, YaiViewport};

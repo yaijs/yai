@@ -1,7 +1,7 @@
 {
   "name": "@yaijs/core",
-  "version": "1.0.5",
-  "description": "Advanced web components built on YpsilonEventHandler - the world's first DOM Event Scoping System",
+  "version": "1.1.0",
+  "description": "Advanced web components with YEH (Yai Event Hub) - the world's first DOM Event Scoping System. Everything you need in one package.",
   "type": "module",
   "main": "./dist/yai-bundle.js",
   "types": "./dist/yai-bundle.d.ts",
@@ -45,17 +45,26 @@
     "./search-and-click": {
       "types": "./utils/yai-search-and-click.d.ts",
       "default": "./utils/yai-search-and-click.js"
+    },
+    "./yeh": {
+      "types": "./yeh/yeh.d.ts",
+      "default": "./yeh/yeh.js"
     }
   },
   "files": [
     "dist/",
     "tabs/",
     "utils/",
+    "yeh/",
     "yai-core.js",
     "yai-core.d.ts"
   ],
   "scripts": {
-    "test": "echo \"No build pipeline required - use browser-based validation with Example.html files\"",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "test:coverage:ui": "vitest --ui --coverage",
     "demo": "echo \"Open tabs/Example.html in browser for live demo\""
   },
   "keywords": [
@@ -80,19 +89,51 @@
     "hash-routing-tabs",
     "event-bus-tabs",
     "performance",
-    "o1-scaling",
-    "o1-event-handling",
+    "constant-time-scaling",
+    "o-1-complexity",
     "lighthouse-100",
     "accessibility",
     "wcag",
     "aria",
     "es6-modules",
     "vanilla-js",
+    "vanilla-javascript",
+    "vanillajs",
     "framework-agnostic",
     "dom-scoping",
     "event-handling",
     "enterprise",
-    "viewport"
+    "viewport",
+    "events",
+    "event-handler",
+    "event-driven",
+    "event-driven-architecture",
+    "dom-events",
+    "passive-events",
+    "web-dev",
+    "handle-event",
+    "browser",
+    "frontend",
+    "memory-efficient",
+    "debugging",
+    "typescript",
+    "types",
+    "quantum-type",
+    "closest-match",
+    "multi-handler",
+    "subscriber",
+    "emit",
+    "on",
+    "eaas",
+    "e-a-a-s",
+    "event-as-a-service",
+    "eal",
+    "e-a-l",
+    "event-abstraction-layer",
+    "event-delegation",
+    "super-delegation",
+    "spa",
+    "single-page-application"
   ],
   "author": {
     "name": "yaijs",
@@ -108,8 +149,12 @@
     "url": "https://github.com/yaijs/yai/issues"
   },
   "dependencies": {},
-  "peerDependencies": {
-    "@yaijs/yeh": "^1.0.5"
+  "devDependencies": {
+    "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/ui": "^3.2.4",
+    "happy-dom": "^19.0.2",
+    "jsdom": "^27.0.0",
+    "vitest": "^3.2.4"
   },
   "engines": {
     "node": ">=14.0.0"

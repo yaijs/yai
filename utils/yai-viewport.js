@@ -1,10 +1,6 @@
 "use strict";
 
-// Ensure YEH is available (for better error messages)
-if (typeof YEH === 'undefined') {
-    throw new Error('YaiViewport requires YEH (Yai Event Hub) to be loaded. ' +
-                    'Load it via: <script src="https://unpkg.com/@yaijs/yeh@1.0.5/yeh.js"></script>');
-}
+import {YEH} from '../yeh/yeh.js';
 
 class YaiViewport extends YEH {
     constructor(setConfig = {}) {

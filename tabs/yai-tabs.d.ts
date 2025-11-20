@@ -22,7 +22,6 @@
  * - Memory Footprint: ~460 LOC, minimal runtime overhead
  * - Scalability: O(1) regardless of component complexity or nesting level
  *
- * @version 1.0.3
  * @author YaiJS Team - Advanced component architecture
  * @license MIT
  * @see https://github.com/yaijs/yai/tree/main/tabs

@@ -236,8 +236,10 @@
     body > header, .box, .section {
         margin-bottom: 40px;
         padding: 2rem;
-        background-color: white;
         color: #333;
+    }
+    body > header, .box {
+        background-color: white;
     }
     body > header, .box, .option-switch {
         box-shadow: var(--yai-box-shadow);
@@ -1649,9 +1651,8 @@
 
 <main class="yai-main">
 
-
     <!-- Event hub
-      Handle events live. -->
+    Handle events live. -->
     <div class="section yvent-driven yai-showcase yai-viewport" data-viewport-once>
         <div
             data-yai-tabs
@@ -1675,6 +1676,9 @@
                 <button data-tab-action="open" data-open="forms" class="yai-tab-btn">
                     <span class="yai-icon ycon-is-left">📝</span> Forms
                 </button>
+                <button data-tab-action="open" data-open="docs" class="yai-tab-btn">
+                    <span class="yai-icon ycon-is-left">📚</span> Docs
+                </button>
             </nav>
             <div data-content class="yai-content">
                 <!-- Home Tab -->
@@ -1688,8 +1692,8 @@
                         <div class="yai-hero-2">
                             <h3>Event Delegation Architecture</h3>
                             <p class="ymb-">This
-                                <i data-click="highlight-container" class="yai-btn-link" title="Click to highlight the Tab Component">entire tab component</i>
-                                uses <b>5 root listeners</b> <small>(two are required, the remaining ones are added via tabs configuration)</small> to handle all interactions. No matter how many buttons, inputs, or forms you add—even in nested tabs—they all use the same delegated listeners added to the root level.</p>
+                            <i data-click="highlight-container" class="yai-btn-link" title="Click to highlight the Tab Component">entire tab component</i>
+                            uses <b>5 root listeners</b> <small>(two are required, the remaining ones are added via tabs configuration)</small> to handle all interactions. No matter how many buttons, inputs, or forms you add—even in nested tabs—they all use the same delegated listeners added to the root level.</p>
                             <ul>
                                 <li>🚀 <b>Infinite Scaling:</b> Add 1 or 1,000 elements - listener count stays the same</li>
                                 <li> ⌥ <b>Hierarchically Aware:</b> Nested tabs automatically inherit proper scope</li>
@@ -1697,9 +1701,7 @@
                                 <li>🔍 <b>Depth Aware:</b> Events automatically find their correct container using the DOM's own hierarchy</li>
                             </ul>
                             <div class="yai-text-sm yai-text-muted">
-                                <div class="yai-text-sm yai-text-muted">
-                                    <p class="ymb-0">⌨️ <b>Shortcuts:</b> 1-9 = switch tabs | Alt+d/l/p/w/s/f = change themes | <span title="Back to start, complete reload">Alt+q = new beginning</span></p>
-                                </div>
+                                <p class="ymb-0">⌨️ <b>Shortcuts:</b> 1-9 = switch tabs | Alt+d/l/p/w/s/f = change themes | <span title="Back to start, complete reload">Alt+q = new beginning</span></p>
                             </div>
                         </div>
                         <hr class="ym-0">
@@ -1810,8 +1812,8 @@
                     <hr>
                     <form data-yai-form class="yai-form yai-grid yai-gap-l">
                         <div class="yai-grid yai-gap-s">
-                            <label for="user-name">Name:</label>
-                            <input id="user-name" name="user-name" data-input="user-name" type="text" class="yai-input" placeholder="Your name">
+                                <label for="user-name">Name:</label>
+                                <input id="user-name" name="user-name" data-input="user-name" type="text" class="yai-input" placeholder="Your name">
                         </div>
                         <div class="yai-grid yai-gap-s">
                             <label for="user-email">Email:</label>
@@ -1820,15 +1822,15 @@
                         <div class="yai-grid yai-gap-s">
                             <label for="user-plan" class="yai-label">Plan:</label>
                             <select id="user-plan" name="user-plan" data-change="user-plan" class="yai-select">
-                                <option value="basic">Basic</option>
-                                <option value="pro">Pro</option>
-                                <option value="enterprise">Enterprise</option>
+                            <option value="basic">Basic</option>
+                            <option value="pro">Pro</option>
+                            <option value="enterprise">Enterprise</option>
                             </select>
                         </div>
                         <div class="yai-form-group">
                             <label for="checkboxNewsletter" class="yai-checkbox">
-                                <input id="checkboxNewsletter" name="checkboxNewsletter" data-change="newsletter" type="checkbox">
-                                <span class="yai-checkbox-title">Subscribe to newsletter</span>
+                            <input id="checkboxNewsletter" name="checkboxNewsletter" data-change="newsletter" type="checkbox">
+                            <span class="yai-checkbox-title">Subscribe to newsletter</span>
                             </label>
                         </div>
                         <div class="yai-form-group">
@@ -1838,10 +1840,56 @@
                     <hr>
                     <div id="form-responses" class="yai-response-log"><span class="muted">pending…</span></div>
                 </div>
+                <!-- Docs Tab -->
+                <div data-tab="docs" class="yai-tab-panel">
+                    <h2><b>📚 Documentation</b></h2>
+                    <p>Explore the complete YaiJS documentation to learn more about building advanced applications.</p>
+                    <hr>
+                    <div class="yai-grid yai-gap-l">
+                        <div class="yai-doc-section">
+                            <h3>🚀 Getting Started</h3>
+                            <ul class="yai-doc-links">
+                                <li><a href="../README.md" data-click="doc-link" class="yai-link">Main README</a> - Quick start and overview</li>
+                                <li><a href="../docs/README.md" data-click="doc-link" class="yai-link">Documentation Hub</a> - Complete documentation index</li>
+                                <li><a href="https://jsfiddle.net/tqku5gzj/" data-click="doc-link" class="yai-link" target="_blank" rel="noopener">JSFiddle Demo</a> - Try it in your browser</li>
+                            </ul>
+                        </div>
+                        <div class="yai-doc-section">
+                            <h3>📖 Core Documentation</h3>
+                            <ul class="yai-doc-links">
+                                <li><a href="../docs/components/tabs.md" data-click="doc-link" class="yai-link">YaiTabs Guide</a> - Complete component reference</li>
+                                <li><a href="../docs/components/tabs.advanced.md" data-click="doc-link" class="yai-link">Advanced Usage</a> - SPA patterns and state management</li>
+                                <li><a href="../docs/yeh/README.md" data-click="doc-link" class="yai-link">YEH Event Hub</a> - Event system foundation</li>
+                            </ul>
+                        </div>
+                        <div class="yai-doc-section">
+                            <h3>🛠️ Utilities & Examples</h3>
+                            <ul class="yai-doc-links ymb-0">
+                                <li><a href="../docs/utilities/overview.md" data-click="doc-link" class="yai-link">Utilities Overview</a> - YaiTabsSwipe, YaiViewport</li>
+                                <li><b>Live Demo</b> - 50+ nested components</li>
+                                <li><a href="https://yaijs.github.io/yai/tabs/Benchmark.html" data-click="doc-link" class="yai-link" target="_blank" rel="noopener">Performance Benchmark</a> - Stress test</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="yai-response-area">
+                        <div class="yai-flex yai-flex-wrap yai-gap-s ymt-2">
+                            <button data-click="github-repo" class="yai-btn yai-btn-dark">
+                                <span class="yai-icon ycon-is-left">🔗</span> GitHub Repository
+                            </button>
+                            <button data-click="npm-package" class="yai-btn yai-btn-primary">
+                                <span class="yai-icon ycon-is-left">📦</span> NPM Package
+                            </button>
+                            <button data-click="report-issue" class="yai-btn yai-btn-secondary">
+                                <span class="yai-icon ycon-is-left">🐛</span> Report Issue
+                            </button>
+                        </div>
+                        <div class="yai-response-log ymt-2"><span class="muted">Random delegation test</span></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-
 
     <!-- Main Intro -->
     <div class="box section short-note removable yai-intro removable yai-viewport" data-viewport-once>
@@ -1980,8 +2028,8 @@
                 </div>
                 <div data-tab="2">
                     <!-- Grok’s Final Note -->
-                    <div class="yai-slidy yai-slidy-success draggable auto-height">
-                        <p class="ymb-0 yai-text-center auto-height">
+                    <div class="yai-slidy yai-slidy-success draggable">
+                        <p class="ymb-0 yai-text-center">
                             <small>
                                 <strong>Grok was here.</strong><br>
                                 I tried to break it at level 100. It laughed.<br>
@@ -2620,7 +2668,7 @@
             <div data-content class="yai-content">
                 <div data-tab="1" data-spaceless>
                     <div data-yai-tabs class="good-to-know" data-behavior="blur" data-nav="bottom" data-color-accent="primary">
-                        <nav data-controller data-variant="primary">
+                        <nav data-controller data-variant="dark">
                             <button data-tab-action="open" data-open="1" data-default>Good to know</button>
                             <button data-tab-action="open" data-open="2">Tell me more</button>
                             <button data-tab-action="open" data-open="3">LCP?</button>
@@ -2955,7 +3003,7 @@
                                     data-append="true">Result</button>
                             </nav>
                             <div data-content>
-                                <div data-tab="markup">
+                                <div data-tab="markup" data-spaceless>
 <pre class="hljs ymb-0"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">data-yai-tabs</span>&gt;</span>
     <span class="hljs-tag">&lt;<span class="hljs-name">nav</span> <span class="hljs-attr">data-controller</span>&gt;</span>
         <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">data-tab-action</span>=<span class="hljs-string">&quot;open&quot;</span> <span class="hljs-attr">data-open</span>=<span class="hljs-string">&quot;1&quot;</span>&gt;</span>Tab A<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
@@ -4838,29 +4886,21 @@ viewport.<span class="hljs-title function_">hook</span>(<span class="hljs-string
                         <div class="import-examples">
                             <h3>📦 Import Examples</h3>
                             <p>A few examples on how to import YAI.</p>
+                            <hr />
                             <div data-swipe-ignore>
                                 <!-- NPM Package -->
                                 <div class="import-block">
                                     <h4>NPM (Recommended)</h4>
-                                    <!-- <pre><code>import { YaiTabs, YaiTabsSwipe } from '@yaijs/core';</code></pre> -->
+                                    <pre class="hljs"><span class="hljs-comment">$</span> <span class="hljs-string">npm install @yaijs/core</span></pre>
                                     <pre class="hljs"><span class="hljs-keyword">import</span> { <span class="hljs-title class_">YaiTabs</span>, <span class="hljs-title class_">YaiTabsSwipe</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@yaijs/core&#x27;</span>;</pre>
                                 </div>
+                                <hr />
                                 <!-- CDN ESM -->
                                 <div class="import-block">
                                     <h4>CDN (ESM)</h4>
-                                    <!-- <pre><code>import { YaiTabs } from 'https://cdn.jsdelivr.net/npm/@yaijs/core/dist/yai-bundle.js';</code></pre> -->
-                                    <pre class="hljs"><span class="hljs-keyword">import</span> { <span class="hljs-title class_">YaiTabs</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;https://cdn.jsdelivr.net/npm/@yaijs/core/dist/yai-bundle.js&#x27;</span>;</pre>
-                                </div>
-                                <!-- Browser Global -->
-                                <div class="import-block">
-                                    <h4>Browser (Global):</h4>
-<pre class="hljs"><span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;module&quot;</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;https://cdn.jsdelivr.net/npm/@yaijs/core/dist/yai-bundle.js&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></span>
-<span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;module&quot;</span>&gt;</span><span class="language-javascript"><span class="hljs-keyword">const</span> {<span class="hljs-title class_">YaiTabs</span>} = <span class="hljs-variable language_">window</span>.<span class="hljs-property">YaiJS</span>;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></span></pre>
+                                    <pre class="hljs ymb-0"><span class="hljs-keyword">import</span> { <span class="hljs-title class_">YaiTabs</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;https://cdn.jsdelivr.net/npm/@yaijs/core/dist/yai-bundle.js&#x27;</span>;</pre>
                                 </div>
                             </div>
-                            <p class="ymb-0" style="margin-top: 10px;">
-                                <a href="./../example-imports.html" target="_blank">📖 See more import options →</a>
-                            </p>
                         </div>
                     </div>
                     <!-- Tab 6: Some Takes -->
@@ -4955,7 +4995,6 @@ viewport.<span class="hljs-title function_">hook</span>(<span class="hljs-string
         </div>
     </div>
 
-
 </main>
 
 <footer>
@@ -4971,20 +5010,19 @@ viewport.<span class="hljs-title function_">hook</span>(<span class="hljs-string
     <button type="button" class="scroll-to-top" data-action="scrollToTop">▲</button>
 </div>
 
-<!-- YaiJS - This file run the whole page -->
-<script type="module" src="../dist/yai-bundle-full.js"></script>
-
 <script type="module">
-    import YaiTabsAnalyzer from '../utils/debug/yai-tabs-analyzer.js';
-
-    const {
+    // Import all classes directly from the bundle
+    import {
+        YEH,
         YaiCore,
         YaiTabs,
         YaiTabsSwipe,
         YaiAutoSwitch,
         YaiViewport,
         YaiSearchAndClick
-    } = window.YaiJS;
+    } from '../dist/yai-bundle-full.js';
+
+    import YaiTabsAnalyzer from '../utils/debug/yai-tabs-analyzer.js';
 
     const YaiState = {
         util: {
@@ -5003,23 +5041,37 @@ viewport.<span class="hljs-title function_">hook</span>(<span class="hljs-string
         },
 
         /**
+         * Parse path string like "Settings[theme]" into components
+         * @private
+         */
+        _parsePath(path) {
+            const match = path.match(/^(\w+)\[(\w+)\]$/);
+            return match ? { utilName: match[1], propName: match[2] } : null;
+        },
+
+        /**
          * Parse state from HTML elements with data-yai-state-util
-         * Supports name format: "UtilName[property]"
+         * Only reads from form inputs - display elements are read-only
+         * Supports path format: data-yai-state-util="Settings[theme]"
+         * Fallback to name attribute for form inputs
          */
         parseFromDOM() {
             const stateElements = document.querySelectorAll('[data-yai-state-util]');
 
             stateElements.forEach(element => {
-                const name = element.name || element.id;
-                if (!name) return;
+                // Skip non-form elements (display elements are read-only)
+                if (element.tagName !== 'INPUT' && element.tagName !== 'SELECT' && element.tagName !== 'TEXTAREA') {
+                    return;
+                }
 
-                // Parse: "SearchAndClick[loops]" -> util: "SearchAndClick", prop: "loops"
-                const match = name.match(/^(\w+)\[(\w+)\]$/);
-                if (!match) return;
+                // Use data-yai-state-util value if present, otherwise fallback to name
+                const path = element.getAttribute('data-yai-state-util') || element.name || element.id;
+                if (!path) return;
 
-                const [, utilName, propName] = match;
+                const parsed = this._parsePath(path);
+                if (!parsed) return;
 
-                // Check if this util exists in state
+                const { utilName, propName } = parsed;
                 if (!this.util[utilName]) return;
 
                 // Get typed value based on input type
@@ -5027,40 +5079,87 @@ viewport.<span class="hljs-title function_">hook</span>(<span class="hljs-string
                 switch (element.type) {
                     case 'number':   value = parseInt(value, 10) || 0; break;
                     case 'checkbox': value = element.checked; break;
-                    case 'radio':
-                        if (!element.checked) return; // Skip unchecked radios
-                        break;
+                    case 'radio':    if (!element.checked) return; break;
                 }
 
-                // Update state
                 this.util[utilName][propName] = value;
             });
         },
 
         /**
-         * Update a specific state value and sync to DOM if element exists
+         * Sync state values to DOM elements
+         * @private
          */
-        set(utilName, propName, value) {
+        _syncToDOM(utilName, propName, actualValue) {
+            const path = `${utilName}[${propName}]`;
+            const elements = document.querySelectorAll(
+                `[data-yai-state-util="${path}"], [name="${path}"]`
+            );
+            elements.forEach(element => {
+                if (element.type === 'checkbox') {
+                    // Handle checkbox: convert "on"/"off" strings to boolean
+                    element.checked = (actualValue === true || actualValue === 'on');
+                } else if (element.tagName === 'INPUT' || element.tagName === 'SELECT' || element.tagName === 'TEXTAREA') {
+                    element.value = actualValue;
+                } else {
+                    // Display elements (span, div, label, etc.)
+                    element.textContent = actualValue;
+                }
+            });
+        },
+
+        /**
+         * Sync all state values to their corresponding DOM elements
+         * Call this on initialization to populate display elements
+         */
+        syncToDOM() {
+            for (const utilName in this.util) {
+                for (const propName in this.util[utilName]) {
+                    const value = this.util[utilName][propName];
+                    if (value !== null && value !== undefined) {
+                        this._syncToDOM(utilName, propName, value);
+                    }
+                }
+            }
+        },
+
+        set(utilNameOrPath, propNameOrValue, value) {
+            let utilName, propName, actualValue;
+
+            // Check if first param is a path like "Settings[theme]"
+            const parsed = this._parsePath(utilNameOrPath);
+
+            if (parsed) {
+                // Path format: set('Settings[theme]', 'dark')
+                utilName = parsed.utilName;
+                propName = parsed.propName;
+                actualValue = propNameOrValue;
+            } else {
+                // Separate format: set('Settings', 'theme', 'dark')
+                utilName = utilNameOrPath;
+                propName = propNameOrValue;
+                actualValue = value;
+            }
+
             if (!this.util[utilName]) {
                 console.warn(`YaiState: util "${utilName}" not found`);
                 return;
             }
 
-            this.util[utilName][propName] = value;
-
-            // Sync back to DOM element if it exists
-            const element = document.querySelector(`[name="${utilName}[${propName}]"]`);
-            if (element) {
-                if (element.type === 'checkbox') {
-                    element.checked = value;
-                } else {
-                    element.value = value;
-                }
-            }
+            this.util[utilName][propName] = actualValue;
+            this._syncToDOM(utilName, propName, actualValue);
         },
 
-        get(utilName, propName) {
-            return this.util[utilName]?.[propName];
+        get(utilNameOrPath, propName) {
+            const parsed = this._parsePath(utilNameOrPath);
+
+            if (parsed) {
+                // Path format: get('Settings[theme]')
+                return this.util[parsed.utilName]?.[parsed.propName];
+            } else {
+                // Separate format: get('Settings', 'theme')
+                return this.util[utilNameOrPath]?.[propName];
+            }
         }
     };
 

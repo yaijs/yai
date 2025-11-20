@@ -29,7 +29,6 @@
  * - Make complex interactions feel effortless to implement
  * - Enable infinite extensibility through hooks and configuration
  *
- * @version 1.0.0-beta.1
  * @author YaiJS Team - Advanced component architecture
  * @license MIT
  * @see https://github.com/yaijs/Yai/tree/main/tabs

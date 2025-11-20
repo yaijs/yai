@@ -32,7 +32,7 @@
 
     /* Form elements */
     --yai-tabs-form-input-elements-padding: .6rem 1rem;
-    --yai-tabs-form-input-elements-border-radius: var(--yai-tabs-form-border-radius, 5px);
+    --yai-tabs-form-input-elements-border-radius: var(--yai-tabs-form-border-radius, 0);
     --yai-tabs-form-input-elements-box-shadow: var(--yai-tabs-shadow-subtle);
 }
 
@@ -171,7 +171,7 @@
     /* Interactive States */
     --yai-tabs-color-focus: #02ffb2;
     --yai-tabs-color-focus-ring: rgba(2, 255, 178, 0.3);
-    /* --yai-loader-color: #89d7c2; */
+    --yai-loader-color: var(--yai-tabs-color-accent);
 
     /* Shadows & Borders - Enhanced for dark mode */
     --yai-tabs-shadow-subtle: 0 0 4px 1px rgba(55, 53, 53, 0.4);
@@ -591,6 +591,10 @@
 
 /**
 * Minimal Theme */
+[data-theme="minimal"] {
+    --yai-loader-color: var(--yai-minimal-primary-color);
+    box-shadow: 0 4px 6px 0px var(--yai-minimal-box-shadow);
+}
 [data-theme="minimal"] [data-controller] [data-open]:focus-visible {
     outline: 2px solid var(--yai-tabs-color-focus);
     outline-offset: 2px;
@@ -599,9 +603,6 @@
 [data-theme="minimal"] [data-controller] [data-open].active:focus-visible {
     outline: 2px solid var(--yai-tabs-color-focus);
     outline-offset: -1px;
-}
-[data-theme="minimal"] {
-    box-shadow: 0 4px 6px 0px var(--yai-minimal-box-shadow);
 }
 [data-theme="minimal"] [data-content] {
     --yai-tabs-content-inactive-background: var(--yai-minimal-tabs-content-inactive-background);
@@ -631,7 +632,7 @@
     box-shadow: inset 3px 0 0 var(--yai-tabs-nav-box-shadow);
 }
 [data-yai-tabs][data-theme="minimal"] > [data-controller] [data-open] {
-    padding: 18px 20px;
+    padding: 16px 20px;
 }
 [data-theme="minimal"] [data-controller] [data-open] {
     background: none;
@@ -681,12 +682,12 @@
     left: 0;
     right: unset;
 }
-[data-theme="minimal"] [data-controller] [data-open].yai-loading {
-    --yai-loader-color: var(--yai-minimal-primary-color);
-    color: transparent;
-}
 
 @media (max-width: 740px) {
+    [data-theme="minimal"] [data-controller] {
+        --yai-tabs-content-inactive-background: #f4f4f4;
+        background-color: var(--yai-tabs-content-inactive-background);
+    }
     [data-theme="minimal"][data-nav] [data-controller] [data-open].active::before,
     [data-theme="minimal"][data-nav="left"] [data-controller] [data-open].active::before,
     [data-theme="minimal"][data-nav="right"] [data-controller] [data-open].active::before,
@@ -703,6 +704,9 @@
 
 /**
  * Default Theme */
+ [data-theme="default"] {
+    border-radius: var(--yai-tabs-border-radius);
+}
 [data-theme="default"],
 [data-theme="default"] [data-yai-tabs] {
     background-color: var(--yai-tabs-color-background);
@@ -898,7 +902,6 @@
     --yai-tabs-shadow-accent: rgba(181, 207, 230, 0.649);
 }
 
-
 [data-color-apply="primary"] { color: var(--yai-tabs-color-primary); }
 [data-color-apply="secondary"] { color: var(--yai-tabs-color-secondary); }
 [data-color-apply="success"] { color: var(--yai-tabs-color-success); }
@@ -928,8 +931,8 @@
 }
 [data-yai-tabs] .yai-input,
 [data-yai-tabs] .yai-select {
-    display: block;
-    width: 100%;
+    display: inline-block;
+    width: auto;
     border: var(--yai-tabs-form-input-elements-border);
     background: var(--yai-tabs-form-input-elements-background);
 }
@@ -1035,8 +1038,9 @@
     pointer-events: none;
 }
 
-[data-yai-tabs][data-theme="default"] [data-controller] [data-open].yai-loading,
-[data-yai-tabs][data-theme="default"] [data-open].yai-loading {
+[data-yai-tabs] [data-controller] [data-open].yai-loading,
+[data-yai-tabs] [data-controller] [data-open].active.yai-loading,
+[data-yai-tabs] [data-content] button.yai-loading {
     color: transparent;
 }
 
@@ -1133,7 +1137,7 @@ button.yai-loading::after {
         background: var(--yai-tabs-content-inactive-background);
     }
     [data-yai-tabs] [data-controller] [data-open] {
-        min-height: 52px;
+        /* min-height: 52px; */
         box-shadow: 0 2px 4px 1px var(--yai-tabs-shadow-medium-color),
             0 0px 4px 1px var(--yai-tabs-shadow-medium-color);
     }

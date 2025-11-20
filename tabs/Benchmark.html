@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YaiTabs - Advanced Tab Browser Component - local-dev-many-title--disabled</title>
+    <title>YaiTabs Stresstest - Advanced Tab Browser Component</title>
     <meta name="description" content="Advanced Tab Browser Component with 9 animations, Dynamic content support, DeepLinks & implements WCAG 2.1 AA compliant tab navigation with full screen reader support">
 
     <!-- Example page styles -->
@@ -550,7 +550,7 @@
         <h1>
             <a href="./Benchmark.html">
                 <span class="ycon ycon-sparkles ycon-sm ycon-is-left ycon-fix-top-2" aria-hidden="true"></span>
-                YaiTabs Demo
+                YaiTabs Stresstest
                 <span style="margin-left: 10px;font-weight: bolder;" class="yai-badge">v1.0.x</span>
             </a>
         </h1>
@@ -1088,35 +1088,48 @@
             <div class="yai-slidy yai-slidy-funky draggable">BeforeSwitch context includes the originating container, watchHooks wires every swipe hook, and resetDraggingState clears stuck drags.</div>
         </div>
     </div>
+    <footer data-tabs-footer>
+
+        <div class="scroll-to-top-container">
+            <button type="button" class="scroll-to-top" data-click="scrollToTop">▲</button>
+        </div>
+
+    </footer>
 </div>
 </div>
 
-
-<div class="box levelling-up-section" data-viewport-once>
-    <div class="yeo-needs-to-level-up" data-label-quote="Yatrix Reloaded">
-        <blockquote>
-            "We're going to need... more advanced techniques."
-            <small>— Ypsipheus</small>
-        </blockquote>
-        <blockquote>
-            "Like what?"
-            <small>— Yeo</small>
-        </blockquote>
-        <blockquote>
-            "Hash routing. Component systems. Advanced state management."
-            <small>— Ypsipheus</small>
-        </blockquote>
-        <blockquote>
-            "downloads framework knowledge directly to brain" <i>(Yeo)</i>
-        </blockquote>
-        <blockquote>
-            "I know Kung Vue..."
-            <small>— Yeo</small>
-        </blockquote>
-        <blockquote>
-            "Show me."
-            <small>— Ypsipheus</small>
-        </blockquote>
+<div class="box docs-section" data-viewport-once>
+    <!-- Docs Tab -->
+    <div data-tab="docs" class="yai-tab-panel">
+        <h2><b>📚 Documentation</b></h2>
+        <p>Explore the complete YaiJS documentation to learn more about building advanced applications.</p>
+        <hr>
+        <div class="yai-grid yai-gap-l">
+            <div class="yai-doc-section">
+                <h3>🚀 Getting Started</h3>
+                <ul class="yai-doc-links">
+                    <li><a href="../README.md" data-click="doc-link" class="yai-link">Main README</a> - Quick start and overview</li>
+                    <li><a href="../docs/README.md" data-click="doc-link" class="yai-link">Documentation Hub</a> - Complete documentation index</li>
+                    <li><a href="https://jsfiddle.net/tqku5gzj/" data-click="doc-link" class="yai-link" target="_blank" rel="noopener">JSFiddle Demo</a> - Try it in your browser</li>
+                </ul>
+            </div>
+            <div class="yai-doc-section">
+                <h3>📖 Core Documentation</h3>
+                <ul class="yai-doc-links">
+                    <li><a href="../docs/components/tabs.md" data-click="doc-link" class="yai-link">YaiTabs Guide</a> - Complete component reference</li>
+                    <li><a href="../docs/components/tabs.advanced.md" data-click="doc-link" class="yai-link">Advanced Usage</a> - SPA patterns and state management</li>
+                    <li><a href="../docs/yeh/README.md" data-click="doc-link" class="yai-link">YEH Event Hub</a> - Event system foundation</li>
+                </ul>
+            </div>
+            <div class="yai-doc-section">
+                <h3>🛠️ Utilities & Examples</h3>
+                <ul class="yai-doc-links ymb-0">
+                    <li><a href="../docs/utilities/overview.md" data-click="doc-link" class="yai-link">Utilities Overview</a> - YaiTabsSwipe, YaiViewport</li>
+                    <li><a href="https://yaijs.github.io/yai/tabs/Example.html" data-click="doc-link" class="yai-link" target="_blank" rel="noopener">Live Demo</a> - 50+ nested components</li>
+                    <li><b>Performance Benchmark</b> - Stress test</li>
+                </ul>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -1125,28 +1138,24 @@
 <footer>
     <nav>
         <a href="https://github.com/yaijs/yai">YAI</a>
-        <small class="ycon ycon-katakana-letter ycon-xs ycon-is-left ycon-is-right"></small>
+        |
         <a href="https://github.com/yaijs/yeh">YEH</a>
     </nav>
     <p><b>© <span title="DOM pun intended">Claude Van DOM</span> &amp; Engin Ypsilon</b></p>
 </footer>
 
-<div class="scroll-to-top-container">
-    <button type="button" class="scroll-to-top" data-action="scrollToTop">▲</button>
-</div>
-
-<script type="module" src="../dist/yai-bundle-full.js"></script>
-
 <script type="module">
-    import YaiTabsAnalyzer from '../utils/debug/yai-tabs-analyzer.js';
-
-    const {
+    import {
+        YEH,
         YaiCore,
         YaiTabs,
         YaiTabsSwipe,
-        YaiSearchAndClick,
-        YaiViewport
-    } = window.YaiJS;
+        YaiAutoSwitch,
+        YaiViewport,
+        YaiSearchAndClick
+    } from '../dist/yai-bundle-full.js';
+
+    import YaiTabsAnalyzer from '../utils/debug/yai-tabs-analyzer.js';
 
     const YaiState = {
         util: {
@@ -1471,6 +1480,7 @@
                 }
                 break;
             case 'countComponents': countComponents(); break;
+            case 'scrollToTop': window.scrollTo({ top: 0, behavior: 'smooth' }); break;
         }
     })
     /** Hook input event **/

@@ -2,7 +2,6 @@
 
 /**
  * @fileoverview YaiTabsSwipe - Swipe/drag navigation utility for YaiTabs
- * @version 1.0.0
  * @license MIT
  */
 

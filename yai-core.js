@@ -1,5 +1,7 @@
 "use strict";
 
+import {YEH} from './yeh/yeh.js';
+
 /**
  * YaiCore - Foundation class for all Yai components
  * Provides shared utilities, event handler factory, and common patterns

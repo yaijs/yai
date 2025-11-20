@@ -20,7 +20,6 @@
  * - Memory Footprint: ~600 LOC, minimal runtime overhead
  * - Scalability: Efficient for dozens of tracked elements with spatial grid
  *
- * @version 1.0.0
  * @author YaiJS Team - Advanced component architecture
  * @license MIT
  * @see https://github.com/yaijs/yai/blob/main/utils/yai-viewport.js
