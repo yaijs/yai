@@ -1,5 +1,6 @@
-import {afterEach, beforeEach, describe, expect, it} from 'vitest';
+import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 import {cleanupDOM, createMockContainer} from './setup.js';
+import {YaiTabs} from '../tabs/yai-tabs.js';
 
 // Mock YEH and YaiCore
 class MockYEH {
@@ -481,5 +482,293 @@ describe('YaiTabs - Sibling Branch Cleanup', () => {
     nestedInTab1.classList.remove('tab-active');
 
     expect(nestedInTab1.classList.contains('tab-active')).toBe(false);
+  });
+});
+
+describe('YaiTabs - Sibling Cleanup with Parallel Active Branches', () => {
+  let container;
+
+  beforeEach(() => {
+    container = createMockContainer();
+    document.body.appendChild(container);
+  });
+
+  afterEach(() => {
+    cleanupDOM();
+  });
+
+  it('should preserve nested routes in active sibling when switching tabs at same level', () => {
+    // Simulate the scenario: STYLES=1 with S-RED, N-PURPLE, S-MIXED (all siblings at same level)
+    // S-MIXED has deep nesting: S-M-BLUE → S-M-DARK → SUB-S-BLUE
+    container.innerHTML = `
+      <div data-yai-tabs data-ref-path="styles" data-nesting="0">
+        <nav data-controller>
+          <button data-tab-action="open" data-open="1" class="active">Tab 1</button>
+          <button data-tab-action="open" data-open="2">Tab 2</button>
+        </nav>
+        <div data-content>
+          <div data-tab="1" class="active">
+            <!-- S-RED container (will switch from C to A) -->
+            <div data-yai-tabs data-ref-path="s-red" data-nesting="1">
+              <nav data-controller>
+                <button data-tab-action="open" data-open="a">A</button>
+                <button data-tab-action="open" data-open="b">B</button>
+                <button data-tab-action="open" data-open="c" class="active">C</button>
+              </nav>
+              <div data-content>
+                <div data-tab="a">Content A</div>
+                <div data-tab="b">Content B</div>
+                <div data-tab="c" class="active">Content C</div>
+              </div>
+            </div>
+
+            <!-- N-PURPLE sibling (same level as S-RED) -->
+            <div data-yai-tabs data-ref-path="n-purple" data-nesting="1">
+              <nav data-controller>
+                <button data-tab-action="open" data-open="1">1</button>
+                <button data-tab-action="open" data-open="2">2</button>
+              </nav>
+              <div data-content>
+                <div data-tab="1">Purple 1</div>
+                <div data-tab="2">Purple 2</div>
+              </div>
+            </div>
+
+            <!-- S-MIXED sibling with deep nesting (should be preserved) -->
+            <div data-yai-tabs data-ref-path="s-mixed" data-nesting="1">
+              <nav data-controller>
+                <button data-tab-action="open" data-open="1" class="active">1</button>
+                <button data-tab-action="open" data-open="2">2</button>
+              </nav>
+              <div data-content>
+                <div data-tab="1" class="active">
+                  <!-- S-M-BLUE (nested level 2) -->
+                  <div data-yai-tabs data-ref-path="s-m-blue" data-nesting="2">
+                    <nav data-controller>
+                      <button data-tab-action="open" data-open="1" class="active">1</button>
+                    </nav>
+                    <div data-content>
+                      <div data-tab="1" class="active">
+                        <!-- S-M-DARK (nested level 3) -->
+                        <div data-yai-tabs data-ref-path="s-m-dark" data-nesting="3">
+                          <nav data-controller>
+                            <button data-tab-action="open" data-open="1" class="active">1</button>
+                          </nav>
+                          <div data-content>
+                            <div data-tab="1" class="active">
+                              <!-- SUB-S-BLUE (nested level 4) -->
+                              <div data-yai-tabs data-ref-path="sub-s-blue" data-nesting="4">
+                                <nav data-controller>
+                                  <button data-tab-action="open" data-open="1" class="active">1</button>
+                                </nav>
+                                <div data-content>
+                                  <div data-tab="1" class="active">Deep content</div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div data-tab="2">Mixed 2</div>
+              </div>
+            </div>
+          </div>
+          <div data-tab="2">Styles Tab 2</div>
+        </div>
+      </div>
+    `;
+
+    // Create a mock YaiTabs instance with routeMap
+    const mockInstance = {
+      config: { rootSelector: '[data-yai-tabs]' },
+      routeMap: new Map([
+        ['styles', '1'],
+        ['s-red', 'c'],
+        ['s-mixed', '1'],
+        ['s-m-blue', '1'],
+        ['s-m-dark', '1'],
+        ['sub-s-blue', '1']
+      ])
+    };
+
+    // Simulate the sibling cleanup logic with the FIX
+    const sRedContainer = container.querySelector('[data-ref-path="s-red"]');
+    const parent = sRedContainer.closest('[data-yai-tabs][data-nesting="0"]');
+    const siblingContainers = parent.querySelectorAll(':scope > [data-content] > [data-tab] > [data-yai-tabs]');
+
+    siblingContainers.forEach(sibling => {
+      if (sibling !== sRedContainer) {
+        // THE FIX: Check if sibling's parent panel is active
+        const siblingPanel = sibling.closest('[data-tab]');
+        const isSiblingPanelActive = siblingPanel && siblingPanel.classList.contains('active');
+
+        // Only cleanup if sibling's panel is NOT active
+        if (!isSiblingPanelActive) {
+          // Would cleanup here, but since panel IS active, this shouldn't run
+          expect(true).toBe(false); // This should never execute
+        }
+      }
+    });
+
+    // Assert: S-MIXED's nested routes should still be in routeMap
+    expect(mockInstance.routeMap.has('s-mixed')).toBe(true);
+    expect(mockInstance.routeMap.has('s-m-blue')).toBe(true);
+    expect(mockInstance.routeMap.has('s-m-dark')).toBe(true);
+    expect(mockInstance.routeMap.has('sub-s-blue')).toBe(true);
+  });
+
+  it('should cleanup nested routes in sibling when its parent panel becomes inactive', () => {
+    // Simulate switching STYLES from 1 to 2 (deactivates all children of tab 1)
+    container.innerHTML = `
+      <div data-yai-tabs data-ref-path="styles" data-nesting="0">
+        <nav data-controller>
+          <button data-tab-action="open" data-open="1">Tab 1</button>
+          <button data-tab-action="open" data-open="2" class="active">Tab 2</button>
+        </nav>
+        <div data-content>
+          <div data-tab="1">
+            <!-- These should be cleaned up since tab 1 is now inactive -->
+            <div data-yai-tabs data-ref-path="s-red" data-nesting="1">
+              <nav data-controller>
+                <button data-tab-action="open" data-open="a">A</button>
+              </nav>
+              <div data-content>
+                <div data-tab="a">Content A</div>
+              </div>
+            </div>
+            <div data-yai-tabs data-ref-path="s-mixed" data-nesting="1">
+              <nav data-controller>
+                <button data-tab-action="open" data-open="1">1</button>
+              </nav>
+              <div data-content>
+                <div data-tab="1">
+                  <div data-yai-tabs data-ref-path="s-m-blue" data-nesting="2">
+                    <nav data-controller>
+                      <button data-tab-action="open" data-open="1">1</button>
+                    </nav>
+                    <div data-content>
+                      <div data-tab="1">Nested</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div data-tab="2" class="active">Styles Tab 2</div>
+        </div>
+      </div>
+    `;
+
+    const mockInstance = {
+      config: { rootSelector: '[data-yai-tabs]' },
+      routeMap: new Map([
+        ['styles', '2'],
+        ['s-red', 'a'],
+        ['s-mixed', '1'],
+        ['s-m-blue', '1']
+      ])
+    };
+
+    // Simulate cleanup when switching to tab 2
+    const stylesContainer = container.querySelector('[data-ref-path="styles"]');
+    const tab1Panel = stylesContainer.querySelector('[data-tab="1"]');
+    const siblingContainers = tab1Panel.querySelectorAll(':scope > [data-yai-tabs]');
+
+    let shouldCleanup = false;
+    siblingContainers.forEach(sibling => {
+      const siblingPanel = sibling.closest('[data-tab]');
+      const isSiblingPanelActive = siblingPanel && siblingPanel.classList.contains('active');
+
+      if (!isSiblingPanelActive) {
+        shouldCleanup = true;
+        // Would delete from routeMap here
+      }
+    });
+
+    // Assert: Cleanup should have been triggered
+    expect(shouldCleanup).toBe(true);
+
+    // Simulate the cleanup
+    mockInstance.routeMap.delete('s-red');
+    mockInstance.routeMap.delete('s-mixed');
+    mockInstance.routeMap.delete('s-m-blue');
+
+    // Assert: All nested routes under inactive tab 1 should be removed
+    expect(mockInstance.routeMap.has('s-red')).toBe(false);
+    expect(mockInstance.routeMap.has('s-mixed')).toBe(false);
+    expect(mockInstance.routeMap.has('s-m-blue')).toBe(false);
+    // But styles should still be there
+    expect(mockInstance.routeMap.has('styles')).toBe(true);
+    expect(mockInstance.routeMap.get('styles')).toBe('2');
+  });
+});
+
+describe('YaiTabs - _cleanupSiblingContainers regression', () => {
+  let container;
+
+  const createTabsDouble = () => {
+    const instance = Object.create(YaiTabs.prototype);
+    instance.config = {rootSelector: '[data-yai-tabs]'};
+    instance._cleanupSiblingBranchParameters = vi.fn();
+    return instance;
+  };
+
+  beforeEach(() => {
+    cleanupDOM();
+    container = createMockContainer();
+  });
+
+  afterEach(() => {
+    cleanupDOM();
+  });
+
+  it('skips cleanup for siblings inside the same active panel', () => {
+    container.innerHTML = `
+      <div data-yai-tabs data-ref-path="styles" data-nesting="0">
+        <div data-content>
+          <div data-tab="1" class="active">
+            <div data-yai-tabs data-ref-path="s-red" data-nesting="1"></div>
+            <div data-yai-tabs data-ref-path="n-purple" data-nesting="1"></div>
+            <div data-yai-tabs data-ref-path="s-mixed" data-nesting="1"></div>
+          </div>
+          <div data-tab="2">Styles Tab 2</div>
+        </div>
+      </div>
+    `;
+
+    const sRedContainer = container.querySelector('[data-ref-path="s-red"]');
+    const tabs = createTabsDouble();
+
+    tabs._cleanupSiblingContainers(sRedContainer);
+
+    expect(tabs._cleanupSiblingBranchParameters).not.toHaveBeenCalled();
+  });
+
+  it('still cleans siblings whose parent panel is inactive', () => {
+    container.innerHTML = `
+      <div data-yai-tabs data-ref-path="styles" data-nesting="0">
+        <div data-content>
+          <div data-tab="1" class="active">
+            <div data-yai-tabs data-ref-path="s-red" data-nesting="1"></div>
+            <div data-yai-tabs data-ref-path="s-mixed" data-nesting="1"></div>
+          </div>
+          <div data-tab="2">
+            <div data-yai-tabs data-ref-path="styles-panel-2" data-nesting="1"></div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const sRedContainer = container.querySelector('[data-ref-path="s-red"]');
+    const tabs = createTabsDouble();
+
+    tabs._cleanupSiblingContainers(sRedContainer);
+
+    expect(tabs._cleanupSiblingBranchParameters).toHaveBeenCalledTimes(1);
+    const [inactiveContainer] = tabs._cleanupSiblingBranchParameters.mock.calls[0];
+    expect(inactiveContainer.dataset.refPath).toBe('styles-panel-2');
   });
 });

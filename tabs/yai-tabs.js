@@ -1065,8 +1065,15 @@ class YaiTabs extends YaiCore {
         const siblingContainers = parent.querySelectorAll(`:scope > [data-content] > [data-tab] > ${this.config.rootSelector}`);
         siblingContainers.forEach(sibling => {
             if (sibling !== container) {
-                // Clean up nested branches in inactive siblings
-                this._cleanupSiblingBranchParameters(sibling);
+                // Check if sibling's parent panel is active
+                const siblingPanel = sibling.closest('[data-tab]');
+                const isSiblingPanelActive = siblingPanel && siblingPanel.classList.contains('active');
+
+                // Only cleanup siblings whose parent panel is NOT active
+                // This preserves nested routes in parallel active branches
+                if (!isSiblingPanelActive) {
+                    this._cleanupSiblingBranchParameters(sibling);
+                }
             }
         });
     }
@@ -1074,6 +1081,16 @@ class YaiTabs extends YaiCore {
     /**
      * Clean up hash parameters from sibling branches when switching tabs at same level
      * This prevents hash pollution from hidden parallel branches
+     *
+     * IMPORTANT: Only called for siblings whose parent panel is INACTIVE.
+     * Active siblings (in same parent panel as clicked container) are preserved.
+     *
+     * Example:
+     *   STYLES=1 (active panel)
+     *     ├─ S-RED=C (clicked, switch to A)
+     *     ├─ N-PURPLE (sibling, same parent panel STYLES=1) → PRESERVED
+     *     └─ S-MIXED=1 with nested routes → PRESERVED (same active parent panel)
+     *
      * @param {Element} container - The container that's being switched to
      */
     _cleanupSiblingBranchParameters(container) {
