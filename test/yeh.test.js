@@ -181,7 +181,7 @@ describe('YEH (Yai Event Hub)', () => {
 
         container.innerHTML = '<button class="test-button" data-action="open">Click</button>';
 
-        const yeh = new YEH(eventMapping, {}, { methods });
+        new YEH(eventMapping, {}, { methods });
         const button = container.querySelector('.test-button');
 
         // Trigger click
@@ -197,7 +197,7 @@ describe('YEH (Yai Event Hub)', () => {
   });
 
   describe('Public API', () => {
-    it('should support .on() method', async () => {
+    it('should support .on() method with string handler', async () => {
       const yeh = new YEH();
       let called = false;
 
@@ -213,6 +213,167 @@ describe('YEH (Yai Event Hub)', () => {
 
       await new Promise(resolve => setTimeout(resolve, 50));
       expect(called).toBe(true);
+    });
+
+    it('should support .on() method with function closure', async () => {
+      const yeh = new YEH();
+      let called = false;
+      let eventData = null;
+
+      // Register event listener with closure instead of string name
+      yeh.on('custom-event', (event) => {
+        called = true;
+        eventData = event.detail;
+      });
+
+      yeh.emit('custom-event', { testData: 'hello' });
+
+      await new Promise(resolve => setTimeout(resolve, 50));
+      expect(called).toBe(true);
+      expect(eventData).toEqual({ testData: 'hello' });
+    });
+
+    it('should support .subscribe() as alias for .on()', async () => {
+      const yeh = new YEH();
+      let called = false;
+
+      yeh.subscribe('test-event', () => {
+        called = true;
+      });
+
+      yeh.emit('test-event');
+
+      await new Promise(resolve => setTimeout(resolve, 50));
+      expect(called).toBe(true);
+    });
+  });
+
+  describe('Hook System', () => {
+    it('should register and execute hooks with closures', () => {
+      const yeh = new YEH();
+      let hookCalled = false;
+      let receivedContext = null;
+
+      yeh.hook('beforeHandleEvent', (context) => {
+        hookCalled = true;
+        receivedContext = context;
+      });
+
+      yeh._executeHook('beforeHandleEvent', { testValue: 123 });
+
+      expect(hookCalled).toBe(true);
+      expect(receivedContext.testValue).toBe(123);
+    });
+
+    it('should support multiple hooks for same event', () => {
+      const yeh = new YEH();
+      const callOrder = [];
+
+      yeh.hook('test-hook', () => callOrder.push(1));
+      yeh.hook('test-hook', () => callOrder.push(2));
+      yeh.hook('test-hook', () => callOrder.push(3));
+
+      yeh._executeHook('test-hook');
+
+      expect(callOrder).toEqual([1, 2, 3]);
+    });
+
+    it('should unhook specific callbacks', () => {
+      const yeh = new YEH();
+      let count = 0;
+
+      const callback1 = () => count++;
+      const callback2 = () => count++;
+
+      yeh.hook('test-hook', callback1);
+      yeh.hook('test-hook', callback2);
+
+      yeh._executeHook('test-hook');
+      expect(count).toBe(2);
+
+      yeh.unhook('test-hook', callback1);
+      yeh._executeHook('test-hook');
+      expect(count).toBe(3); // Only callback2 called
+
+      yeh.unhook('test-hook', callback2);
+      yeh._executeHook('test-hook');
+      expect(count).toBe(3); // No callbacks called
+    });
+
+    it('should clear all hooks for a specific event', () => {
+      const yeh = new YEH();
+      let called = false;
+
+      yeh.hook('test-hook', () => called = true);
+      yeh.hook('test-hook', () => called = true);
+
+      yeh.clearHooks('test-hook');
+      yeh._executeHook('test-hook');
+
+      expect(called).toBe(false);
+    });
+
+    it('should return instance for chaining', () => {
+      const yeh = new YEH();
+
+      const result = yeh
+        .hook('hook1', () => {})
+        .hook('hook2', () => {})
+        .unhook('hook1', () => {})
+        .clearHooks('hook2');
+
+      expect(result).toBe(yeh);
+    });
+
+    it('should pass instance as second argument to hooks', () => {
+      const yeh = new YEH();
+      let receivedInstance = null;
+
+      yeh.hook('test-hook', (_context, instance) => {
+        receivedInstance = instance;
+      });
+
+      yeh._executeHook('test-hook', {});
+
+      expect(receivedInstance).toBe(yeh);
+    });
+
+    it('should execute beforeHandleEvent and afterHandleEvent hooks', () => {
+      return new Promise((resolve) => {
+        const eventMapping = {
+          '.test-button': ['click'],
+        };
+
+        const beforeCalled = [];
+        const afterCalled = [];
+
+        container.innerHTML = '<button class="test-button">Click</button>';
+
+        const yeh = new YEH(eventMapping, {}, {
+          methods: {
+            click: {
+              handleClick: () => {}
+            }
+          }
+        });
+
+        yeh.hook('beforeHandleEvent', (context) => {
+          beforeCalled.push(context.eventType);
+        });
+
+        yeh.hook('afterHandleEvent', (context) => {
+          afterCalled.push(context.eventType);
+        });
+
+        const button = container.querySelector('.test-button');
+        button.click();
+
+        setTimeout(() => {
+          expect(beforeCalled).toContain('click');
+          expect(afterCalled).toContain('click');
+          resolve();
+        }, 50);
+      });
     });
   });
 

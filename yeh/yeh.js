@@ -175,6 +175,13 @@ class YEH {
         return instance;
     }
 
+    /**
+     * Register a custom event listener dynamically
+     * @param {string} type - Event type to listen for
+     * @param {string|Function} handler - Handler method name or function closure
+     * @param {string|Element} target - Target selector or element (defaults to 'document')
+     * @returns {YEH} - Returns this for chaining
+     */
     on(type, handler, target) {
         this.addEvent(target || 'document', { type, handler });
         return this;
@@ -547,11 +554,16 @@ class YEH {
 
     /**
      * Enhanced handler resolution with methods object and global fallback support
-     * @param {string} handlerName - Handler method name to resolve
+     * @param {string|Function} handlerName - Handler method name to resolve or function closure
      * @param {string} eventType - Event type for scoped alias lookup
      * @returns {Function|null} - Resolved handler function or null if not found
      */
     resolveHandler(handlerName, eventType) {
+        // Support direct function references (closures)
+        if (typeof handlerName === 'function') {
+            return handlerName;
+        }
+
         // First resolve any aliases
         const resolvedName = this.resolveMethodName(handlerName, eventType);
 
@@ -588,7 +600,7 @@ class YEH {
 
     /**
      * Validate that a resolved handler exists and is callable
-     * @param {string} handlerName - Original handler name for error reporting
+     * @param {string|Function} handlerName - Original handler name for error reporting (or function closure)
      * @param {string} eventType - Event type for context
      * @param {Function|null} resolvedHandler - The resolved handler function
      * @param {string} resolvedName - The resolved method name after alias processing
@@ -596,6 +608,11 @@ class YEH {
      * @private
      */
     validateResolvedHandler(handlerName, eventType, resolvedHandler, resolvedName) {
+        // Skip validation for function closures
+        if (typeof handlerName === 'function') {
+            return true;
+        }
+
         if (!this.config.enableHandlerValidation) {
             return !!resolvedHandler; // Skip validation but return boolean
         }
