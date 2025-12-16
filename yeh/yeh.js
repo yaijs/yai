@@ -478,9 +478,13 @@ class YEH {
                     handler = {
                         handleEvent: (event) => {
                             // Generate unique key per element using WeakMap-style approach
-                            const elementId = event.target.dataset.yehDid ||
-                                            event.target.id ||
-                                            event.target.getAttribute('name');
+                            let elementId = null;
+                            const target = event.target;
+
+                            // Check if target is a DOM element with dataset property
+                            if (target && target.dataset) {
+                                elementId = target.dataset.yehDid || target.id || target.getAttribute('name');
+                            }
 
                             // Fallback: use element itself as weak reference via Map
                             const debounceKey = elementId
