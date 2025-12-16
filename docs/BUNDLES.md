@@ -21,7 +21,7 @@ This document explains the different bundle files available in `@yaijs/core` and
 **Components:**
 - `YaiCore` - Base framework with event handling
 - `YaiTabs` - Tab component with routing, ARIA, animations
-- `YEH` - Event hub for O(1) event delegation
+- `YEH` - Event hub for event delegation
 
 **When to use:**
 - Minimal bundle size is critical

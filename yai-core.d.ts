@@ -1,12 +1,12 @@
 /**
  * 🏗️ **YaiCore - Foundation Architecture for YaiJS Components**
  *
- * Advanced base class built on YEH's O(1) event delegation system.
+ * Advanced base class built on YEH's event delegation system.
  * Provides unified component initialization, dynamic content loading, and extensible
  * hook system for building high-performance web components with mathematical scalability.
  *
  * **🚀 Core Features:**
- * - **O(1) Performance**: Single event listener architecture with infinite scalability
+ * - **Performance**: Single event listener architecture with infinite scalability
  * - **Dynamic Content Loading**: Fetch-based content with comprehensive delay management
  * - **Hook System**: Extensible callback architecture for lifecycle customization
  * - **Memory Management**: Automatic cleanup with AbortController integration
@@ -18,14 +18,13 @@
  * **📊 Performance Benefits:**
  * - **Query Optimization**: DOM caching reduces repeated querySelector calls
  * - **Memory Efficient**: Automatic cleanup prevents memory leaks
- * - **Scalable Architecture**: O(1) performance regardless of component complexity
+ * - **Scalable Architecture**: performance regardless of component complexity
  * - **Intelligent Batching**: Event delegation minimizes listener overhead
  * - **Lazy Loading**: Dynamic content loading with comprehensive delay controls
  *
  * **🎯 Design Philosophy:**
  * "Mathematical Elegance Meets Developer Experience"
  * - Provide maximum functionality with minimal code
- * - Ensure every feature scales mathematically (O(1) or better)
  * - Make complex interactions feel effortless to implement
  * - Enable infinite extensibility through hooks and configuration
  *
@@ -226,7 +225,7 @@ export interface LifecycleCallbacks {
  *
  * Base class for all YaiJS components providing unified architecture, dynamic content
  * loading, lifecycle management, and extensible hook system built on YEH's
- * advanced O(1) event delegation.
+ * advanced event delegation.
  *
  * **🎯 Core Architecture:**
  * - **Event Factory**: Creates YEH instances with component integration
@@ -467,8 +466,7 @@ export declare class YaiCore extends YEH {
   /**
    * 🏭 **Create Event Handler Factory**
    *
-   * Factory method to create YEH instances with component-specific
-   * configuration. Provides method binding and event system integration for O(1) performance.
+   * Factory method to create YEH instances with component-specific configuration.
    *
    * @param selectors - Event listener selectors mapping
    * @param aliases - Event method aliases for cleaner handler names

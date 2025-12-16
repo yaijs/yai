@@ -152,7 +152,7 @@ Build **complete single-page applications** using YaiTabs as your **router, stat
 
 ## Event Hub Patterns
 
-YaiTabs handles ANY event type with the same O(1) delegation.
+YaiTabs handles ANY event type with the same delegation.
 
 ### Multi-Event Configuration
 
@@ -490,7 +490,9 @@ const swipe = new YaiTabsSwipe({
 
 ## Advanced Configuration
 
-### Complete Enterprise Setup
+### Complete Setup
+
+With Event
 
 ```javascript
 import { YaiTabs, YaiTabsSwipe, YaiViewport, YaiCore } from '@yaijs/core';
@@ -591,7 +593,7 @@ tabs
 **Distance Cache** - Cache container lookups for repeated events:
 ```javascript
 events: {
-    enableDistanceCache: true  // O(1) container lookups after first event
+    enableDistanceCache: true
 }
 ```
 

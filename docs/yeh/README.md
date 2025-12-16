@@ -1,29 +1,46 @@
 # YEH (Yai Event Hub)
 
-> A lightweight, flexible event handler for modern web applications. Simplifies event management by centralizing listeners and providing advanced routing options.
+> Lightweight event delegation library for modern web applications
 
-YEH is fundamentally designed around **event delegation** - the concept of using a single listener to handle multiple, or even dynamically added elements efficiently and lossless. This isn't just an optimization; it's the entire architectural foundation. Works on `file://` with zero build tools.
+YEH is fundamentally designed around **event delegation** - using a single listener to handle multiple elements, including dynamically added ones. This isn't just an optimization; it's the entire architectural foundation. Works on `file://` with zero build tools.
+
+**Documentation Status:** Early release - actively being refined
 
 ---
 
-## ✨ Features
+## ✨ Core Features
 
-- **Event Delegation Made Easy**: One listener handles dynamic elements with scope-based routing.
-- **Automatic Target Resolution**: Handles nested elements (e.g., SVGs in buttons).
-- **Throttle & Debounce Support**: Built-in performance controls.
-- **Dynamic Listener Management**: Add/remove events at runtime.
-- **Flexible Handler Resolution**: Class methods, external maps, or globals.
-- **Multi-Handler System**: Closest-match resolution for nested components.
-- **Performance Tracking**: Optional metrics for optimization.
-- **No Dependencies**: ~5kB gzipped, enterprise-ready (729 LOC).
+**Built for developers who value speed and simplicity:**
+
+YEH is perfect for **quick prototyping**, **experimental projects**, and **production apps** alike. No build tools, no configuration files, no framework lock-in — just write code and see results instantly.
+
+**Technical Features:**
+
+- **Event Delegation** - One listener handles dynamic elements with scope-based routing
+- **Auto Target Resolution** - Handles nested elements correctly (e.g., SVGs in buttons)
+- **Throttle & Debounce** - Built-in performance controls
+- **Dynamic Listeners** - Add/remove events at runtime
+- **Flexible Handlers** - Class methods, external maps, or globals
+- **Multi-Handler System** - Closest-match resolution for nested components
+- **Hook System** - Zero-cost event observation without DOM listeners
+
+**Developer Experience:**
+
+- **Zero dependencies** - Works standalone, no npm install required
+- **Works on `file://`** - No server needed, perfect for local experiments
+- **Copy-paste ready** - Full examples that actually run
+- **Framework agnostic** - Use with React, Vue, Vanilla, or anything
+- **5KB minified** - Lightweight enough for quick prototypes, solid enough for production
 
 ---
 
 ## 🚀 Quick Start
 
-**No setup, no build step, no server, just include the file.**
+**No setup, no build step, no server, just include YEH.**
 
-**Get started in 30 seconds** – [try it live on JSFiddle](https://jsfiddle.net/nu2p54ao/)
+**Get started in 30 seconds** – [or try it live on JSFiddle](https://jsfiddle.net/qdwozL0c/)
+
+Using the CDN Demo below obviously requires a internet connection, but the demo itself can be used via `file://` protocol (tested in Opera, Firefox, Brave & Chrome; latest versions, DEC 2025). If installed via npm, it even works offline on `file://` protocol.
 
 ```html
 <!DOCTYPE html>
@@ -31,20 +48,20 @@ YEH is fundamentally designed around **event delegation** - the concept of using
 <head><title>YEH Demo</title></head>
 <body>
   <div id="app">
-    <button data-action="save">Save</button>
-    <button data-action="delete">Delete</button>
+    <button data-click="save">Save</button>
+    <button data-click="delete">Delete</button>
   </div>
 
   <script type="module">
-    import { YEH } from 'https://cdn.jsdelivr.net/npm/@yaijs/core@1.1.1/yeh/yeh.min.js';
+    import { YEH } from 'https://cdn.jsdelivr.net/npm/@yaijs/core@1.1.2/yeh/yeh.min.js';
 
     class MyHandler extends YEH {
       constructor() {
-        super({ '#app': ['click'] }); // Falls back to handleClick() = "handle + click"
+        super({ '#app': ['click'] }); // Falls back to handleClick()
       }
 
       handleClick(event, target, container) {
-        const action = target.dataset.action;
+        const action = target.dataset[event.type]; // require click data-attribute
         if (action && this[action]) this[action](target, event, container);
       }
 
@@ -52,13 +69,15 @@ YEH is fundamentally designed around **event delegation** - the concept of using
       delete(target) { console.log('Deleting...'); }
     }
 
-    new MyHandler(); // Adding listeners Done
+    new MyHandler(); // Adding click listeners done. Forever. In this session.
   </script>
 </body>
 </html>
 ```
 
 **30-second setup:** Create `app.html`, copy & paste the above code, then double-click to run.
+
+---
 
 > **💡 Universal Delegation Pattern**
 >
@@ -71,8 +90,8 @@ YEH is fundamentally designed around **event delegation** - the concept of using
 ### CDN (Instant Setup)
 
 ```html
-<script type="module">
-  import { YEH } from 'https://cdn.jsdelivr.net/npm/@yaijs/core@1.1.1/yeh/yeh.min.js';
+<script type="module"> // Standalone version
+  import { YEH } from 'https://cdn.jsdelivr.net/npm/@yaijs/core@1.1.2/yeh/yeh.min.js';
   new YEH({ '#app': ['click'] });
 </script>
 ```
@@ -93,8 +112,6 @@ import { YEH } from '@yaijs/core/yeh';
 
 > **Note:** Package is ESM-only. Use `import`, not `require()`.
 
-Works with `file://` protocol — no server needed.
-
 ---
 
 ## ⚙️ Configuration Options
@@ -110,24 +127,43 @@ Pass a third argument to the constructor to enable advanced features:
 | `passiveEvents`        | `array`   | auto    | Override default passive events (scroll, touch, wheel, pointer).           |
 | `abortController`      | `boolean` | `false` | Enable `AbortController` support for programmatic listener removal.        |
 | `enableDistanceCache`  | `boolean` | `true`  | Cache DOM distance calculations for performance (multi-handler scenarios). |
+| `autoTargetResolution` | `boolean` | `false` | Automatically resolve event targets for nested elements (e.g., SVG icons). |
 
 **Example:** `new YEH(events, aliases, { enableStats: true });`
 
 ---
 
-## 🔗 Fluent Chaining API
+## 🔗 API Reference
 
-Chain operations for complex event orchestration:
+### Constructor
 
-```js
-App.on('data-ready', 'handleData')
-    .on('user-login', 'handleLogin')
-    .emit('init-complete', { loaded: true });
+```javascript
+new YEH(
+  { '#app': ['click', { type: 'input', debounce: 300 }] }, // Event mapping
+  { click: { save: 'handleSave' } }, // Aliases (optional, event type scoped)
+  { enableStats: true } // Config (optional)
+);
 ```
 
----
+### Event System
 
-## 🧹 Cleanup
+```javascript
+// Subscribe to custom events (adds a DOM listener per .on())
+handler.on('data-ready', 'handleData');
+handler.on('user-login', (event) => console.log(event.detail));
+
+// Emit custom events (dispatches to document via default)
+handler.emit('init-complete', { loaded: true }, document);
+
+// Hook system (zero-cost, no DOM listener)
+handler.hook('eventclick', (target) => console.log('clicked', target));
+
+// Chain operations
+handler.on('ready', 'init')
+       .emit('start', { time: Date.now() });
+```
+
+### Cleanup
 
 ```javascript
 handler.destroy();
@@ -135,9 +171,7 @@ handler.destroy();
 handler.abort();
 ```
 
----
-
-## 📊 Performance Metrics
+### Performance Metrics
 
 With `enableStats: true`:
 
@@ -146,38 +180,6 @@ console.log(handler.getStats());
 ```
 
 ---
-
-## 🌐 Browser Support
-
-**Opera** | **Chrome** | **Firefox** | **Safari** | **Edge** - all modern versions
-
-*Works with legacy browsers via Webpack + Babel.*
-
----
-
-## 📊 Comparison vs Popular Libraries
-
-| Feature                     | YEH                 | EventEmitter3 | Redux Toolkit | jQuery         |
-|-----------------------------|---------------------|---------------|---------------|----------------|
-| **Bundle Size**             | 5kB gzipped         | 7kB gzipped   | 12kB+ gzipped | 30kB+ gzipped  |
-| **Dependencies**            | ✅ Zero             | ✅ Zero       | ❌ Many       | ✅ Zero        |
-| **Event Delegation**        | ✅ Advanced         | ❌ None       | ❌ None       | ✅ Basic       |
-| **Multi-Handler System**    | ✅ Unique           | ❌ None       | ❌ None       | ❌ None        |
-| **Throttle/Debounce**       | ✅ Built-in         | ❌ None       | ❌ None       | ❌ None        |
-| **Native Browser API**      | ✅ Yes              | ❌ No         | ❌ No         | ❌ No          |
-| **Dynamic Element Support** | ✅ Zero-config      | ❌ None       | ❌ None       | ✅ Re-bind     |
-| **TypeScript Support**      | ✅ Full             | ✅ Partial    | ✅ Full       | ⚠️ Community   |
-| **Memory Leak Prevention**  | ✅ Automatic        | ⚠️ Manual     | ✅ Automatic  | ⚠️ Manual      |
-| **Performance**             | ✅ Native           | ⚠️ Synthetic  | ⚠️ Virtual    | ⚠️ Abstraction |
-| **Custom Event Dispatch**   | ✅ Built-in         | ✅ Yes        | ✅ Yes        | ✅ Yes         |
-| **Learning Curve**          | ✅ Low              | ✅ Low        | ❌ Steep      | ✅ Familiar    |
-
-### Why YEH Stands Out
-- **Smallest footprint** with advanced features like multi-handler delegation.
-- **Native performance** using browser APIs, avoiding synthetic event overhead.
-- **Zero dependencies** and automatic memory management for scalability.
-- **Built-in utilities** (throttle, debounce, stats) eliminate external needs.
-
 
 ## 🎯 Advanced Patterns
 
@@ -190,14 +192,14 @@ YEH's event delegation enables powerful declarative patterns where HTML configur
 [Try it live on JSFiddle](https://jsfiddle.net/hb9t3gam/)
 
 ```javascript
-import { YEH } from 'https://cdn.jsdelivr.net/npm/@yaijs/core@1.1.1/yeh/yeh.min.js';
+import { YEH } from 'https://cdn.jsdelivr.net/npm/@yaijs/core@1.1.2/yeh/yeh.min.js';
 
 class App extends YEH {
   constructor() {
     super(
       { '#app': ['click'] },
       {},
-      { autoTargetResolution: true } // Enable smart targeting
+      { autoTargetResolution: true }
     );
   }
 
@@ -213,14 +215,14 @@ class App extends YEH {
     if (!targetSelector) return;
 
     const config = {
-      targetAll: target.hasAttribute('data-target-all'),
-      toggleClass: target.dataset.toggleClass,
-      toggleContent: target.dataset.toggleContent,
-      toggleAttribute: target.dataset.toggleAttribute,
-      toggleAttributeValue: target.dataset.toggleAttributeValue,
-      toggleClassSelf: target.dataset.toggleClassSelf,
-      toggleContentSelf: target.dataset.toggleContentSelf,
-      toggleOnce: target.hasAttribute('data-toggle-once'),
+      targetAll: target.hasAttribute('data-target-all'),           // document.querySelectorAll
+      toggleClass: target.dataset.toggleClass,                     // targetElement
+      toggleContent: target.dataset.toggleContent,                 // targetElement
+      toggleAttribute: target.dataset.toggleAttribute,             // targetElement
+      toggleAttributeValue: target.dataset.toggleAttributeValue,   // targetElement
+      toggleClassSelf: target.dataset.toggleClassSelf,             // self (trigger)
+      toggleContentSelf: target.dataset.toggleContentSelf,         // self
+      toggleOnce: target.hasAttribute('data-toggle-once'),         // self
     };
 
     const targets = config.targetAll
@@ -276,6 +278,9 @@ class App extends YEH {
     }
   }
 }
+
+// Initialize the app
+new App();
 ```
 
 #### Usage Examples
@@ -294,7 +299,7 @@ class App extends YEH {
 </div>
 ```
 
-**Expand/Collapse All (Replaces Multiple Methods!):**
+**Expand/Collapse All:**
 ```html
 <button
   data-action="toggleTarget"
@@ -383,61 +388,90 @@ collapseAll() {
     el.classList.add('collapsed'));
   this.button.textContent = 'Expand All';
 }
+
+// Worst case: 2 controller for each togglable; exponentially worsening
 ```
 
 **After (Declarative):**
 ```html
-<button data-action="toggleTarget" data-target=".item"
-        data-target-all data-toggle-class="collapsed"
+<!-- One button to handle them all -->
+<button data-click="toggleTarget"
+        data-target=".item"
+        data-target-all
+        data-toggle-class="collapsed"
         data-toggle-content-self="Expand All">
   Collapse All
 </button>
 ```
+> First rule: Try Single-handlability, if it fails, alter your approach and try it again.
 
 **Benefits:**
-- ✅ **94% code reduction** - One handler replaces dozens of methods
+- ✅ **Significant code reduction** - One handler replaces multiple methods
 - ✅ **Designer-friendly** - HTML changes, not JavaScript
 - ✅ **Framework-independent** - Works anywhere HTML renders
 - ✅ **Self-documenting** - Intent is clear from markup
-- ✅ **Zero memory leaks** - YEH's delegation handles cleanup
+
+---
+
+## 🌐 Browser Support
+
+**Opera** | **Chrome** | **Firefox** | **Safari** | **Edge** - Latest versions of DEC 2025
+
+*Works with legacy browsers via Webpack + Babel.*
+
+---
+
+## When to Use YEH
+
+### ✅ Good Fit
+- Forms with many inputs requiring validation
+- Dynamic content (SPAs, AJAX-loaded elements)
+- Complex UI with nested interactive elements
+- Need consistent debounce/throttle patterns
+- Working without build tools or frameworks
+- Quick prototyping, dev-friendly setup in minutes
+
+### ❌ Not Needed
+- Static pages with 2-3 buttons
+- Simple click handlers only
+- Already using a framework with built-in event delegation
+- Need IE11 support without transpilation
 
 ---
 
 ## 🚀 See It In Action
 
 **[YaiTabs Live Demo](https://yaijs.github.io/yai/tabs/Example.html)**
-Advanced tab system built on YEH with 20+ nested components
+Advanced tab system built on YEH with 50+ nested components
 
 **[Performance Benchmark](https://yaijs.github.io/yai/tabs/Benchmark.html)**
-Stress test with 400+ nesting levels demonstrating YEH's O(1) delegation
+Stress test with X nesting levels demonstrating efficient event delegation
 
 **[php-ymap Demo](https://github.com/yaijs/php-ymap)**
-Production IMAP client showcasing YEH's declarative toggle pattern in action
+A interactive IMAP client demo build on YEH, using 4 event listener for the whole demo:
+  - Many "toggle more" buttons
+  - LocalStorage for credentials - add/load/remove
+  - Mail fetching
+    - Listing fetched mails with previews
+      - Toggle each mail read/unread
+      - Toggle each mail answered/unanswered
+    - Modal for full message
+    - Nav in modal: `prev - next`
+  - All features with CSS animations (opening & closing)
 
 ---
 
 ## 📦 Resources
 
-- **[YaiTabs Documentation](../components/tabs.md)** - Complete implementation guide
-- **[Utilities Overview](../utilities/overview.md)** - YaiTabsSwipe, YaiViewport utilities
+- **[Dynamic Events Example](./DYNAMIC_EVENTS_EXAMPLE.md)** - Auto-generate event handlers from config
 - **[GitHub Repository](https://github.com/yaijs/yai)** - Source code and issues
 - **[NPM Package](https://npmjs.org/package/@yaijs/core)** - Install via npm
 
+
+## Author
+
+- **Engin Ypsilon**
+
 ---
 
-## License
-
-MIT License – free to use in personal or commercial projects.
-
-## 👥 Authors
-
-- **Engin Ypsilon** - Architecture & concept, Declarative Toggle Pattern design
-- **Claude-3.5-Sonnet (Sonnet 4.5)** - Implementation & optimization, Advanced Patterns documentation
-- **DeepSeek-V3** - Documentation & examples
-- **Grok-2** - Performance analysis
-- **ChatGPT** - Design tokens
-
-### Special Thanks
-
-The Declarative Toggle Pattern showcased in this README emerged from a collaborative design session during the development of [php-ymap](https://github.com/yaijs/php-ymap), demonstrating how YEH's architecture naturally enables Alpine.js-level declarative power with vanilla JavaScript.
-
+**License:** MIT

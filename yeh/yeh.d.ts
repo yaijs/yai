@@ -10,7 +10,7 @@ interface AddEventListenerOptions {
 }
 
 /**
- * 🚀 YEH (Yai Event Hub) - Advanced Multi-Handler Event System
+ * YEH (Yai Event Hub) - Advanced Multi-Handler Event System
  *
  * The most advanced event delegation library for modern web applications.
  * Features the world's only multi-handler system with closest-match DOM resolution.
@@ -25,10 +25,10 @@ interface AddEventListenerOptions {
  * - AbortController support for efficient cleanup
  * - TypeScript-first design with comprehensive type safety
  *
- * 📦 **Bundle Size:** ~5kB gzipped (15x smaller than React)
- * 🌍 **Browser Support:** IE11+ with polyfills, modern browsers natively
- * 🔗 **GitHub:** https://github.com/yaijs/yeh
- * 📖 **Documentation:** Full examples and live demos: https://eypsilon.github.io/YpsilonEventHandler-Examples/example/public/
+ * **Bundle Size:** ~5kB gzipped (15x smaller than React)
+ * **Browser Support:** IE11+ with polyfills, modern browsers natively
+ * **GitHub:** https://github.com/yaijs/yeh
+ * **Documentation:** Full examples and live demos: https://eypsilon.github.io/YpsilonEventHandler-Examples/example/public/
  *
  * @example
  * ```ts

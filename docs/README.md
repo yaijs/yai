@@ -10,8 +10,8 @@ Complete documentation for YaiJS - Advanced web components with YEH (Yai Event H
 
 #### YaiTabs
 - **[YaiTabs Guide](https://yaijs.github.io/yai/docs/components/tabs.html)** - Complete tabs component documentation
-- **[Live Demo](https://yaijs.github.io/yai/tabs/Example.html)** - Interactive demo with 20+ nested components
-- **[Stress Test](https://yaijs.github.io/yai/tabs/Benchmark.html)** - Performance benchmark with 400+ nesting levels
+- **[Live Demo](https://yaijs.github.io/yai/tabs/Example.html)** - Interactive demo with 50+ nested components
+- **[Stress Test](https://yaijs.github.io/yai/tabs/Benchmark.html)** - Performance benchmark with X nesting levels
 
 ### Utilities
 
@@ -64,6 +64,10 @@ docs/
     └── README.md                  # YEH event system overview
 ```
 
+## Author
+
+- **Engin Ypsilon**
+
 ---
 
-**Happy coding!** 🚀
+**License:** MIT

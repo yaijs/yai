@@ -19,6 +19,7 @@ class YEH {
             enableHandlerValidation: false,
             stopPropagation: true,
             enableDistanceCache: false,
+            autoPreventDefault: [],
             callable: {},
             ...config,
         };
@@ -49,7 +50,6 @@ class YEH {
 
         // DOM Distance Cache for performance optimization
         this.distanceCache = new WeakMap();
-        // this.distanceCache = new Map();
         this.enableDistanceCache = this.config.enableDistanceCache; // Default: enabled
 
         // Configurable actionable target patterns
@@ -125,6 +125,16 @@ class YEH {
                     handler: closestHandler.handler,
                     result
                 });
+
+                // Auto preventDefault if configured (per-event config takes precedence)
+                const eventConfig = closestHandler.config;
+                const shouldPreventDefault = typeof eventConfig === 'object' && eventConfig.preventDefault !== undefined
+                    ? eventConfig.preventDefault
+                    : this.config.autoPreventDefault.includes(event.type);
+
+                if (shouldPreventDefault) {
+                    event.preventDefault();
+                }
 
                 if (this.config.stopPropagation !== false) {
                     event.stopPropagation();
@@ -434,14 +444,68 @@ class YEH {
         let handler = this;
 
         if (typeof eventConfig === 'object') {
+            // Warn if mixing debounce/throttle with preventDefault
+            if ((eventConfig.debounce || eventConfig.throttle) && eventConfig.preventDefault !== undefined) {
+                console.warn(
+                    `YEH: Mixing debounce/throttle with preventDefault on '${eventType}' event is not recommended. ` +
+                    `preventDefault requires immediate execution, but debounce/throttle delays handler execution. ` +
+                    `Use either rate-limiting (debounce/throttle) OR preventDefault, not both.`
+                );
+            }
+
             if (eventConfig.throttle) {
+                const options = {
+                    leading: eventConfig.leading !== false,  // Default true
+                    trailing: eventConfig.trailing !== false  // Default true
+                };
                 handler = {
-                    handleEvent: this.throttle((event) => this.handleEvent(event), eventConfig.throttle, `${key}-${eventType}-throttle`)
+                    handleEvent: this.throttle(
+                        (event) => this.handleEvent(event),
+                        eventConfig.throttle,
+                        `${key}-${eventType}-throttle`,
+                        options
+                    )
                 };
             } else if (eventConfig.debounce) {
-                handler = {
-                    handleEvent: this.debounce((event) => this.handleEvent(event), eventConfig.debounce, `${key}-${eventType}-debounce`)
+                const options = {
+                    leading: eventConfig.leading === true,    // Default false
+                    trailing: eventConfig.trailing !== false, // Default true
+                    perElement: eventConfig.perElement !== false  // Default true for element isolation
                 };
+
+                // Per-element debounce: create dynamic key based on target
+                if (options.perElement) {
+                    handler = {
+                        handleEvent: (event) => {
+                            // Generate unique key per element using WeakMap-style approach
+                            const elementId = event.target.dataset.yehDid ||
+                                            event.target.id ||
+                                            event.target.getAttribute('name');
+
+                            // Fallback: use element itself as weak reference via Map
+                            const debounceKey = elementId
+                                ? `${key}-${eventType}-${elementId}-debounce`
+                                : `${key}-${eventType}-debounce`;
+
+                            this.debounce(
+                                () => this.handleEvent(event),
+                                eventConfig.debounce,
+                                debounceKey,
+                                options
+                            ).call(this);
+                        }
+                    };
+                } else {
+                    // Container-level debounce (legacy behavior)
+                    handler = {
+                        handleEvent: this.debounce(
+                            (event) => this.handleEvent(event),
+                            eventConfig.debounce,
+                            `${key}-${eventType}-debounce`,
+                            options
+                        )
+                    };
+                }
             }
         }
 
@@ -510,9 +574,13 @@ class YEH {
      * Cross-browser closest() implementation
      * @param {Element} element - Starting element
      * @param {string} selector - CSS selector to match
-     * @returns {Element|null} - Closest matching ancestor or null
+     * @returns {Element|Document|Window|null} - Closest matching ancestor or null
      */
     findClosest(element, selector) {
+        // Handle global selectors (document, window)
+        if (selector === 'document') return document;
+        if (selector === 'window') return window;
+
         // Use native closest() if available (modern browsers)
         if (element.closest) {
             return element.closest(selector);
@@ -972,12 +1040,12 @@ class YEH {
         };
     }
 
-    debounce(fn, delay, key) {
-        return YEH._debounceImplementation(fn, delay, key, this.debounceTimers);
+    debounce(fn, delay, key, options) {
+        return YEH._debounceImplementation(fn, delay, key, this.debounceTimers, options);
     }
 
-    throttle(fn, delay, key) {
-        return YEH._throttleImplementation(fn, delay, key, this.throttleTimers);
+    throttle(fn, delay, key, options) {
+        return YEH._throttleImplementation(fn, delay, key, this.throttleTimers, options);
     }
 
     detectPassiveSupport() {
@@ -1004,36 +1072,58 @@ class YEH {
 
     /**
      * Shared debounce implementation used by both instance and static methods
+     * Supports leading and trailing edge execution
      * @private
      * @static
      */
-    static _debounceImplementation(fn, delay, key, timers) {
-        return function(...args) {
-            // Clear existing timer
-            if (timers.has(key)) clearTimeout(timers.get(key));
+    static _debounceImplementation(fn, delay, key, timers, options = {}) {
+        const { leading = false, trailing = true } = options;
 
-            // Set new timer with latest arguments
-            const timerId = setTimeout(() => {
+        return function(...args) {
+            const timerData = timers.get(key);
+            const hadTimer = !!timerData;
+
+            // Clear existing timer if present
+            if (hadTimer) {
+                clearTimeout(timerData.timerId);
+            }
+
+            // Leading edge: execute immediately on first call
+            if (leading && !hadTimer) {
                 fn.apply(this, args);
+            }
+
+            // Set new timer for trailing edge
+            const timerId = setTimeout(() => {
+                // Trailing edge: execute with latest arguments (unless leading-only)
+                if (trailing && (!leading || hadTimer)) {
+                    fn.apply(this, args);
+                }
                 timers.delete(key);
             }, delay);
 
-            timers.set(key, timerId);
+            timers.set(key, { timerId, args });
         };
     }
 
     /**
      * Shared throttle implementation used by both instance and static methods
+     * Supports leading and trailing edge execution
      * @private
      * @static
      */
-    static _throttleImplementation(fn, delay, key, timers) {
+    static _throttleImplementation(fn, delay, key, timers, options = {}) {
+        const { leading = true, trailing = true } = options;
+
         return function(...args) {
             const timerData = timers.get(key);
 
             if (!timerData || !timerData.timeout) {
-                // Leading edge: execute immediately
-                fn.apply(this, args);
+                // Leading edge: execute immediately if enabled
+                if (leading) {
+                    fn.apply(this, args);
+                }
+
                 timers.set(key, {
                     timeout: setTimeout(() => { timers.delete(key) }, delay),
                     lastArgs: args
@@ -1042,34 +1132,36 @@ class YEH {
                 // Update arguments for trailing edge
                 timerData.lastArgs = args;
 
-                // Clear existing trailing timeout and set new one
-                if (timerData.trailingTimeout) {
-                    clearTimeout(timerData.trailingTimeout);
-                }
+                // Clear existing trailing timeout and set new one if trailing is enabled
+                if (trailing) {
+                    if (timerData.trailingTimeout) {
+                        clearTimeout(timerData.trailingTimeout);
+                    }
 
-                timerData.trailingTimeout = setTimeout(() => {
-                    // Trailing edge: execute with latest arguments
-                    fn.apply(this, timerData.lastArgs);
-                    timers.delete(key);
-                }, delay);
+                    timerData.trailingTimeout = setTimeout(() => {
+                        // Trailing edge: execute with latest arguments
+                        fn.apply(this, timerData.lastArgs);
+                        timers.delete(key);
+                    }, delay);
+                }
             }
         };
     }
 
-    static debounce(fn, delay, key = 'default') {
+    static debounce(fn, delay, key = 'default', options) {
         if (!YEH._staticDebounceTimers) {
             YEH._staticDebounceTimers = new Map();
         }
 
-        return YEH._debounceImplementation(fn, delay, key, YEH._staticDebounceTimers);
+        return YEH._debounceImplementation(fn, delay, key, YEH._staticDebounceTimers, options);
     }
 
-    static throttle(fn, delay, key = 'default') {
+    static throttle(fn, delay, key = 'default', options) {
         if (!YEH._staticThrottleTimers) {
             YEH._staticThrottleTimers = new Map();
         }
 
-        return YEH._throttleImplementation(fn, delay, key, YEH._staticThrottleTimers);
+        return YEH._throttleImplementation(fn, delay, key, YEH._staticThrottleTimers, options);
     }
 
     /**

@@ -1,12 +1,8 @@
 /**
- * 🎯 **YaiTabs 3.0 - Advanced Tab Component System**
+ * **YaiTabs 1.0 - Advanced Tab Component System**
  *
- * Built on YEH's (Yai Event Hub) O(1) event delegation architecture, YaiTabs provides
- * enterprise-grade tab functionality with mathematical O(1) performance scaling,
- * infinite nesting capabilities, and comprehensive accessibility compliance.
- *
- * **🚀 Key Features:**
- * - **O(1) Performance**: Single event listener per container, scales infinitely
+ * **Key Features:**
+ * - **Performance**: Single event listener per container, scales infinitely
  * - **Infinite Nesting**: Tested to 55+ levels without performance degradation
  * - **Auto-Disambiguation**: Intelligent ID conflict resolution for nested components
  * - **WCAG 2.1 AA Compliance**: Full accessibility with dynamic ARIA management
@@ -16,11 +12,10 @@
  * - **Remote Control**: Content buttons can control parent tab navigation
  * - **Framework Agnostic**: Works with React, Vue, Angular, or Vanilla JS
  *
- * **📊 Performance Metrics:**
+ * **Performance Metrics:**
  * - Initialization: < 100ms for complex nested structures
  * - Interaction Response: < 16ms (60fps guaranteed)
  * - Memory Footprint: ~460 LOC, minimal runtime overhead
- * - Scalability: O(1) regardless of component complexity or nesting level
  *
  * @author YaiJS Team - Advanced component architecture
  * @license MIT
@@ -30,7 +25,7 @@
 import { HookContext, LifecycleCallbacks, YaiCore, YaiCoreConfig } from '../yai-core.js';
 
 /**
- * 🎨 **Animation Behaviors**
+ * **Animation Behaviors**
  *
  * Smooth CSS-based transitions optimized for performance and accessibility.
  * All animations use transform + opacity for hardware acceleration.
@@ -241,7 +236,7 @@ export interface TabLifecycleCallbacks extends LifecycleCallbacks {
 /**
  * 🏗️ **YaiTabs Class - Advanced Tab Component**
  *
- * Advanced tab system built on YEH's O(1) architecture.
+ * Advanced tab system built on YEH's architecture.
  * Provides enterprise-grade functionality with infinite scalability.
  *
  * **🎯 Core Architecture:**
@@ -367,7 +362,6 @@ export interface TabLifecycleCallbacks extends LifecycleCallbacks {
  * - **DOM Caching**: Intelligent query caching reduces DOM traversal
  * - **Event Delegation**: Single listener handles all tab interactions
  * - **Memory Management**: Automatic cleanup prevents memory leaks
- * - **Infinite Scalability**: O(1) performance regardless of nesting depth
  *
  * **♿ Accessibility Features:**
  * - **WCAG 2.1 AA Compliant**: Full keyboard navigation and screen reader support
@@ -395,7 +389,6 @@ export declare class YaiTabs extends YaiCore {
    *
    * Core initialization method that:
    * - Discovers and processes all tab containers
-   * - Sets up event delegation for O(1) performance
    * - Initializes default tabs and accessibility
    * - Processes hash routing if enabled
    */
@@ -874,7 +867,6 @@ export { HookContext, LifecycleCallbacks, YaiCore, YaiCoreConfig } from './yai-c
  * - **Accessibility**: Full WCAG 2.1 AA compliance with keyboard navigation
  *
  * **⚡ Performance Tips:**
- * - Only root containers have event listeners (O(1) scaling)
  * - Use data-spaceless to remove default padding
  * - Leverage data-delay and data-min-loading for smooth UX
  * - Enable autoDisambiguate for conflict-free nested IDs

@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Utils build on YEH. Auto-mode everything made easy with YEH.">
+    <title>Yai Input Utils local-dev-many-title</title>
+    <style>
+        :root {
+            scroll-behavior: smooth;
+            --bg: #0f172a;
+            --text: #f1f5f9;
+            --accent: #73a6f9;
+            --muted: #cbd5e1;
+            --error: #ff0000;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scrollbar-gutter: stable; }
+        body { padding: 2rem; color: var(--text); background: var(--bg); }
+
+        /* Scroll-to-top functionality */
+        .scroll-to-top-container { position: fixed; bottom: 1.5rem; right: 1.25rem; z-index: 1001; }
+        .scroll-to-top { line-height: 1; opacity: 0; transform: translateY(80px); transition: all 0.3s ease-in-out; }
+        body.page-is-scrolled .scroll-to-top { opacity: 1; transform: translateY(0); }
+        /* Scroll-to-top ends */
+
+        /* Example */
+        main { min-height: 1500px; }
+        .app-form-group { padding: 10px 0; }
+        .yai-util-body { display: flex; }
+        .yai-util-body label, .fancy-label-wrapper { margin-right: .5rem; }
+        .yai-error { color: var(--error); border-color: currentColor; box-shadow: 0 0 1px 1px var(--error); position: relative; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><a href="">YaiInputUtils Demo</a></h1>
+        <p class="subtitle">Utils for YEH</p>
+    </header>
+    <main id="app">
+
+        <div class="container">
+            <form method="post"
+                data-submit="exampleFormSubmit"
+                data-prevent-default>
+
+                <input type="text"
+                    name="username"
+                    minlength="3"
+                    maxlength="50"
+                    autocomplete="username"
+                    data-input="validateInput"
+                    data-yai-util="clear"
+                    data-wrapper="input"
+                    data-label="Required Field"
+                    data-label-wrapper="fancy-label"
+                    required
+                    value="">
+
+                <input type="password"
+                    name="password"
+                    minlength="3"
+                    maxlength="30"
+                    autocomplete="current-password"
+                    data-input="validateInput"
+                    data-yai-util="password-toggle clear"
+                    data-wrapper="input"
+                    data-label="Password"
+                    required
+                    value="">
+
+                <hr>
+
+                <input type="text"
+                    name="testtext"
+                    minlength="3"
+                    maxlength="10"
+                    data-input="validateInput"
+                    data-yai-util="clear"
+                    data-wrapper="input"
+                    data-label="Test"
+                    data-error-message="Input is invalid"
+                    value="">
+
+                <hr>
+
+                <input type="number"
+                    name="someNumber"
+                    max="25"
+                    data-input="validateInput"
+                    data-yai-util="clear"
+                    data-wrapper="input">
+
+                <hr>
+
+                <textarea
+                    name="comment"
+                    minlength="3"
+                    maxlength="10"
+                    data-input="validateInput"
+                    data-yai-util="clear"
+                    data-wrapper="input"
+                    data-label="Test"
+                ></textarea>
+
+                <hr>
+
+                <select
+                    name="subscription"
+                    data-input="validateInput"
+                    data-yai-util="clear"
+                    data-wrapper="input"
+                    data-label="Test"
+                >
+                    <option value="">Select Subscription</option>
+                    <option value="mini">Mini</option>
+                    <option value="medium">Medium</option>
+                    <option value="tier">TIER</option>
+                </select>
+
+                <hr>
+
+                <div class="app-form-group">
+                    <button type="button" data-click="openExampleModal">Info</button>
+                </div>
+
+                <hr>
+
+                <div class="app-form-group submit-button-container">
+                    <button type="submit">Submit</button>
+                </div>
+
+            </form>
+        </div>
+
+        <!-- Unstyled scroll to top -->
+        <div class="scroll-to-top-container">
+            <button type="button" class="scroll-to-top" data-click="scrollToTop">▲</button>
+        </div>
+    </main>
+
+    <!-- Single template with all utility wrappers -->
+    <template id="yai-input-utils-template">
+        <!-- Default wrapper -->
+        <div class="app-form-group" data-wrapper="input">
+            <div class="yai-util-body"></div>
+        </div>
+
+        <!-- Default label -->
+        <label data-wrapper="label"></label>
+
+        <!-- Optional fancy label wrapper -->
+        <div class="fancy-label-wrapper" data-wrapper="fancy-label">
+            <label></label>
+            <span class="fancy-helper">help</span>
+        </div>
+
+        <span data-wrapper="error-message" role="alert"></span>
+
+        <button type="button"
+                data-auto-focus
+                data-util="password-toggle"
+                data-click="togglePassword"
+                data-toggle-content="📛"
+                class="yai-util-btn">👀</button>
+
+        <button type="button"
+                data-auto-focus
+                data-util="clear"
+                data-click="clearInput"
+                class="yai-util-btn">✕</button>
+
+        <button type="button"
+                data-util="copy"
+                data-click="copyToClipboard"
+                data-success-content="✓"
+                class="yai-util-btn">📋</button>
+
+        <span data-util="counter" class="yai-char-counter" data-role="counter">0</span>
+        <span data-util="requiredIndicator" class="yai-required-indicator">*</span>
+    </template>
+
+    <script type="module">
+        /**
+         * YEH-based Interactive Handler Demo
+         */
+        import { YEH } from '../../yeh/yeh.js';
+        import { YaiInputUtils } from '../../utils/yai-input-utils.js';
+
+        /**
+         * Default implementation
+         */
+
+        // Add attribute handler on the fly, eg: <button data-click="validateInput"/>
+        const appMethods = {
+            validateInput: (target, event, container) => {
+                console.log('validating Input:', target.value, event)
+            },
+            pageIsScrolled: () => {
+                document.body.classList.toggle('page-is-scrolled', window.scrollY > 150)
+            },
+        };
+
+        const appConfig = {
+            emitEvents: false, // every inputUtils.on('eventname', fn) adds a new listener to document.body
+            emitHooks: true,   // inputUtils.hook('eventname') adds no listener, but is bound to the `inputUtils` instance
+            eventHandler: {
+                selector: {
+                    window: [
+                        'keydown',
+                        { type: 'scroll', throttle: 240, leading: false },
+                        { type: 'resize', throttle: 700, leading: false },
+                        { type: 'load', options: { once: true } },
+                    ],
+                    '#app': [
+                        'click',
+                        'submit',
+                        { type: 'input', debounce: 750, leading: false },
+                        { type: 'change', debounce: 750 },
+                    ],
+                },
+                aliases: {},
+                config: {
+                    methods: appMethods,
+                    methodsFirst: true,
+                    autoTargetResolution: true,
+                    // Overrides auto generated attributes
+                    // actionableAttributes: [
+                    //     'data-overrider'
+                    // ],
+                    // Add more data-attributes to generated
+                    addActionableAttributes: [
+                        'data-yeh-attr'
+                    ],
+                }
+            },
+            templates: document.getElementById('yai-input-utils-template'),
+        };
+
+        // Init
+        const inputUtils = new YaiInputUtils({ appConfig });
+
+        inputUtils
+            /**
+             * Element based hooks
+             */
+            .hook('eventclick', ({ target, event, container }) => {
+                console.log('click', target, event, container)
+            })
+            .hook('eventinput', ({ target, event, container }) => {
+                console.log('input', event)
+            })
+            .hook('eventchange', ({ target, event, container }) => {
+                console.log('change', event)
+            })
+            .hook('eventsubmit', ({ target, event, container }) => {
+                console.log('submit', event)
+            })
+
+            /**
+             * Global hooks
+             */
+            .hook('eventload',    ({ target, event, container }) => { appMethods.pageIsScrolled() })
+            .hook('eventscroll',  ({ target, event, container }) => { appMethods.pageIsScrolled() })
+            .hook('eventresize',  ({ target, event, container }) => { console.log(`RESIZED: ${window.innerWidth}px`) })
+            .hook('eventkeydown', ({ target, event, container }) => {
+                if (YaiInputUtils.hasActiveInput()) return;
+                console.log('keydown', target, event, container)
+            })
+        ;
+
+
+        console.log('DEV_TERRITORY', inputUtils)
+
+        // Opera issue after reload
+        setTimeout(() => { window.dispatchEvent(new Event('resize')) }, 250);
+    </script>
+</body>
+</html>

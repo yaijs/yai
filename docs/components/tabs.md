@@ -1,6 +1,6 @@
 # YaiTabs
 
-Enterprise-grade tab component with O(1) event delegation, deep nesting support, and hash-based deep linking. Built on [Yai Event Hub](https://yaijs.github.io/yai/docs/yeh/) architecture.
+Enterprise-grade tab component with event delegation, deep nesting support, and hash-based deep linking. Built on [Yai Event Hub](https://yaijs.github.io/yai/docs/yeh/) architecture.
 
 **🎯 More Than Tabs - It's an Event Hub!**
 YaiTabs doubles as a powerful application event hub. Add listeners for ANY event type (`click`, `input`, `change`, `submit`, etc.) and handle them through hooks. All listeners are internally delegated and shared from root level as well. Perfect for building complete SPAs within a single tab component. You can throw needed elements into the tab, and remove them without headache. No manual register/unregister - That's the power of Event Delegation - zero manual lifecycle management while providing max flexibility!
@@ -24,7 +24,7 @@ YaiTabs doubles as a powerful application event hub. Add listeners for ANY event
 ## Features
 
 **🚀 Performance**
-- O(1) event delegation (listeners only on root level, regardless of depth)
+- Event delegation (listeners only on root level, regardless of depth)
 - Tested to 400+ nesting levels (1,530 components, 15,504 elements)
 - Production use: 3-20 levels (native-like performance)
 - Bottleneck: Browser rendering at 60+ levels, not framework
@@ -37,7 +37,7 @@ YaiTabs doubles as a powerful application event hub. Add listeners for ANY event
 - Full ARIA/WCAG 2.1 AA compliance
 
 **⚡ Event Hub Superpowers** (The Secret Sauce)
-- Handle ANY event type within tab containers with same O(1) event delegation
+- Handle ANY event type within tab containers with same event delegation
 - Single event system for entire application
 - Built-in debouncing and throttling
 - Automatic container scoping
@@ -380,12 +380,10 @@ Check the CSS for all available variables: [tabs/yai-tabs.css](https://cdn.jsdel
 - **[NPM Package](https://www.npmjs.com/package/@yaijs/core)** - Install via npm
 - **[Next: YaiTabs Advanced Usage](https://yaijs.github.io/yai/docs/components/tabs.advanced.html)** - Advanced patterns and real-world examples
 
-## Authors
-- **Engin Ypsilon** - Architecture & concept
-- **Claude-3.5-Sonnet** - Implementation & optimization
-- **DeepSeek-V3** - Documentation & examples
-- **Grok-2** - Performance analysis
-- **ChatGPT** - Design tokens
+
+## Author
+
+- **Engin Ypsilon**
 
 ---
 

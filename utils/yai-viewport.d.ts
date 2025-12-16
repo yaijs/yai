@@ -1,13 +1,12 @@
 /**
  * 🎯 **YaiViewport 1.0 - Advanced Viewport Tracking System**
  *
- * Built on YEH's O(1) event delegation architecture, YaiViewport provides
+ * Built on YEH's event delegation architecture, YaiViewport provides
  * high-performance viewport visibility tracking with spatial optimization for elements.
  * Designed for seamless integration with the Yai Framework, it enables visibility-driven
  * interactions like lazy loading, animations, or analytics triggers with minimal overhead.
  *
  * **🚀 Key Features:**
- * - **O(1) Performance**: Single event listener for window events with throttled handlers
  * - **Spatial Optimization**: Grid-based element tracking for efficient visibility checks
  * - **Configurable Thresholds**: Fine-tuned control over visibility detection
  * - **WCAG 2.1 AA Support**: Compatible with accessibility-driven UI interactions
@@ -139,7 +138,7 @@ export interface ViewportLifecycleCallbacks extends LifecycleCallbacks {
 /**
  * 🏗️ **YaiViewport Class - Advanced Viewport Tracking**
  *
- * High-performance viewport tracking system built on YEH's O(1) architecture.
+ * High-performance viewport tracking system built on YEH's architecture.
  * Provides efficient element visibility detection with spatial optimization and hook-based extensibility.
  *
  * **🎯 Core Architecture:**
@@ -205,7 +204,7 @@ export interface ViewportLifecycleCallbacks extends LifecycleCallbacks {
  * - **Spatial Optimization**: Grid-based tracking reduces visibility checks
  * - **Throttled Events**: Configurable delays for scroll and resize
  * - **Memory Management**: Automatic cleanup of removed elements
- * - **Scalability**: Efficient for dozens of elements with O(1) event handling
+ * - **Scalability**: Efficient for dozens of elements with event handling
  *
  * **♿ Accessibility Features:**
  * - **Dynamic Attributes**: Updates `data-yvp-is-visible` for screen reader support

@@ -1,6 +1,23 @@
 # YaiJS
 
-**Advanced web components with YEH (Yai Event Hub) - Enterprise-grade tabs with O(1) event delegation**
+**A personal note from EY:**
+
+This library is a cumulation of ~20 years of experience — from writing static HTML pages as someone who just needed a website, to building fully functional CMS systems when needed.
+
+What I always needed was JavaScript. And for a while, jQuery did the trick, but I was looking for something that handled event delegation without me even knowing the concept — I simply knew what I needed: no add- & remove Listener chaos, just because i needed some interactive buttons or input elements.
+
+jQuery couldn't quite deliver that. Or rather, it technically could, but I couldn't figure out how to do event delegation properly.
+
+Then, over 10 years ago, I discovered the pretty unspectacular `handleEvent` interface. My entire JavaScript approach instinctively shifted towards event delegation (still without knowing its formal name).
+
+The first thing I did on new projects since: I created a minimalistic version of what YEH does today — though not even close to what YEH can do now.
+
+At the end, it does event delegation — a concept older than JavaScript itself, presumably even older than me.
+
+BTW, now I know, and I admit it, in the first few years I didn't even implement it properly because i didn't knew how and there were no tutorials at all. Or maybe there were a few, but a few was as good as none back in the days. And with that out of the way:
+
+
+**Advanced web components with YEH (Yai Event Hub) - Enterprise-grade tabs with efficient event delegation**
 
 Build deeply nested, event-heavy interfaces with constant-time listener delegation and zero manual lifecycle handling. Everything you need in one package.
 
@@ -12,7 +29,7 @@ Build deeply nested, event-heavy interfaces with constant-time listener delegati
 
 ## Why YaiJS?
 
-- **O(1) Event Delegation** – One listener per event type per container, even across 400+ nested components
+- **Event Delegation** – One listener per event type per container, even across X nested components
 - **YEH Integrated** – Event hub included directly in `@yaijs/core` package
 - **Enterprise Tabs** – Feature-complete with accessibility, dynamic loading, routing, animations
 - **Pure ESM** – Works from `file://`, CDN, or bundler with zero build required
@@ -78,9 +95,20 @@ class AppBus extends YEH {
 
 ## Component Highlights
 
+### YEH Event Hub
+
+**[Complete YEH Documentation →](https://yaijs.github.io/yai/docs/yeh/)**
+
+- Scope-aware event delegation
+- Automatic target resolution for nested elements
+- Built-in throttle/debounce helpers
+- Chainable API (`.on().emit()`)
+- Multi-handler resolution
+- Performance metrics and stats
+
 ### YaiTabs
 
-**[Complete Documentation →](https://yaijs.github.io/yai/docs/components/tabs.html)** | **[Live Demo →](https://yaijs.github.io/yai/tabs/Example.html)**
+**[Complete YaiTabs Documentation →](https://yaijs.github.io/yai/docs/components/tabs.html)** | **[Live Demo →](https://yaijs.github.io/yai/tabs/Example.html)**
 
 - 9 animation behaviors (fade, slide, zoom, flip, blur, etc.) + instant mode
 - 4 navigation positions (top, right, bottom, left)
@@ -89,17 +117,6 @@ class AppBus extends YEH {
 - Dynamic content loading via `data-url` with abort controllers
 - Touch/swipe navigation (YaiTabsSwipe)
 - Built-in hooks: `tabOpened`, `tabReady`, `eventClick`, `eventInput`, etc.
-
-### YEH Event Hub
-
-**[Complete Documentation →](https://yaijs.github.io/yai/docs/yeh/)**
-
-- Scope-aware event delegation
-- Automatic target resolution for nested elements
-- Built-in throttle/debounce helpers
-- Chainable API (`.on().emit()`)
-- Multi-handler resolution
-- Performance metrics and stats
 
 ### Utilities
 
@@ -124,7 +141,7 @@ const tabs = new YaiTabs({
     }
 });
 
-// All events automatically available as hooks
+// All events are automatically available as hooks
 tabs.hook('eventClick', ({ event, target, container, action }) => {
     console.log('Click action:', action); // Extracted from data-click
 });
@@ -147,53 +164,6 @@ tabs
     .hook('tabOpened', (ctx) => loadContent(ctx));
 ```
 
-See [YaiTabs Documentation](https://yaijs.github.io/yai/docs/components/tabs.html) and [YEH Documentation](https://yaijs.github.io/yai/docs/yeh/) for complete hook catalog.
-
----
-
-## EventListener Orchestration
-
-Define listener placement declaratively for optimal performance:
-
-```javascript
-const tabs = new YaiTabs({
-    events: {
-        setListener: {
-            '[data-yai-tabs]': ['click', 'keydown'],              // Core events
-            '[data-yai-forms]': ['change', 'input', 'submit'],    // Form sections only
-            '[data-swipe]': [
-                'mousedown', 'mousemove', 'mouseup',
-                'touchstart', 'touchmove', 'touchend'
-            ]  // Swipe-enabled elements only
-        }
-    }
-});
-```
-
-**Real-world results** (60 nested components with recursive AJAX loading):
-
-| Approach | Elements | Listeners | Reduction |
-|----------|----------|-----------|-----------|
-| Without orchestration | 60 | 484+ | baseline |
-| **With orchestration** | **12** | **45** | **91%** |
-
-≈439 fewer event listeners while maintaining full functionality!
-
----
-
-## Available Bundles
-
-```javascript
-// Minimal: YaiCore + YaiTabs + YEH
-import { YaiTabs } from 'https://cdn.jsdelivr.net/npm/@yaijs/core@latest/dist/yai-bundle-core.js';
-
-// Recommended: + YaiTabsSwipe + YaiViewport
-import { YaiTabs, YaiTabsSwipe, YaiViewport } from 'https://cdn.jsdelivr.net/npm/@yaijs/core@latest/dist/yai-bundle.js';
-
-// Full: + YaiAutoSwitch + YaiSearchAndClick
-import { YaiTabs, YaiTabsSwipe, YaiViewport } from 'https://cdn.jsdelivr.net/npm/@yaijs/core@latest/dist/yai-bundle-full.js';
-```
-
 ---
 
 ## Documentation
@@ -209,14 +179,15 @@ import { YaiTabs, YaiTabsSwipe, YaiViewport } from 'https://cdn.jsdelivr.net/npm
 
 - **[Interactive Demo](https://yaijs.github.io/yai/tabs/Example.html)** – 50+ nested components with all features
 - **[Performance Benchmark](https://yaijs.github.io/yai/tabs/Benchmark.html)** – Stress test with 400+ nesting levels
-- **[JSFiddle](https://jsfiddle.net/tqku5gzj/)** – Quick start playground
+- **[JSFiddle](https://jsfiddle.net/tqku5gzj/)**
+– Quick start playground, Challenge: Copy the component and paste it into `data-tab="1"` or `data-tab="2"`. And repeat the step in each pasted component. But set your expectations first, what's your first thought? And share your final conclusion.
 
 ---
 
 ## Browser Support
 
-- **Modern ES Modules:** Chrome 61+, Firefox 60+, Safari 11+, Edge 16+
-- **Tested:** Safari 15.6 (macOS 2015), Chrome 106 (Android), Chrome/Brave/Opera/Firefox (Ubuntu 24.04)
+- **Modern ES Modules:** Opera 48+, Chrome 61+, Firefox 60+, Safari 11+, Edge 16+
+- **Tested:** Safari 15.6 (macOS 2015), Chrome 106 (Android), Opera/Chrome/Brave/Firefox (Ubuntu 24.04)
 - **Legacy:** Use bundler with polyfills for older browsers
 
 ---
@@ -228,20 +199,10 @@ import { YaiTabs, YaiTabsSwipe, YaiViewport } from 'https://cdn.jsdelivr.net/npm
 - **[Report Issues](https://github.com/yaijs/yai/issues)** – Bug reports and feature requests
 - **[GitHub Pages](https://yaijs.github.io/yai/)** – Live documentation site
 
----
+## Author
 
-## License
-
-MIT License – Free for personal and commercial use
-
-## Authors
-
-- **Engin Ypsilon** – Architecture & concept
-- **Claude-3.5-Sonnet** – Implementation & optimization
-- **DeepSeek-V3** – Documentation & examples
-- **Grok-2** – Performance analysis
-- **ChatGPT** – Design tokens
+- **Engin Ypsilon**
 
 ---
 
-**Happy building!** 🚀
+**License:** MIT

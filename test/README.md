@@ -215,3 +215,7 @@ After running `npm run test:coverage`, coverage reports are generated in:
 - [Vitest Documentation](https://vitest.dev/)
 - [Testing Best Practices](https://kentcdodds.com/blog/common-mistakes-with-react-testing-library)
 - [Mocking with Vitest](https://vitest.dev/guide/mocking.html)
+
+---
+
+**License:** MIT

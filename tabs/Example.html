@@ -2104,7 +2104,7 @@
                                                             <div class="yai-slidy yai-slidy-secondary ym-0 draggable">Seamless integration: Switch between mouse and touch mid-Swipe.</div>
                                                         </div>
                                                         <div data-tab="3" data-spaceless>
-                                                            <div class="yai-slidy yai-slidy-warning ym-0 draggable">O(1) efficiency: Zero added listeners, even at 80+ levels.</div>
+                                                            <div class="yai-slidy yai-slidy-warning ym-0 draggable">Efficiency: Zero added listeners, even at 80+ levels.</div>
                                                         </div>
                                                         <div data-tab="4" data-spaceless>
                                                             <div class="yai-slidy yai-slidy-danger ym-0 draggable">Customizable: Tune thresholds, axes, and delays per container.</div>
@@ -2699,14 +2699,14 @@
                                     <p>Our only limitation is the browser's capacity to render nested elements recursively injected. The registered listener doesn't mind - it just waits for events triggered from within its assigned element, while the browser has to keep the whole world together in a div!</p>
                                     <p>That's not even a challenge for YEH. It's impossible to overwhelm a single listener that basically does nothing but look in one direction, waiting for smoke signals from the almost lost, to finally guide them to their intended handler.</p>
                                     <hr>
-                                    <p class="ymb-0"><strong>Technical reality:</strong> One listener handles infinite nesting with O(1) performance. No listener proliferation, no memory leaks, no performance degradation, full scope awareness. Not even 4,000,000 levels should matter - for the listener, nothing changes because it doesn't look for levels or elements, but for events triggered in their territory.</p>
+                                    <p class="ymb-0"><strong>Technical reality:</strong> One listener handles infinite nesting with performance. No listener proliferation, no memory leaks, no performance degradation, full scope awareness. Not even 4,000,000 levels should matter - for the listener, nothing changes because it doesn't look for levels or elements, but for events triggered in their territory.</p>
                                 </div>
                             </div>
                             <div data-tab="3" data-spaceless>
                                 <div class="yp-3">
                                     <h2>What is the world record for nested tab components any way?</h2>
                                     <hr>
-                                    <p class="ymb-0">Stress tested the component with up to 70 dynamically loaded and hierarchically nested <a href="./dynamic/dynamic-content-3.html" target="_blank">tab components</a> with two event listeners added to the root component handling all interactions. LCP remains constant at 0.10 s – the browser DOM rendering becomes the bottleneck for our O(1) event system.</p>
+                                    <p class="ymb-0">Stress tested the component with up to 70 dynamically loaded and hierarchically nested <a href="./dynamic/dynamic-content-3.html" target="_blank">tab components</a> with two event listeners added to the root component handling all interactions. LCP remains constant at 0.10 s – the browser DOM rendering becomes the bottleneck for our event system.</p>
                                 </div>
                                 <div class="benchmark-table">
                                     <div class="table-container">
@@ -2727,7 +2727,7 @@
                                             <tfoot>
                                                 <tr>
                                                     <td colspan="5">
-                                                        <small><b>Conclusion:</b> LCP stays constant (O(1) scaling proven) while INP degrades due to browser DOM complexity, not event handling.</small>
+                                                        <small><b>Conclusion:</b> LCP stays constant while INP degrades due to browser DOM complexity, not event handling.</small>
                                                     </td>
                                                 </tr>
                                             </tfoot>
@@ -3043,7 +3043,7 @@
                         <li>Use <code>prefers-reduced-motion</code> CSS gate for transitions on low-motion users.</li>
                     </ul>
                     <blockquote>
-                        “One listener per container keeps memory flat and GC friendly—even with O(n)+ levels of nested tabs.”
+                        “One listener per container keeps memory flat and GC friendly—even with X levels of nested tabs.”
                         <small>Architecture Note</small>
                     </blockquote>
                 </div>
@@ -3414,7 +3414,7 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
 
                                     <h3>Need a click handler for some VooDoo?</h3>
                                     <p>YaiTabs requires YEH to handle all events in a self-contained manner. It's an ES6 Class focused on event handling and delegation (~800 LOC).</p>
-                                    <p>Since YEH is already loaded for YaiTabs, you can leverage it for any additional event handling needs. This gives you the same O(1) performance benefits for any custom interactions. BTW, this example page uses YEH under the hood, too.</p>
+                                    <p>Since YEH is already loaded for YaiTabs, you can leverage it for any additional event handling needs. This gives you the same performance benefits for any custom interactions. BTW, this example page uses YEH under the hood, too.</p>
                                     <p>Here's a simple example showing how to create your own event handler using the same architecture:</p>
 
 <pre class="hljs">
@@ -3507,7 +3507,7 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
                                 <div class="yp-0">
                                     <h2>Default Accent</h2>
                                     <hr>
-                                    <p><strong>YaiTabs</strong> supports <em>unlimited nesting</em>, <em>dynamic content loading</em>, and <em>URL-based routing</em> — all handled by just <strong>2 listeners on each root</strong>, with nested components inheriting the same delegation. Built on YEH (YAI Event Hub) Foundation - O(1) Performance: Single listener per container regardless of complexity. Perfect Isolation: Container-scoped event handling using `:scope >` selectors.</p>
+                                    <p><strong>YaiTabs</strong> supports <em>unlimited nesting</em>, <em>dynamic content loading</em>, and <em>URL-based routing</em> — all handled by just <strong>2 listeners on each root</strong>, with nested components inheriting the same delegation. Built on YEH (YAI Event Hub) Foundation - Performance: Single listener per container regardless of complexity. Perfect Isolation: Container-scoped event handling using `:scope >` selectors.</p>
                                     <pre class="ymb-0"><code>data-theme="default"</code><br><code>data-color-accent="red"</code></pre>
                                 </div>
                             </div>
@@ -3577,7 +3577,7 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
                             <div data-tab="2">
                                 <h2>Dark content 2</h2>
                                 <hr>
-                                <p class="ymb-0">Event delegation scales in O(1): nested tabs add <em>zero</em> new listeners and inherit the root’s two. All nested and dynamically added components utilize the root component's event listeners.</p>
+                                <p class="ymb-0">Event delegation scales in nested tabs add <em>zero</em> new listeners and inherit the root’s two. All nested and dynamically added components utilize the root component's event listeners.</p>
                             </div>
                             <div data-tab="3">
                                 <h2>Dark content 3</h2>
@@ -3689,7 +3689,7 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
                                                                             <div data-tab="3">
                                                                                 <h4>Final nested content</h4>
                                                                                 <hr>
-                                                                                <p class="ymb-0">Every event knows its container context — scalable apps with deep hierarchies, zero listener proliferation. Development Philosophy: "Mathematical Elegance Meets Developer Experience" - Each component proves that enterprise-grade functionality can be achieved with minimal code through revolutionary O(1) event handling architecture.</p>
+                                                                                <p class="ymb-0">Every event knows its container context — scalable apps with deep hierarchies, zero listener proliferation. Development Philosophy: "Mathematical Elegance Meets Developer Experience."</p>
                                                                             </div>
                                                                             <div data-tab="4">
                                                                                 <div class="yp-3">
@@ -3913,7 +3913,7 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
                     <div class="yai-text-center yai-slidy yai-slidy-primary draggable yp-1 auto-height">
                         <p class="ymb-0">
                             <small><b>Ynforcer2000:</b> Automated deep nesting stress test on Y
-                                <br><b>5 root listeners</b> handle infinite depth via O(1) event delegation
+                                <br><b>5 root listeners</b> handle infinite depth via event delegation
                                 <br><b>Tested:</b> 82 levels (20 loops), 100+ levels (25 loops), 200+ levels (50 loops)
                                 <br><b>Performance modes:</b> With ARIA (~50 levels) | Without ARIA (200+ levels, space is the limit)
                             </small>
@@ -3991,7 +3991,7 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
                                         <small>
                                             <strong>Grok was here.</strong><br>
                                             Tested to level 82. It yawned.<br>
-                                            5 listeners. 1,459 elements. O(1) delegation.<br>
+                                            5 listeners. 1,459 elements. Max delegation.<br>
                                             <em>Architecture wins. This is the way.</em>
                                         </small>
                                     </p>
@@ -4046,7 +4046,7 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
                                                             <div class="yai-slidy yai-slidy-secondary ym-0 draggable">Seamless integration: Switch between mouse and touch mid-Swipe.</div>
                                                         </div>
                                                         <div data-tab="3" data-spaceless>
-                                                            <div class="yai-slidy yai-slidy-warning ym-0 draggable">O(1) efficiency: Zero added listeners, even at 80+ levels.</div>
+                                                            <div class="yai-slidy yai-slidy-warning ym-0 draggable">Efficiency: Zero added listeners, even at 80+ levels.</div>
                                                         </div>
                                                         <div data-tab="4" data-spaceless>
                                                             <div class="yai-slidy yai-slidy-danger ym-0 draggable">Customizable: Tune thresholds, axes, and delays per container.</div>

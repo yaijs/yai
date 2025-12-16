@@ -139,3 +139,12 @@ import { YaiTabs, YaiTabsSwipe, YaiViewport } from 'https://cdn.jsdelivr.net/npm
 - **[Live Demo](https://yaijs.github.io/yai/tabs/Example.html)** - Interactive examples with all utilities
 - **[YaiTabs Documentation](../components/tabs.md)** - Core component guide
 - **[GitHub Repository](https://github.com/yaijs/yai)** - Source code and issues
+
+
+## Author
+
+- **Engin Ypsilon**
+
+---
+
+**License:** MIT

@@ -472,6 +472,193 @@ describe('YEH (Yai Event Hub)', () => {
     });
   });
 
+  describe('Auto preventDefault', () => {
+    // Note: Form submit tests are skipped due to happy-dom limitations
+    // Feature verified working in real browser (see yai-input-utils.html)
+    it.skip('should auto preventDefault for globally configured events', () => {
+      return new Promise((resolve) => {
+        let handlerCalled = false;
+
+        container.innerHTML = '<form id="test-form" data-action="fill"><button type="submit">Submit</button></form>';
+
+        const eventMapping = {
+          '#test-form': ['submit'],
+        };
+
+        new YEH(eventMapping, {}, {
+          autoPreventDefault: ['submit'],
+          methods: {
+            submit: {
+               handleSubmit: () => {
+                handlerCalled = true;
+              }
+            }
+          }
+        });
+
+        const form = container.querySelector('form');
+
+        // Listen in bubble phase AFTER YEH handler
+        document.addEventListener('submit', (e) => {
+          expect(handlerCalled).toBe(true); // Verify handler was called
+          expect(e.defaultPrevented).toBe(true);
+          resolve();
+        }, { once: true });
+
+        const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+        form.dispatchEvent(submitEvent);
+      });
+    });
+
+    it.skip('should allow per-event preventDefault override to true', () => {
+      return new Promise((resolve) => {
+        container.innerHTML = '<form id="test-form-2"><button type="submit">Submit</button></form>';
+
+        const eventMapping = {
+          '#test-form-2': [
+            { type: 'submit', handler: 'handleSubmit', preventDefault: true }
+          ],
+        };
+
+        new YEH(eventMapping, {}, {
+          autoPreventDefault: [], // Not in global config
+          methods: {
+            submit: {
+              handleSubmit: () => {}
+            }
+          }
+        });
+
+        const form = container.querySelector('form');
+
+        // Listen in bubble phase AFTER YEH handler
+        document.addEventListener('submit', (e) => {
+          expect(e.defaultPrevented).toBe(true);
+          resolve();
+        }, { once: true });
+
+        const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+        form.dispatchEvent(submitEvent);
+      });
+    });
+
+    it.skip('should allow per-event preventDefault override to false', () => {
+      return new Promise((resolve) => {
+        container.innerHTML = '<form id="test-form-3"><button type="submit">Submit</button></form>';
+
+        const eventMapping = {
+          '#test-form-3': [
+            { type: 'submit', handler: 'handleSubmit', preventDefault: false }
+          ],
+        };
+
+        const yeh = new YEH(eventMapping, {}, {
+          autoPreventDefault: ['submit'], // In global config, but overridden
+          methods: {
+            submit: {
+              handleSubmit: () => {}
+            }
+          }
+        });
+
+        const form = container.querySelector('form');
+
+        document.addEventListener('submit', (e) => {
+          expect(e.defaultPrevented).toBe(false);
+          resolve();
+        }, { once: true });
+
+        const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+        form.dispatchEvent(submitEvent);
+      });
+    });
+
+    it.skip('should not preventDefault when not configured', () => {
+      return new Promise((resolve) => {
+        container.innerHTML = '<form id="test-form-4"><button type="submit">Submit</button></form>';
+
+        const eventMapping = {
+          '#test-form-4': ['submit'],
+        };
+
+        const yeh = new YEH(eventMapping, {}, {
+          autoPreventDefault: [], // Empty - no auto preventDefault
+          methods: {
+            submit: {
+              handleSubmit: () => {}
+            }
+          }
+        });
+
+        const form = container.querySelector('form');
+
+        document.addEventListener('submit', (e) => {
+          expect(e.defaultPrevented).toBe(false);
+          resolve();
+        }, { once: true });
+
+        const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+        form.dispatchEvent(submitEvent);
+      });
+    });
+
+    it.skip('should support multiple event types in autoPreventDefault', () => {
+      return new Promise((resolve) => {
+        container.innerHTML = '<form id="test-form-5"><button type="submit">Submit</button></form>';
+
+        const eventMapping = {
+          '#test-form-5': ['submit'],
+        };
+
+        new YEH(eventMapping, {}, {
+          autoPreventDefault: ['submit'],
+          methods: {
+            submit: {
+              handleSubmit: () => {}
+            }
+          }
+        });
+
+        const form = container.querySelector('form');
+
+        // Listen in bubble phase AFTER YEH handler
+        document.addEventListener('submit', (e) => {
+          expect(e.defaultPrevented).toBe(true);
+          resolve();
+        }, { once: true });
+
+        const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+        form.dispatchEvent(submitEvent);
+      });
+    });
+
+    it('should warn when mixing debounce/throttle with preventDefault', () => {
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      const eventMapping = {
+        'form': [
+          { type: 'submit', handler: 'handleSubmit', preventDefault: true, debounce: 500 }
+        ],
+      };
+
+      container.innerHTML = '<form><button type="submit">Submit</button></form>';
+
+      new YEH(eventMapping, {}, {
+        methods: {
+          submit: {
+            handleSubmit: () => {}
+          }
+        }
+      });
+
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Mixing debounce/throttle with preventDefault')
+      );
+
+      warnSpy.mockRestore();
+    });
+  });
+
   describe('Cleanup', () => {
     it('should destroy and cleanup event listeners', () => {
       const eventMapping = {
