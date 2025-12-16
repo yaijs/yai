@@ -4,6 +4,64 @@ Utilities that extend YaiTabs functionality. All examples below are working snip
 
 ---
 
+## YaiInputUtils
+
+**[Live Demo →](https://yaijs.github.io/yai/docs/utilities/yai-input-utils.html)**
+
+Headless form enhancement utilities that provide validation, character counters, and keyboard shortcut helpers without imposing any UI styling.
+
+**Features:**
+- Pre-validation with automatic error classes
+- Character counter for inputs with length constraints
+- Password visibility toggle helpers
+- Input clear utilities
+- Global keyboard shortcut detection (`hasActiveInput()`)
+- Support for INPUT, TEXTAREA, and SELECT elements
+- Custom error messages via `data-error-message`
+- Template-based wrapper and label injection
+- Event-driven architecture with hooks
+
+**Quick Example:**
+
+```javascript
+import { YaiInputUtils } from 'https://cdn.jsdelivr.net/npm/@yaijs/core@latest/utils/yai-input-utils.js';
+
+const inputUtils = new YaiInputUtils({
+  appConfig: {
+    eventHandler: {
+      selector: {
+        '#form': [
+          { type: 'input', debounce: 300 },
+          'click'
+        ],
+        window: ['keydown']  // Global keyboard shortcuts
+      }
+    },
+    templates: document.getElementById('templates')
+  }
+});
+
+// Prevent keyboard shortcuts while user is typing
+inputUtils.hook('eventkeydown', (target, event) => {
+  if (YaiInputUtils.hasActiveInput()) return;
+
+  if (event.key === 's' && event.ctrlKey) {
+    event.preventDefault();
+    // Save action
+  }
+});
+```
+
+**Available Methods:**
+- `preValidation(input, config)` - Validate and add error classes
+- `inputCounter(input, container)` - Update character counter
+- `togglePassword(target)` - Toggle password visibility
+- `clearInput(target)` - Clear input value
+- `autoEnhance(input, container)` - Auto-add counters for length-constrained inputs
+- `static hasActiveInput()` - Check if user is typing in a form
+
+---
+
 ## YaiViewport
 
 Advanced viewport tracking utility with throttled resize/scroll events and visibility detection.
@@ -130,6 +188,11 @@ import { YaiTabs, YaiTabsSwipe, YaiViewport } from 'https://cdn.jsdelivr.net/npm
 
 // Full - YaiCore, YaiTabs, YaiTabsSwipe, YaiViewport, YaiAutoSwitch, YaiSearchAndClick, YEH
 import { YaiTabs, YaiTabsSwipe, YaiViewport } from 'https://cdn.jsdelivr.net/npm/@yaijs/core@latest/dist/yai-bundle-full.js';
+
+// Individual utility imports
+import { YaiInputUtils } from 'https://cdn.jsdelivr.net/npm/@yaijs/core@latest/utils/yai-input-utils.js';
+import { YaiViewport } from 'https://cdn.jsdelivr.net/npm/@yaijs/core@latest/utils/yai-viewport.js';
+import { YEH } from 'https://cdn.jsdelivr.net/npm/@yaijs/core@latest/yeh/yeh.js';
 ```
 
 ---
