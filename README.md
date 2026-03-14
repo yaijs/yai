@@ -1,22 +1,5 @@
 # YaiJS
 
-**A personal note from EY:**
-
-This library is a cumulation of ~20 years of experience — from writing static HTML pages as someone who just needed a website, to building fully functional CMS systems when needed.
-
-What I always needed was JavaScript. And for a while, jQuery did the trick, but I was looking for something that handled event delegation without me even knowing the concept — I simply knew what I needed: no add- & remove Listener chaos, just because i needed some interactive buttons or input elements.
-
-jQuery couldn't quite deliver that. Or rather, it technically could, but I couldn't figure out how to do event delegation properly.
-
-Then, over 10 years ago, I discovered the pretty unspectacular `handleEvent` interface. My entire JavaScript approach instinctively shifted towards event delegation (still without knowing its formal name).
-
-The first thing I did on new projects since: I created a minimalistic version of what YEH does today — though not even close to what YEH can do now.
-
-At the end, it does event delegation — a concept older than JavaScript itself, presumably even older than me.
-
-BTW, now I know, and I admit it, in the first few years I didn't even implement it properly because i didn't knew how and there were no tutorials at all. Or maybe there were a few, but a few was as good as none back in the days. And with that out of the way:
-
-
 **Advanced web components with YEH (Yai Event Hub) - Enterprise-grade tabs with efficient event delegation**
 
 Build deeply nested, event-heavy interfaces with constant-time listener delegation and zero manual lifecycle handling. Everything you need in one package.

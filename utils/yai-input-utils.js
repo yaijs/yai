@@ -314,6 +314,7 @@ export class YaiInputUtils extends YEH {
         input.value = '';
 
         this.inputCounter(input, passwordWrapper);
+        this.preValidation(input);
 
         if (typeof target.dataset.autoFocus !== "undefined") input.focus();
     }

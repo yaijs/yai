@@ -18,15 +18,15 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html { scrollbar-gutter: stable; }
         body { padding: 2rem; color: var(--text); background: var(--bg); }
+        hr { margin: .5rem 0; }
 
         /* Scroll-to-top functionality */
         .scroll-to-top-container { position: fixed; bottom: 1.5rem; right: 1.25rem; z-index: 1001; }
-        .scroll-to-top { line-height: 1; opacity: 0; transform: translateY(80px); transition: all 0.3s ease-in-out; }
-        body.page-is-scrolled .scroll-to-top { opacity: 1; transform: translateY(0); }
+        [data-click="scrollToTop"] { line-height: 1; opacity: 0; transform: translateY(80px); transition: all 0.3s ease-in-out; }
+        body.page-is-scrolled [data-click="scrollToTop"] { opacity: 1; transform: translateY(0); }
         /* Scroll-to-top ends */
 
         /* Example */
-        main { min-height: 1500px; }
         .app-form-group { padding: 10px 0; }
         .yai-util-body { display: flex; }
         .yai-util-body label, .fancy-label-wrapper { margin-right: .5rem; }
@@ -36,8 +36,11 @@
 <body>
     <header>
         <h1><a href="">YaiInputUtils Demo</a></h1>
-        <p class="subtitle">Utils for YEH</p>
+        <p class="subtitle">Headless Utils for YEH</p>
     </header>
+
+    <hr />
+
     <main id="app">
 
         <div class="container">
@@ -53,10 +56,9 @@
                     data-input="validateInput"
                     data-yai-util="clear"
                     data-wrapper="input"
-                    data-label="Required Field"
                     data-label-wrapper="fancy-label"
-                    required
-                    value="">
+                    data-label="Username"
+                    required>
 
                 <input type="password"
                     name="password"
@@ -67,10 +69,9 @@
                     data-yai-util="password-toggle clear"
                     data-wrapper="input"
                     data-label="Password"
-                    required
-                    value="">
+                    required>
 
-                <hr>
+                <hr />
 
                 <input type="text"
                     name="testtext"
@@ -80,19 +81,19 @@
                     data-yai-util="clear"
                     data-wrapper="input"
                     data-label="Test"
-                    data-error-message="Input is invalid"
-                    value="">
+                    data-error-message="Input is invalid">
 
-                <hr>
+                <hr />
 
                 <input type="number"
                     name="someNumber"
                     max="25"
                     data-input="validateInput"
                     data-yai-util="clear"
-                    data-wrapper="input">
+                    data-wrapper="input"
+                    data-label="Favorite number">
 
-                <hr>
+                <hr />
 
                 <textarea
                     name="comment"
@@ -104,7 +105,7 @@
                     data-label="Test"
                 ></textarea>
 
-                <hr>
+                <hr />
 
                 <select
                     name="subscription"
@@ -119,13 +120,13 @@
                     <option value="tier">TIER</option>
                 </select>
 
-                <hr>
+                <hr />
 
                 <div class="app-form-group">
                     <button type="button" data-click="openExampleModal">Info</button>
                 </div>
 
-                <hr>
+                <hr />
 
                 <div class="app-form-group submit-button-container">
                     <button type="submit">Submit</button>
@@ -136,13 +137,15 @@
 
         <!-- Unstyled scroll to top -->
         <div class="scroll-to-top-container">
-            <button type="button" class="scroll-to-top" data-click="scrollToTop">▲</button>
+            <button data-click="scrollToTop">▲</button>
         </div>
     </main>
 
-    <!-- Single template with all utility wrappers -->
+    <!--
+        Single template with all utility wrappers
+    -->
     <template id="yai-input-utils-template">
-        <!-- Default wrapper -->
+        <!-- Default wrapper (content injected into yai-util-body) -->
         <div class="app-form-group" data-wrapper="input">
             <div class="yai-util-body"></div>
         </div>
@@ -156,28 +159,32 @@
             <span class="fancy-helper">help</span>
         </div>
 
+        <!-- Default error message -->
         <span data-wrapper="error-message" role="alert"></span>
 
+        <!-- Util: Toggle password -->
         <button type="button"
                 data-auto-focus
                 data-util="password-toggle"
                 data-click="togglePassword"
-                data-toggle-content="📛"
-                class="yai-util-btn">👀</button>
+                data-toggle-content="📛">👀</button>
 
+        <!-- Util: clear input -->
         <button type="button"
                 data-auto-focus
                 data-util="clear"
-                data-click="clearInput"
-                class="yai-util-btn">✕</button>
+                data-click="clearInput">✕</button>
 
+        <!-- Util: copy to clipboard -->
         <button type="button"
                 data-util="copy"
                 data-click="copyToClipboard"
-                data-success-content="✓"
-                class="yai-util-btn">📋</button>
+                data-success-content="✓">📋</button>
 
+        <!-- Util: input char counter -->
         <span data-util="counter" class="yai-char-counter" data-role="counter">0</span>
+
+        <!-- Util: required input element indicator; appended to label -->
         <span data-util="requiredIndicator" class="yai-required-indicator">*</span>
     </template>
 
@@ -209,9 +216,9 @@
                 selector: {
                     window: [
                         'keydown',
+                        { type: 'load', options: { once: true } },
                         { type: 'scroll', throttle: 240, leading: false },
                         { type: 'resize', throttle: 700, leading: false },
-                        { type: 'load', options: { once: true } },
                     ],
                     '#app': [
                         'click',
@@ -276,5 +283,155 @@
         // Opera issue after reload
         setTimeout(() => { window.dispatchEvent(new Event('resize')) }, 250);
     </script>
+
+
+<!--
+    Markup
+-->
+<hr />
+<h2>Markup</h2>
+<pre class="hljs">
+<span class="hljs-tag">&lt;<span class="hljs-name">form</span> <span class="hljs-attr">method</span>=<span class="hljs-string">&quot;post&quot;</span>
+    <span class="hljs-attr">data-submit</span>=<span class="hljs-string">&quot;exampleFormSubmit&quot;</span>
+    <span class="hljs-attr">data-prevent-default</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;text&quot;</span>
+        <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;username&quot;</span>
+        <span class="hljs-attr">minlength</span>=<span class="hljs-string">&quot;3&quot;</span>
+        <span class="hljs-attr">maxlength</span>=<span class="hljs-string">&quot;50&quot;</span>
+        <span class="hljs-attr">autocomplete</span>=<span class="hljs-string">&quot;username&quot;</span>
+        <span class="hljs-attr">data-input</span>=<span class="hljs-string">&quot;validateInput&quot;</span>
+        <span class="hljs-attr">data-yai-util</span>=<span class="hljs-string">&quot;clear&quot;</span>
+        <span class="hljs-attr">data-wrapper</span>=<span class="hljs-string">&quot;input&quot;</span>
+        <span class="hljs-attr">data-label</span>=<span class="hljs-string">&quot;Username&quot;</span>
+        <span class="hljs-attr">data-label-wrapper</span>=<span class="hljs-string">&quot;fancy-label&quot;</span>
+        <span class="hljs-attr">required</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;password&quot;</span>
+        <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;password&quot;</span>
+        <span class="hljs-attr">minlength</span>=<span class="hljs-string">&quot;3&quot;</span>
+        <span class="hljs-attr">maxlength</span>=<span class="hljs-string">&quot;30&quot;</span>
+        <span class="hljs-attr">autocomplete</span>=<span class="hljs-string">&quot;current-password&quot;</span>
+        <span class="hljs-attr">data-input</span>=<span class="hljs-string">&quot;validateInput&quot;</span>
+        <span class="hljs-attr">data-yai-util</span>=<span class="hljs-string">&quot;password-toggle clear&quot;</span>
+        <span class="hljs-attr">data-wrapper</span>=<span class="hljs-string">&quot;input&quot;</span>
+        <span class="hljs-attr">data-label</span>=<span class="hljs-string">&quot;Password&quot;</span>
+        <span class="hljs-attr">required</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">hr</span> /&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;text&quot;</span>
+        <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;testtext&quot;</span>
+        <span class="hljs-attr">minlength</span>=<span class="hljs-string">&quot;3&quot;</span>
+        <span class="hljs-attr">maxlength</span>=<span class="hljs-string">&quot;10&quot;</span>
+        <span class="hljs-attr">data-input</span>=<span class="hljs-string">&quot;validateInput&quot;</span>
+        <span class="hljs-attr">data-yai-util</span>=<span class="hljs-string">&quot;clear&quot;</span>
+        <span class="hljs-attr">data-wrapper</span>=<span class="hljs-string">&quot;input&quot;</span>
+        <span class="hljs-attr">data-label</span>=<span class="hljs-string">&quot;Test&quot;</span>
+        <span class="hljs-attr">data-error-message</span>=<span class="hljs-string">&quot;Input is invalid&quot;</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">hr</span> /&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;number&quot;</span>
+        <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;someNumber&quot;</span>
+        <span class="hljs-attr">max</span>=<span class="hljs-string">&quot;25&quot;</span>
+        <span class="hljs-attr">data-input</span>=<span class="hljs-string">&quot;validateInput&quot;</span>
+        <span class="hljs-attr">data-yai-util</span>=<span class="hljs-string">&quot;clear&quot;</span>
+        <span class="hljs-attr">data-wrapper</span>=<span class="hljs-string">&quot;input&quot;</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">hr</span> /&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">textarea</span>
+        <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;comment&quot;</span>
+        <span class="hljs-attr">minlength</span>=<span class="hljs-string">&quot;3&quot;</span>
+        <span class="hljs-attr">maxlength</span>=<span class="hljs-string">&quot;10&quot;</span>
+        <span class="hljs-attr">data-input</span>=<span class="hljs-string">&quot;validateInput&quot;</span>
+        <span class="hljs-attr">data-yai-util</span>=<span class="hljs-string">&quot;clear&quot;</span>
+        <span class="hljs-attr">data-wrapper</span>=<span class="hljs-string">&quot;input&quot;</span>
+        <span class="hljs-attr">data-label</span>=<span class="hljs-string">&quot;Test&quot;</span>
+    &gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">textarea</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">hr</span> /&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">select</span>
+        <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;subscription&quot;</span>
+        <span class="hljs-attr">data-input</span>=<span class="hljs-string">&quot;validateInput&quot;</span>
+        <span class="hljs-attr">data-yai-util</span>=<span class="hljs-string">&quot;clear&quot;</span>
+        <span class="hljs-attr">data-wrapper</span>=<span class="hljs-string">&quot;input&quot;</span>
+        <span class="hljs-attr">data-label</span>=<span class="hljs-string">&quot;Test&quot;</span>
+    &gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;&quot;</span>&gt;</span>Select Subscription<span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;mini&quot;</span>&gt;</span>Mini<span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;medium&quot;</span>&gt;</span>Medium<span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;tier&quot;</span>&gt;</span>TIER<span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">select</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">hr</span> /&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;app-form-group&quot;</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;button&quot;</span> <span class="hljs-attr">data-click</span>=<span class="hljs-string">&quot;openExampleModal&quot;</span>&gt;</span>Info<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">hr</span> /&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;app-form-group submit-button-container&quot;</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;submit&quot;</span>&gt;</span>Submit<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+
+<span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span>
+
+
+<span class="hljs-comment">&lt;!--
+    Single template with all utility wrappers
+--&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">template</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;yai-input-utils-template&quot;</span>&gt;</span>
+    <span class="hljs-comment">&lt;!-- Default wrapper (content injected into yai-util-body) --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;app-form-group&quot;</span> <span class="hljs-attr">data-wrapper</span>=<span class="hljs-string">&quot;input&quot;</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;yai-util-body&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- Default label --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">label</span> <span class="hljs-attr">data-wrapper</span>=<span class="hljs-string">&quot;label&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- Optional fancy label wrapper --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;fancy-label-wrapper&quot;</span> <span class="hljs-attr">data-wrapper</span>=<span class="hljs-string">&quot;fancy-label&quot;</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">label</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;fancy-helper&quot;</span>&gt;</span>help<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- Default error message --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">data-wrapper</span>=<span class="hljs-string">&quot;error-message&quot;</span> <span class="hljs-attr">role</span>=<span class="hljs-string">&quot;alert&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- Util: Toggle password --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;button&quot;</span>
+            <span class="hljs-attr">data-auto-focus</span>
+            <span class="hljs-attr">data-util</span>=<span class="hljs-string">&quot;password-toggle&quot;</span>
+            <span class="hljs-attr">data-click</span>=<span class="hljs-string">&quot;togglePassword&quot;</span>
+            <span class="hljs-attr">data-toggle-content</span>=<span class="hljs-string">&quot;📛&quot;</span>
+            <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;yai-util-btn&quot;</span>&gt;</span>👀<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- Util: clear input --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;button&quot;</span>
+            <span class="hljs-attr">data-auto-focus</span>
+            <span class="hljs-attr">data-util</span>=<span class="hljs-string">&quot;clear&quot;</span>
+            <span class="hljs-attr">data-click</span>=<span class="hljs-string">&quot;clearInput&quot;</span>
+            <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;yai-util-btn&quot;</span>&gt;</span>✕<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- Util: copy to clipboard --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;button&quot;</span>
+            <span class="hljs-attr">data-util</span>=<span class="hljs-string">&quot;copy&quot;</span>
+            <span class="hljs-attr">data-click</span>=<span class="hljs-string">&quot;copyToClipboard&quot;</span>
+            <span class="hljs-attr">data-success-content</span>=<span class="hljs-string">&quot;✓&quot;</span>
+            <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;yai-util-btn&quot;</span>&gt;</span>📋<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- Util: input char counter --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">data-util</span>=<span class="hljs-string">&quot;counter&quot;</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;yai-char-counter&quot;</span> <span class="hljs-attr">data-role</span>=<span class="hljs-string">&quot;counter&quot;</span>&gt;</span>0<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- Util: required input element indicator; appended to label --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">data-util</span>=<span class="hljs-string">&quot;requiredIndicator&quot;</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;yai-required-indicator&quot;</span>&gt;</span>*<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">template</span>&gt;</span>
+</pre>
+<style>.hljs{margin-top:1rem;white-space:pre-wrap;}.hljs{display:block;overflow-x:auto;padding:1rem;color:#abb2bf;background:#070b15}.hljs-comment,.hljs-quote{color:#5c6370;font-style:italic}.hljs-doctag,.hljs-formula,.hljs-keyword{color:#c678dd}.hljs-deletion,.hljs-name,.hljs-section,.hljs-selector-tag,.hljs-subst{color:#e06c75}.hljs-literal{color:#56b6c2}.hljs-addition,.hljs-attribute,.hljs-meta .hljs-string,.hljs-regexp,.hljs-string{color:#98c379}.hljs-attr,.hljs-number,.hljs-selector-attr,.hljs-selector-class,.hljs-selector-pseudo,.hljs-template-variable,.hljs-type,.hljs-variable{color:#d19a66}.hljs-bullet,.hljs-link,.hljs-meta,.hljs-selector-id,.hljs-symbol,.hljs-title{color:#61aeee}.hljs-built_in,.hljs-class .hljs-title,.hljs-title.class_{color:#e6c07b}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}.hljs-link{text-decoration:underline}</style>
+
 </body>
 </html>
