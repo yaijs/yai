@@ -655,6 +655,7 @@
                                 type="checkbox"
                                 name="SearchAndClick[scroll]"
                                 data-input="handleYaiState"
+                                checked="checked"
                                 data-disabled-checked="checked"
                                 data-yai-state-util>
                             <small>Scrolls</small>
@@ -1121,7 +1122,8 @@
             <div class="yai-doc-section">
                 <h3>🛠️ Utilities & Examples</h3>
                 <ul class="yai-doc-links ymb-0">
-                    <li><a href="https://yaijs.github.io/yai/docs/utilities/overview.html" data-click="doc-link" class="yai-link">Utilities Overview</a> - YaiTabsSwipe, YaiViewport</li>
+                                <li><a href="https://jsfiddle.net/cmp5zynh/" data-click="doc-link" class="yai-link">YaiViewport On JSFiddle</a></li>
+                                <li><a href="https://yaijs.github.io/yai/docs/utilities/overview.html" data-click="doc-link" class="yai-link">Utilities Overview</a> - YaiTabsSwipe, YaiViewport</li>
                     <li><a href="https://yaijs.github.io/yai/tabs/Example.html" data-click="doc-link" class="yai-link" target="_blank" rel="noopener">Live Demo</a> - 50+ nested components</li>
                     <li><b>Performance Benchmark</b> - Stress test</li>
                 </ul>
@@ -1161,8 +1163,7 @@
                 loops: 5,
                 scroll: false,
                 timeouts: {
-                    // init: 500, ajax: 400, goIn: 600, loop: 800,
-                    init: 500, ajax: 100, goIn: 500, loop: 300,
+                    init: 500, ajax: 300, goIn: 750, loop: 300,
                 },
                 roadMap: {
                     goIn: [{ open: '4' }, { open: '6' }],

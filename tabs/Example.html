@@ -1865,6 +1865,7 @@
                         <div class="yai-doc-section">
                             <h3>🛠️ Utilities & Examples</h3>
                             <ul class="yai-doc-links ymb-0">
+                                <li><a href="https://jsfiddle.net/cmp5zynh/" data-click="doc-link" class="yai-link">YaiViewport On JSFiddle</a></li>
                                 <li><a href="https://yaijs.github.io/yai/docs/utilities/overview.html" data-click="doc-link" class="yai-link">Utilities Overview</a> - YaiTabsSwipe, YaiViewport</li>
                                 <li><b>Live Demo</b> - 50+ nested components</li>
                                 <li><a href="https://yaijs.github.io/yai/tabs/Benchmark.html" data-click="doc-link" class="yai-link" target="_blank" rel="noopener">Performance Benchmark</a> - Stress test</li>
@@ -3901,8 +3902,8 @@ Your local INP value of <span class="hljs-number">1</span>,<span class="hljs-num
                 </div>
             </header>
             <nav data-controller>
-                <button data-tab-action="open" data-open="1" data-inview-default>A</button>
-                <button data-tab-action="open" data-open="2">Y</button>
+                <button data-tab-action="open" data-open="1">A</button>
+                <button data-tab-action="open" data-open="2" data-inview-default>Y</button>
                 <button data-tab-action="open" data-open="3">C</button>
                 <button data-tab-action="open" data-open="4">D</button>
                 <button data-tab-action="open" data-open="5">E</button>
@@ -5030,8 +5031,7 @@ viewport.<span class="hljs-title function_">hook</span>(<span class="hljs-string
                 loops: 3,      // Default values
                 scroll: true,
                 timeouts: {
-                    // init: 500, ajax: 400, goIn: 600, loop: 800,
-                    init: 500, ajax: 100, goIn: 500, loop: 300,
+                    init: 500, ajax: 300, goIn: 750, loop: 300,
                 },
                 roadMap: {
                     goIn: [{ open: '4' }, { open: '6' }],
@@ -5919,21 +5919,24 @@ viewport.<span class="hljs-title function_">hook</span>(<span class="hljs-string
 
                 const params = new URLSearchParams(location.hash.substring(1));
 
+                // Per-root component analytics
+                const rootComponents = document.querySelectorAll('[data-yai-tabs][data-root]');
+
                 // Global selectors (scoped to entire document)
                 const globalSelectors = {
-                    swypables:              '[data-swipe]',
-                    inert:                  '[inert]',
-                    ariaHiddenContent:      'div[aria-hidden="true"]',
-                    buttonsActive:          '[data-controller] button[data-open].active',
-                    buttonsDefault:         '[data-controller] button[data-default]',
-                    buttonsDefaultIfInView: '[data-controller] button[data-inview-default]',
-                    buttonsNotFocusable:    'button[tabindex="-1"]',
+                    swypables:              '[data-yai-tabs] [data-swipe]',
+                    inert:                  '[data-yai-tabs] [inert]',
+                    ariaHiddenContent:      '[data-yai-tabs] div[aria-hidden="true"]',
+                    buttonsActive:          '[data-yai-tabs] [data-controller] button[data-open].active',
+                    buttonsDefault:         '[data-yai-tabs] [data-controller] button[data-default]',
+                    buttonsDefaultIfInView: '[data-yai-tabs] [data-controller] button[data-inview-default]',
+                    buttonsNotFocusable:    '[data-yai-tabs] button[tabindex="-1"]',
                     componentsRoots:        '[data-yai-tabs][data-root]',
-                    componentsInRoots:      '[data-yai-tabs][data-in-root]',
-                    componentsActive:       '[data-yai-tabs].tab-active',
-                    contentsActive:         '[data-content] [data-tab].active',
-                    tabButtons:             '[data-controller] button[data-open]',
-                    tabContents:            '[data-content] [data-tab]',
+                    componentsInRoots:      '[data-yai-tabs] [data-yai-tabs][data-in-root]',
+                    componentsActive:       '[data-yai-tabs] [data-tab].active',
+                    contentsActive:         '[data-yai-tabs] [data-content] [data-tab].active',
+                    tabButtons:             '[data-yai-tabs] [data-controller] button[data-open]',
+                    tabContents:            '[data-yai-tabs] [data-content] [data-tab]',
                 };
 
                 // Collect global stats
@@ -5955,13 +5958,11 @@ viewport.<span class="hljs-title function_">hook</span>(<span class="hljs-string
                 // Global counts (entire document)
                 for (const key in globalSelectors) {
                     const selector = globalSelectors[key];
-                    const getElements = document.querySelectorAll(`[data-yai-tabs] ${selector}`);
+                    const getElements = document.querySelectorAll(`${selector}`);
                     collect.elements[key] = getElements;
                     collect.count[key] = getElements.length;
                 }
 
-                // Per-root component analytics
-                const rootComponents = document.querySelectorAll('[data-yai-tabs][data-root]');
                 rootComponents.forEach((root, index) => {
                     const rootData = {
                         index,

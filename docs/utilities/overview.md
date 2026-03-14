@@ -6,7 +6,7 @@ Utilities that extend YaiTabs functionality. All examples below are working snip
 
 ## YaiInputUtils
 
-**[Live Demo →](https://yaijs.github.io/yai/docs/utilities/yai-input-utils.html)**
+**[YaiInputUtils Live Demo On JSFiddle →](https://yaijs.github.io/yai/docs/utilities/yai-input-utils.html)**
 
 Headless form enhancement utilities that provide validation, character counters, and keyboard shortcut helpers without imposing any UI styling.
 
@@ -73,6 +73,8 @@ Advanced viewport tracking utility with throttled resize/scroll events and visib
 - Automatic element state management
 
 **Example:**
+
+[YaiViewport Live Demo On JSFiddle →](https://jsfiddle.net/cmp5zynh/)
 
 ```html
 <script type="module">

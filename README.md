@@ -24,7 +24,7 @@ Build deeply nested, event-heavy interfaces with constant-time listener delegati
 
 ### CDN (No Build Required)
 
-[Live on JSFiddle](https://jsfiddle.net/ha40njk9/)
+[YaiTabs Live Demo On JSFiddle](https://jsfiddle.net/ha40njk9/)
 
 ```html
 <!DOCTYPE html>
@@ -107,7 +107,7 @@ class AppBus extends YEH {
 
 - **YaiInputUtils** – Headless form utilities with validation, counters, and keyboard shortcuts ([Demo →](https://yaijs.github.io/yai/docs/utilities/yai-input-utils.html))
 - **YaiTabsSwipe** – Circular navigation, nested ascend/descend, axis locking
-- **YaiViewport** – Observer-free visibility tracking with throttled events
+- **YaiViewport** – Observer-free visibility tracking with throttled events ([Demo →](https://jsfiddle.net/cmp5zynh/))
 - **YaiAutoSwitch** – Automated tab cycling for demos (bundle-full only)
 
 ---
@@ -161,8 +161,8 @@ tabs
 
 ## Live Examples
 
-- **[Interactive Demo](https://yaijs.github.io/yai/tabs/Example.html)** – 50+ nested components with all features
-- **[Performance Benchmark](https://yaijs.github.io/yai/tabs/Benchmark.html)** – Stress test with 400+ nesting levels
+- **[YaiTabs Page Demo](https://yaijs.github.io/yai/tabs/Example.html)** – 50+ nested components with all features
+- **[Performance Benchmark](https://yaijs.github.io/yai/tabs/Benchmark.html)** – Stress test with 400+ nesting levels through recursive injected AJAX
 - **[YaiInputUtils Demo](https://yaijs.github.io/yai/docs/utilities/yai-input-utils.html)** – Headless input tools
 - **[JSFiddle](https://jsfiddle.net/tqku5gzj/)**
 – Quick start playground, Challenge: Copy the component and paste it into `data-tab="1"` or `data-tab="2"`. And repeat the step in each pasted component. But set your expectations first, what's your first thought? And share your final conclusion.
