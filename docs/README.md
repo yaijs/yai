@@ -20,6 +20,7 @@ Complete documentation for YaiJS - Advanced web components with YEH (Yai Event H
 ### YaiWorker
 
 - **[YaiWorker Overview](https://yaijs.github.io/yai/docs/worker/)** - Ultra-lightweight WebWorker manager
+- **[Live Demo](https://yaijs.github.io/yai/worker/Example.html)** - Self-calibrating progress bar
 
 ### YEH (Yai Event Hub)
 

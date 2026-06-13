@@ -170,7 +170,8 @@ Place `/assets/yai-worker-bridge.js` in your public folder. Detection is automat
 
 ## 🧪 Live Demo
 
-[DOM-to-WebWorker Event Bridge](https://jsfiddle.net/j1u4rzno/) — Type to trigger prime number computation off the main thread.
+[DOM-to-WebWorker Event Bridge on JSFiddle](https://jsfiddle.net/j1u4rzno/) — Type to trigger prime number computation off the main thread.
+[YaiWorker Demo](https://yaijs.github.io/yai/worker/Example.html) - Self-calibrating progress bar
 
 ---
 

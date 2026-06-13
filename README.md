@@ -164,6 +164,7 @@ tabs
 
 - **[YaiTabs Page Demo](https://yaijs.github.io/yai/tabs/Example.html)** – 50+ nested components with all features
 - **[Performance Benchmark](https://yaijs.github.io/yai/tabs/Benchmark.html)** – Stress test with 400+ nesting levels through recursive injected AJAX
+- **[YaiWorker Demo](https://yaijs.github.io/yai/worker/Example.html)** - Self-calibrating progress bar
 - **[YaiInputUtils Demo](https://yaijs.github.io/yai/docs/utilities/yai-input-utils.html)** – Headless input tools
 - **[JSFiddle](https://jsfiddle.net/tqku5gzj/)**
 – Quick start playground, Challenge: Copy the component and paste it into `data-tab="1"` or `data-tab="2"`. And repeat the step in each pasted component. But set your expectations first, what's your first thought? And share your final conclusion.

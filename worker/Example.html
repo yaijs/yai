@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YaiWorker Demo — Self-Calibrating Progress Bar</title>
+    <meta name="description" content="YaiWorker Demo — Self-calibrating progress bar with real-time ETA">
     <style>
         :root {
             scrollbar-gutter: stable;
@@ -25,7 +26,7 @@
         .card {
             background: white;
             border-radius: 1rem;
-            margin: 0;
+            margin: 0 0 1.5rem;
             padding: 2rem;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         }
@@ -41,7 +42,6 @@
 
         .subtitle {
             color: #666;
-            margin-bottom: 2rem;
             border-left: 3px solid #667eea;
             padding-left: 1rem;
         }
@@ -216,6 +216,13 @@
         }
 
         .click-arena {
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 0.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.05s;
             user-select: none;
         }
 
@@ -232,6 +239,41 @@
             font-weight: bold;
             color: #ff9800;
             z-index: 1000;
+        }
+
+        .counter-cards {
+            margin-top: 0.75rem;
+            display: flex;
+            gap: 1.2rem;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .counter-card .int-var {
+            background: rgba(0,0,0,0.1);
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-family: monospace;
+            font-weight: bold;
+        }
+
+        .counter-card .var-type {
+            margin-left: 0.2rem;
+            font-size: 0.75rem;
+            color: #666;
+        }
+
+        .button-panel {
+            margin: 1rem 0;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .button-panel button {
+            flex: 1;
+            padding: 0.5rem;
+            color: #fff;
         }
 
         .how-to-run {
@@ -313,116 +355,108 @@
     <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAYNJREFUOI2lkz9S20AYxX+7ttOgGDOjQKMZmMEt8lapdQQdISlInRJTcQ5ofAPgBOgG2citMrEnNBpnAgFBgdBuCs8a2TEMjF+1/97b7739VhwWllUgV2I/J1Cu0THWaDc31uhyjc6rBEqLahQmmQzTnlubDNPe46/furSoFwVKiypG2RzZ4ebycrsYZQmS6DmBuBhlycNtsQ6wuafO3YYbP9wW67nWF0A8J2Aln/JUnzqyH6q+EE+HhCD2Q9UH+LAXfi8luoIDAHF4b49zrfcB3r33/nZ2u1+FYfB/XFOLAA3MYDJMe1tKnTRNZT4CtINg3Nzw48cKWmIZHVoNOlc/sjNXKYCsPBn5oeo3fT9qwtGfof7myqujgoNc6wtH3lLqBMMXUevEOE/1aT24WQ6SmU2ATaU+O5tioZXjq5/ZYHZLqARAnmrrMtrY7cYYkrlXqOHM2+lG7SAYL1poB8HY2+lGdfKyCoBpKzcKk0ghFUxbufJk1LrjevHsUoG3YOXf+A/28K0/S+gHCgAAAABJRU5ErkJggg==">
 </head>
 <body>
-    <div class="card">
+    <header class="card">
         <h1><a href="./Example.html">🚀 YaiWorker Demo</a></h1>
-
         <div class="subtitle">
             Self-calibrating progress bar with real-time ETA |
             <span class="inline-code">1B iterations</span> of heavy math
         </div>
+    </header>
 
-        <div class="control-group">
-            <label for="iterations">Iterations (100k - 1B):</label>
-            <div class="flexed">
-                <input type="number" id="iterations" value="25000000" min="100000" max="1000000000" step="100000">
-                <span id="iterations-readable">0</span>
-            </div>
-        </div>
+    <main role="main">
+        <div class="card">
 
-        <button id="startBtn">▶ Start Heavy Computation</button>
-
-        <div class="progress-container" style="display: none;" id="progressContainer">
-            <div class="progress-bar-wrapper">
-                <div class="progress-bar" id="progressBar">0%</div>
-            </div>
-
-            <div class="stats">
-                <div class="stat">
-                    <div class="stat-label">Progress</div>
-                    <div class="stat-value" id="percent">0%</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-label">ETA</div>
-                    <div class="stat-value" id="eta">—</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-label">Speed</div>
-                    <div class="stat-value" id="speed">—</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-label">Elapsed</div>
-                    <div class="stat-value" id="elapsed">0s</div>
+            <div class="control-group">
+                <label for="iterations">Iterations (100k - 1B):</label>
+                <div class="flexed">
+                    <input type="number" id="iterations" value="25000000" min="100000" max="1000000000" step="100000">
+                    <span id="iterations-readable">0</span>
                 </div>
             </div>
-        </div>
 
-        <div class="click-arena"
-            style="margin: 1.5rem 0; padding: 1rem; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); border-radius: 0.5rem; text-align: center; cursor: pointer; transition: transform 0.05s;">
+            <button id="startBtn">▶ Start Heavy Computation</button>
+
+            <div class="progress-container" style="display: none;" id="progressContainer">
+                <div class="progress-bar-wrapper">
+                    <div class="progress-bar" id="progressBar">0%</div>
+                </div>
+
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-label">Progress</div>
+                        <div class="stat-value" id="percent">0%</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">ETA</div>
+                        <div class="stat-value" id="eta">—</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">Speed</div>
+                        <div class="stat-value" id="speed">—</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">Elapsed</div>
+                        <div class="stat-value" id="elapsed">0s</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="click-arena">
                 <div style="font-size: 3rem; margin-bottom: 0.5rem;">🎮</div>
                 <div style="font-weight: bold; margin-bottom: 0.5rem;">Click Arena — Test UI Responsiveness</div>
-                <div style="font-size: 0.875rem; color: #666;">Click anywhere here while the worker is running → counter goes up!
-            </div>
-            <div style="margin-top: 0.75rem; display: flex; gap: 1.2rem; justify-content: center; align-items: center;">
-                <div class="counter-card">
-                    <span
-                        style="background: rgba(0,0,0,0.1); padding: 0.25rem 0.75rem; border-radius: 1rem; font-family: monospace; font-weight: bold;"
-                        id="clickCounter">0</span>
-                    <span style="margin-left: 0.2rem; font-size: 0.75rem; color: #666;">clicks</span>
-                </div>
-                <div class="counter-card">
-                    <span
-                        style="background: rgba(0,0,0,0.1); padding: 0.25rem 0.75rem; border-radius: 1rem; font-family: monospace; font-weight: bold;"
-                        id="colorCounter">0</span>
-                    <span style="margin-left: 0.2rem; font-size: 0.75rem; color: #666;">Colors</span>
-                </div>
-                <div class="counter-card">
-                    <span
-                        style="background: rgba(0,0,0,0.1); padding: 0.25rem 0.75rem; border-radius: 1rem; font-family: monospace; font-weight: bold;"
-                        id="domCounter">0</span>
-                    <span style="margin-left: 0.2rem; font-size: 0.75rem; color: #666;">DOM Nodes</span>
+                <div style="font-size: 0.875rem; color: #666;">Click anywhere here while the worker is running → counter goes up!</div>
+                <div class="counter-cards">
+                    <div class="counter-card">
+                        <span id="clickCounter" class="int-var">0</span> <span class="var-type">clicks</span>
+                    </div>
+                    <div class="counter-card">
+                        <span id="colorCounter" class="int-var">0</span> <span class="var-type">Colors</span>
+                    </div>
+                    <div class="counter-card">
+                        <span id="domCounter" class="int-var">0</span> <span class="var-type">DOM Nodes</span>
+                    </div>
                 </div>
             </div>
+
+            <div class="button-panel">
+                <button id="testAlertBtn" style="background: #ff9800;">🔔 Test Alert</button>
+                <button id="testColorBtn" style="background: #2196f3;">🎨 Random Color</button>
+                <button id="testDomBtn" style="background: #4caf50;">📝 Add DOM Node</button>
+                <button id="cancelWorkerBtn" style="background: #f44336; display: none;">⛔ Cancel Worker</button>
+            </div>
+
+            <div id="result" style="display: none;"></div>
+
+            <div class="log" id="log">
+                <div class="log-entry info">💡 Ready — click "Start Heavy Computation"</div>
+            </div>
         </div>
 
-        <div class="button-panel" style="margin: 1rem 0; display: flex; gap: 0.5rem; flex-wrap: wrap;">
-            <button id="testAlertBtn" style="background: #ff9800; flex: 1; padding: 0.5rem;">🔔 Test Alert</button>
-            <button id="testColorBtn" style="background: #2196f3; flex: 1; padding: 0.5rem;">🎨 Random Color</button>
-            <button id="testDomBtn" style="background: #4caf50; flex: 1; padding: 0.5rem;">📝 Add DOM Node</button>
-            <button id="cancelWorkerBtn" style="background: #f44336; flex: 1; padding: 0.5rem; display: none;">⛔ Cancel Worker</button>
+        <div class="card how-to-run hidden">
+            <h2>Run the Demo</h2>
+            <pre>cd ~/bin/yaijs/yai</pre>
+            <pre>npx http-server -p 8000<hr>npx serve -l 8000<hr>php -S localhost:8000</pre>
+            <p>Call: <a href="http://localhost:8000/worker/Example.html">YaiWorker Demo</a></p>
         </div>
-
-        <div id="result" style="display: none;"></div>
-
-        <div class="log" id="log">
-            <div class="log-entry info">💡 Ready — click "Start Heavy Computation"</div>
-        </div>
-    </div>
-
-    <div class="card how-to-run hidden">
-        <h2>Run the Demo</h2>
-        <pre>npx http-server -p 8000<hr>npx serve -l 8000<hr>php -S localhost:8000</pre>
-        <p>Call: <a href="http://localhost:8000/worker/index.html">YaiWorker Demo</a></p>
-    </div>
+    </main>
 
     <footer>
         <a href="https://yaijs.github.io/yai/docs/worker">YaiWorker DOCs</a>
     </footer>
 
-    <script>
+    <script type="module">
         if (!location.protocol.startsWith("http")) {
             const getHelp = document.querySelector('.card.how-to-run');
             if (getHelp) getHelp.classList.remove('hidden');
         }
-    </script>
 
-    <script type="module">
         // Automatically determine if we are running locally or on production Pages/CDN
         const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || !location.hostname;
 
         // Dynamically point to local source code OR your absolute published CDN path
         const workerModulePath = isLocal
             ? '../worker/yai-worker.js'
-            : 'https://cdn.jsdelivr.net/npm/@yaijs/core@1.1.7/worker/yai-worker.js';
+            : 'https://cdn.jsdelivr.net/npm/@yaijs/core@1.1.8/worker/yai-worker.min.js';
 
         const {default: YaiWorker} = await import(workerModulePath);
 
@@ -644,9 +678,9 @@
          */
 
         // Click Arena — Test UI Responsiveness
-        let clickCount = 0;
-        let colorCount = 0;
-        let domCount = 0;
+        let clickCount = 0,
+            colorCount = 0,
+            domCount = 0;
         const clickCounter = document.getElementById('clickCounter');
         const colorCounter = document.getElementById('colorCounter');
         const domCounter = document.getElementById('domCounter');
