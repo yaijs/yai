@@ -155,6 +155,7 @@ tabs
 - **[Documentation Hub](https://yaijs.github.io/yai/docs/)** – Complete framework documentation
 - **[YaiTabs Guide](https://yaijs.github.io/yai/docs/components/tabs.html)** – Component reference with examples
 - **[Utilities Overview](https://yaijs.github.io/yai/docs/utilities/overview.html)** – YaiTabsSwipe, YaiViewport utilities
+- **[YaiWorker Overview](https://yaijs.github.io/yai/docs/worker/)** - Ultra-lightweight WebWorker manager
 - **[YEH Event Hub](https://yaijs.github.io/yai/docs/yeh/)** – Event system foundation
 
 ---

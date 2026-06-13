@@ -25,7 +25,9 @@ export default defineConfig({
         'yeh/**/*.js',
         'yai-core.js',
         'tabs/**/*.js',
-        'utils/**/*.js'
+        'utils/**/*.js',
+        'worker/yai-worker.js',
+        'worker/internal/*.js'
       ],
       // Thresholds for CI
       lines: 70,

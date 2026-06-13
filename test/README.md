@@ -25,10 +25,11 @@ npm run test:coverage:ui
 
 ```
 test/
-├── setup.js           # Global test setup & utilities
-├── yeh.test.js        # YEH (Yai Event Hub) tests
-├── yai-core.test.js   # YaiCore foundation tests
-└── yai-tabs.test.js   # YaiTabs component tests
+├── setup.js              # Global test setup & utilities
+├── yeh.test.js           # YEH (Yai Event Hub) tests
+├── yai-core.test.js      # YaiCore foundation tests
+├── yai-tabs.test.js      # YaiTabs component tests
+└── yai-worker.test.js    # YaiWorker Web Worker manager tests
 ```
 
 ## Test Categories
@@ -62,6 +63,39 @@ test/
 - ✅ ARIA accessibility
 - ✅ Lazy component registration
 - ✅ Sibling branch cleanup
+
+### YaiWorker Tests (`yai-worker.test.js`)
+- ✅ SerializationGuard — forbidden globals detection, `this` binding, string tasks
+- ✅ TaskRegistry — register/resolve/remove by taskId, WeakRef memory safety
+- ✅ CSPDetector — Chrome Extension detection, CSP meta tag detection
+- ✅ WORKER_BRIDGE_SOURCE — exported string, bridge calls task with 3 args (inputData, taskId, sharedBuffer)
+- ✅ Constructor — option validation, task serialization, `workerUrl` bypass
+- ✅ `start()` — success/error resolution, already-running guard, terminated guard
+- ✅ `terminate()` — cleans up blob URL, rejects pending promise with `AbortError`
+- ✅ `static run()` — one-shot static wrapper, auto-terminates
+- ✅ Progress — `onProgress` callback fires, promise still resolves with final result
+- ✅ `targetElement` — dispatches `worker:success` / `worker:error` CustomEvents
+- ✅ `AbortSignal` — `terminate()` called when signal fires
+- ✅ Mode — `'transient'` auto-terminates, `'persistent'` keeps worker alive
+
+#### MockWorker
+
+`yai-worker.test.js` installs a `MockWorker` class as `global.Worker` before any tests run. The real `Worker` API is unavailable in happy-dom, so `MockWorker` simulates the full message-passing contract synchronously via microtasks.
+
+Key methods:
+
+| Method | Purpose |
+|--------|---------|
+| `mock.autoSucceed(payload)` | Wire handler: next `postMessage` call auto-responds success |
+| `mock.autoFail(message)` | Wire handler: next `postMessage` call auto-responds error |
+| `mock.triggerSuccess(payload)` | Directly fire success response (use after `start()` already sent the run message) |
+| `mock.triggerError(payload)` | Directly fire error response (same pattern) |
+| `mock.triggerThreadError(message)` | Fire an `onerror` event (simulates uncaught worker exception) |
+| `mock.sendProgress(payload)` | Immediately call `onmessage` with a progress envelope |
+| `MockWorker.last()` | Return the most recently constructed mock instance |
+| `MockWorker.succeedNext(payload)` | Static: wire success for the next constructed worker |
+| `MockWorker.failNext(message)` | Static: wire failure for the next constructed worker |
+| `MockWorker.reset()` | Clear all instances and pending handlers between tests |
 
 ## Test Utilities
 

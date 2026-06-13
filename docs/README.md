@@ -17,6 +17,10 @@ Complete documentation for YaiJS - Advanced web components with YEH (Yai Event H
 
 - **[Utilities Overview](https://yaijs.github.io/yai/docs/utilities/overview.html)** - YaiTabsSwipe, YaiViewport, YaiAutoSwitch with working examples
 
+### YaiWorker
+
+- **[YaiWorker Overview](https://yaijs.github.io/yai/docs/worker/)** - Ultra-lightweight WebWorker manager
+
 ### YEH (Yai Event Hub)
 
 - **[YEH Overview](https://yaijs.github.io/yai/docs/yeh/)** - Event system foundation

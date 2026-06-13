@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YaiWorker Demo — Self-Calibrating Progress Bar</title>
+    <style>
+        :root {
+            scrollbar-gutter: stable;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .card {
+            background: white;
+            border-radius: 1rem;
+            margin: 0;
+            padding: 2rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        hr {
+            opacity: .4;
+        }
+
+        h1 {
+            margin: 0 0 0.5rem 0;
+            color: #333;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 2rem;
+            border-left: 3px solid #667eea;
+            padding-left: 1rem;
+        }
+
+        .control-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #555;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+            width: 100%;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-1px);
+        }
+
+        button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .progress-container {
+            margin: 1.5rem 0;
+        }
+
+        .progress-bar-wrapper {
+            background: #f0f0f0;
+            border-radius: 1rem;
+            overflow: hidden;
+            height: 2rem;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 0.75rem;
+            color: white;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 0.5rem;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #888;
+        }
+
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .result {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: #e8f5e9;
+            border-left: 3px solid #4caf50;
+            border-radius: 0.5rem;
+            font-family: monospace;
+            word-break: break-all;
+        }
+
+        .error {
+            background: #ffebee;
+            border-left-color: #f44336;
+            color: #c62828;
+        }
+
+        .log {
+            margin-top: 1.5rem;
+            max-height: 330px;
+            overflow-y: auto;
+            background: #1e1e1e;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            font-family: monospace;
+            font-size: 0.75rem;
+        }
+
+        .log-entry {
+            color: #d4d4d4;
+            padding: 0.25rem 0;
+            border-bottom: 1px solid #333;
+        }
+
+        .log-entry:last-of-type {
+            border-bottom: 0 none;
+        }
+
+        .log-entry.info {
+            color: #4ec9b0;
+        }
+
+        .log-entry.progress {
+            color: #ce9178;
+        }
+
+        .log-entry.success {
+            color: #6a9955;
+        }
+
+        .log-entry.error {
+            color: #f48771;
+        }
+
+        .inline-code {
+            background: #f0f0f0;
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.25rem;
+            font-family: monospace;
+            font-size: 0.875rem;
+        }
+
+        .click-arena {
+            user-select: none;
+        }
+
+        .click-arena:active {
+            transform: scale(0.98);
+            transition: transform 0.05s;
+        }
+
+        .click-feedback {
+            position: fixed;
+            pointer-events: none;
+            animation: floatUp 0.8s ease-out forwards;
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #ff9800;
+            z-index: 1000;
+        }
+
+        .how-to-run {
+            margin-top: 2rem;
+            line-height: 1;
+        }
+
+        .how-to-run h2,
+        .how-to-run pre,
+        .how-to-run p {
+            margin: 0;
+        }
+
+        .how-to-run pre {
+            background: #222;
+            color: #eee;
+            margin: .5rem 0;
+            padding: .5rem;
+        }
+
+        .how-to-run a {
+            color: #6b6fd4;
+        }
+
+        .how-to-run.hidden {
+            display: none !important;
+        }
+
+        .control-group .flexed {
+            display: flex;
+            gap: .5rem;
+            align-items: center;
+        }
+
+        .control-group .flexed input {
+            width: 100%;
+        }
+
+        .control-group .flexed span {
+            font-size: 85%;
+            color: #666;
+            font-weight: 500;
+            white-space: nowrap;
+            background: #f0f2f5;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.25rem;
+            min-width: 90px;
+            text-align: center;
+        }
+
+        footer {
+            margin: 2rem 0 0;
+            text-align: center;
+            color: #eee;
+        }
+
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-50px) scale(1.5);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAYNJREFUOI2lkz9S20AYxX+7ttOgGDOjQKMZmMEt8lapdQQdISlInRJTcQ5ofAPgBOgG2citMrEnNBpnAgFBgdBuCs8a2TEMjF+1/97b7739VhwWllUgV2I/J1Cu0THWaDc31uhyjc6rBEqLahQmmQzTnlubDNPe46/furSoFwVKiypG2RzZ4ebycrsYZQmS6DmBuBhlycNtsQ6wuafO3YYbP9wW67nWF0A8J2Aln/JUnzqyH6q+EE+HhCD2Q9UH+LAXfi8luoIDAHF4b49zrfcB3r33/nZ2u1+FYfB/XFOLAA3MYDJMe1tKnTRNZT4CtINg3Nzw48cKWmIZHVoNOlc/sjNXKYCsPBn5oeo3fT9qwtGfof7myqujgoNc6wtH3lLqBMMXUevEOE/1aT24WQ6SmU2ATaU+O5tioZXjq5/ZYHZLqARAnmrrMtrY7cYYkrlXqOHM2+lG7SAYL1poB8HY2+lGdfKyCoBpKzcKk0ghFUxbufJk1LrjevHsUoG3YOXf+A/28K0/S+gHCgAAAABJRU5ErkJggg==">
+</head>
+<body>
+    <div class="card">
+        <h1><a href="./Example.html">🚀 YaiWorker Demo</a></h1>
+
+        <div class="subtitle">
+            Self-calibrating progress bar with real-time ETA |
+            <span class="inline-code">1B iterations</span> of heavy math
+        </div>
+
+        <div class="control-group">
+            <label for="iterations">Iterations (100k - 1B):</label>
+            <div class="flexed">
+                <input type="number" id="iterations" value="25000000" min="100000" max="1000000000" step="100000">
+                <span id="iterations-readable">0</span>
+            </div>
+        </div>
+
+        <button id="startBtn">▶ Start Heavy Computation</button>
+
+        <div class="progress-container" style="display: none;" id="progressContainer">
+            <div class="progress-bar-wrapper">
+                <div class="progress-bar" id="progressBar">0%</div>
+            </div>
+
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-label">Progress</div>
+                    <div class="stat-value" id="percent">0%</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">ETA</div>
+                    <div class="stat-value" id="eta">—</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Speed</div>
+                    <div class="stat-value" id="speed">—</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Elapsed</div>
+                    <div class="stat-value" id="elapsed">0s</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="click-arena"
+            style="margin: 1.5rem 0; padding: 1rem; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); border-radius: 0.5rem; text-align: center; cursor: pointer; transition: transform 0.05s;">
+                <div style="font-size: 3rem; margin-bottom: 0.5rem;">🎮</div>
+                <div style="font-weight: bold; margin-bottom: 0.5rem;">Click Arena — Test UI Responsiveness</div>
+                <div style="font-size: 0.875rem; color: #666;">Click anywhere here while the worker is running → counter goes up!
+            </div>
+            <div style="margin-top: 0.75rem; display: flex; gap: 1.2rem; justify-content: center; align-items: center;">
+                <div class="counter-card">
+                    <span
+                        style="background: rgba(0,0,0,0.1); padding: 0.25rem 0.75rem; border-radius: 1rem; font-family: monospace; font-weight: bold;"
+                        id="clickCounter">0</span>
+                    <span style="margin-left: 0.2rem; font-size: 0.75rem; color: #666;">clicks</span>
+                </div>
+                <div class="counter-card">
+                    <span
+                        style="background: rgba(0,0,0,0.1); padding: 0.25rem 0.75rem; border-radius: 1rem; font-family: monospace; font-weight: bold;"
+                        id="colorCounter">0</span>
+                    <span style="margin-left: 0.2rem; font-size: 0.75rem; color: #666;">Colors</span>
+                </div>
+                <div class="counter-card">
+                    <span
+                        style="background: rgba(0,0,0,0.1); padding: 0.25rem 0.75rem; border-radius: 1rem; font-family: monospace; font-weight: bold;"
+                        id="domCounter">0</span>
+                    <span style="margin-left: 0.2rem; font-size: 0.75rem; color: #666;">DOM Nodes</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="button-panel" style="margin: 1rem 0; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button id="testAlertBtn" style="background: #ff9800; flex: 1; padding: 0.5rem;">🔔 Test Alert</button>
+            <button id="testColorBtn" style="background: #2196f3; flex: 1; padding: 0.5rem;">🎨 Random Color</button>
+            <button id="testDomBtn" style="background: #4caf50; flex: 1; padding: 0.5rem;">📝 Add DOM Node</button>
+            <button id="cancelWorkerBtn" style="background: #f44336; flex: 1; padding: 0.5rem; display: none;">⛔ Cancel Worker</button>
+        </div>
+
+        <div id="result" style="display: none;"></div>
+
+        <div class="log" id="log">
+            <div class="log-entry info">💡 Ready — click "Start Heavy Computation"</div>
+        </div>
+    </div>
+
+    <div class="card how-to-run hidden">
+        <h2>Run the Demo</h2>
+        <pre>npx http-server -p 8000<hr>npx serve -l 8000<hr>php -S localhost:8000</pre>
+        <p>Call: <a href="http://localhost:8000/worker/index.html">YaiWorker Demo</a></p>
+    </div>
+
+    <footer>
+        <a href="https://yaijs.github.io/yai/docs/worker">YaiWorker DOCs</a>
+    </footer>
+
+    <script>
+        if (!location.protocol.startsWith("http")) {
+            const getHelp = document.querySelector('.card.how-to-run');
+            if (getHelp) getHelp.classList.remove('hidden');
+        }
+    </script>
+
+    <script type="module">
+        // Automatically determine if we are running locally or on production Pages/CDN
+        const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || !location.hostname;
+
+        // Dynamically point to local source code OR your absolute published CDN path
+        const workerModulePath = isLocal
+            ? '../worker/yai-worker.js'
+            : 'https://cdn.jsdelivr.net/npm/@yaijs/core@1.1.7/worker/yai-worker.js';
+
+        const {default: YaiWorker} = await import(workerModulePath);
+
+        console.log("YaiWorker loaded from:", workerModulePath);
+
+        const startBtn = document.getElementById('startBtn');
+        const iterationsInput = document.getElementById('iterations');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const percentSpan = document.getElementById('percent');
+        const etaSpan = document.getElementById('eta');
+        const speedSpan = document.getElementById('speed');
+        const elapsedSpan = document.getElementById('elapsed');
+        const resultDiv = document.getElementById('result');
+        const logDiv = document.getElementById('log');
+        const readableSpan = document.getElementById('iterations-readable');
+
+        let currentWorker = null;
+
+        function addLog(message, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logDiv.appendChild(entry);
+            entry.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+        }
+
+        function formatTime(ms) {
+            if (ms < 1000) return `${ms.toFixed(0)}ms`;
+            const seconds = ms / 1000;
+            if (seconds < 60) return `${seconds.toFixed(1)}s`;
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return `${minutes}m ${remainingSeconds.toFixed(0)}s`;
+        }
+
+        function formatSpeed(msPerIter) {
+            if (msPerIter < 0.001) return `${(msPerIter * 1000000).toFixed(0)} μs/iter`;
+            if (msPerIter < 1) return `${(msPerIter * 1000).toFixed(0)} μs/iter`;
+            return `${msPerIter.toFixed(2)} ms/iter`;
+        }
+
+        async function runHeavyTask() {
+            const iterations = parseInt(iterationsInput.value, 10);
+
+            if (isNaN(iterations) || iterations < 100000) {
+                addLog('❌ Please enter at least 100,000 iterations', 'error');
+                return;
+            }
+
+            startBtn.disabled = true;
+            iterationsInput.disabled = true;
+            progressContainer.style.display = 'block';
+            resultDiv.style.display = 'none';
+            resultDiv.className = '';
+            showCancelButton(true);  // ← Show cancel button
+
+            // Reset click counter when starting new task
+            clickCount = 0;
+            colorCount = 0;
+            domCount = 0;
+            clickCounter.textContent = '0';
+            colorCounter.textContent = '0';
+            domCounter.textContent = '0';
+
+            // Reset UI
+            progressBar.style.width = '0%';
+            progressBar.textContent = '0%';
+            percentSpan.textContent = '0%';
+            etaSpan.textContent = '—';
+            speedSpan.textContent = '—';
+            elapsedSpan.textContent = '0s';
+
+            addLog(`🚀 Starting heavy task with ${iterations.toLocaleString()} iterations...`, 'info');
+
+            try {
+                const task = createHeavyTask();
+
+                currentWorker = new YaiWorker(task, {
+                    targetElement: document.body,
+                    onProgress: (progress) => {
+                        const percent = progress.percent;
+                        progressBar.style.width = `${percent}%`;
+                        progressBar.textContent = `${percent.toFixed(1)}%`;
+                        percentSpan.textContent = `${percent.toFixed(1)}%`;
+
+                        if (progress.etaMs > 0 && progress.etaMs < Infinity) {
+                            etaSpan.textContent = formatTime(progress.etaMs);
+                        }
+
+                        if (progress.avgMsPerIteration) {
+                            speedSpan.textContent = formatSpeed(progress.avgMsPerIteration);
+                        }
+
+                        elapsedSpan.textContent = formatTime(progress.elapsedMs);
+
+                        const percentInt = Math.floor(percent);
+                        if (percentInt % 10 === 0 && percentInt !== 0) {
+                            const lastLogPercent = window._lastLoggedPercent;
+                            if (lastLogPercent !== percentInt) {
+                                window._lastLoggedPercent = percentInt;
+                                const etaFormatted = progress.etaMs > 0 ? formatTime(progress.etaMs) : 'calculating...';
+                                addLog(`📊 ${percent.toFixed(1)}% complete — ETA: ${etaFormatted} — Speed: ${formatSpeed(progress.avgMsPerIteration)}`, 'progress');
+                            }
+                        }
+                    }
+                });
+
+                const result = await currentWorker.start({iterations: iterations});
+
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result';
+                resultDiv.innerHTML = `
+                    <strong>✅ Computation Complete!</strong><br>
+                    <strong>Result:</strong> ${result.finalResult.toFixed(4)}<br>
+                    <strong>Total time:</strong> ${formatTime(result.totalTimeMs)}<br>
+                    <strong>Iterations processed:</strong> ${result.totalIterations.toLocaleString()}<br>
+                    <strong>💪 You clicked ${clickCount} times during computation!</strong><br>
+                    <strong>💪 You switched colors ${colorCount} times during computation!</strong><br>
+                    <strong>💪 You created ${domCount} DOM nodes during computation!</strong>
+                `;
+
+                addLog(`✅ Task completed in ${formatTime(result.totalTimeMs)}! You clicked ${clickCount} times during computation.`, 'success');
+            } catch (error) {
+                console.error('Worker error:', error);
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                <strong>❌ Error</strong><br>
+                ${error.message}
+            `;
+                addLog(`❌ Error: ${error.message}`, 'error');
+            } finally {
+                startBtn.disabled = false;
+                iterationsInput.disabled = false;
+                showCancelButton(false);
+                currentWorker = null;
+                window._lastLoggedPercent = null;
+            }
+        }
+
+        // Heavy task with self-calibrating progress — iterations come from inputData
+        function createHeavyTask() {
+            return async (inputData, taskId) => {
+                const iterations = inputData.iterations; // ← Get from inputData
+                const startTime = performance.now();
+                let result = 0;
+                let smoothAvgMs = null;
+                let lastLogTime = Date.now();
+
+                for (let i = 1; i <= iterations; i++) {
+                    // Heavy computation: sqrt + sin + cos + random-ish operations
+                    result += Math.sqrt(i) * Math.sin(i) * Math.cos(i * 0.001);
+                    result += Math.log(i + 1) * Math.sin(i * 0.01);
+
+                    // Add occasional "slow" operations to test ETA adaptation
+                    if (i % 500000 === 0) {
+                        // Simulate a heavy batch (GC or complex calc)
+                        let acc = 0;
+                        for (let j = 0; j < 10000; j++) acc += Math.sqrt(j);
+                        result += acc * 0.000001;
+                    }
+
+                    // Send progress every 1000 iterations
+                    if (i % 1000 === 0 || i === iterations) {
+                        const elapsedMs = performance.now() - startTime;
+                        const currentAvgMs = elapsedMs / i;
+
+                        // Exponential smoothing for ETA
+                        if (smoothAvgMs === null) {
+                            smoothAvgMs = currentAvgMs;
+                        } else {
+                            smoothAvgMs = (currentAvgMs * 0.3) + (smoothAvgMs * 0.7);
+                        }
+
+                        const remainingMs = smoothAvgMs * (iterations - i);
+                        const percent = (i / iterations) * 100;
+
+                        self.postMessage({
+                            taskId: taskId,
+                            status: 'progress',
+                            payload: {
+                                percent: percent,
+                                iterationsComplete: i,
+                                totalIterations: iterations,
+                                elapsedMs: elapsedMs,
+                                etaMs: remainingMs,
+                                avgMsPerIteration: smoothAvgMs,
+                                resultSoFar: result
+                            }
+                        });
+
+                        // Prevent log spam by throttling to every 2 seconds
+                        if (Date.now() - lastLogTime > 2000 || i === iterations) {
+                            lastLogTime = Date.now();
+                        }
+                    }
+                }
+
+                return {
+                    finalResult: result,
+                    totalIterations: iterations,
+                    totalTimeMs: performance.now() - startTime
+                };
+            };
+        }
+
+        startBtn.addEventListener('click', runHeavyTask);
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (currentWorker) {
+                currentWorker.terminate();
+            }
+        });
+
+        /**
+         * Demo page internals
+         */
+
+        // Click Arena — Test UI Responsiveness
+        let clickCount = 0;
+        let colorCount = 0;
+        let domCount = 0;
+        const clickCounter = document.getElementById('clickCounter');
+        const colorCounter = document.getElementById('colorCounter');
+        const domCounter = document.getElementById('domCounter');
+
+        const clickArena = document.querySelector('.click-arena');
+        const testAlertBtn = document.getElementById('testAlertBtn');
+        const testColorBtn = document.getElementById('testColorBtn');
+        const testDomBtn = document.getElementById('testDomBtn');
+        const cancelWorkerBtn = document.getElementById('cancelWorkerBtn');
+
+        // Track if worker is running to show cancel button
+        let isWorkerRunning = false;
+
+        function showCancelButton(show) {
+            isWorkerRunning = show;
+            cancelWorkerBtn.style.display = show ? 'block' : 'none';
+        }
+
+        // Click arena counter
+        if (clickArena) {
+            clickArena.addEventListener('click', (e) => {
+                // Don't count clicks on buttons inside
+                if (e.target.closest('button')) return;
+
+                clickCount++;
+                clickCounter.textContent = clickCount;
+
+                // Visual feedback
+                const feedback = document.createElement('div');
+                feedback.className = 'click-feedback';
+                feedback.textContent = '+1';
+                feedback.style.left = `${e.clientX - 15}px`;
+                feedback.style.top = `${e.clientY - 20}px`;
+                document.body.appendChild(feedback);
+                setTimeout(() => feedback.remove(), 800);
+            });
+        }
+
+        // Test Alert — shows main thread is responsive
+        testAlertBtn.addEventListener('click', () => {
+            alert('🎉 Main thread is responsive! The worker is still running in the background.');
+
+            clickCount++;
+            clickCounter.textContent = clickCount;
+        });
+
+        // Test Random Color — changes page color instantly
+        testColorBtn.addEventListener('click', () => {
+            const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8'];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            testColorBtn.style.background = randomColor;
+
+            colorCount++;
+            colorCounter.textContent = colorCount;
+        });
+
+        // Test DOM manipulation — adds nodes while worker runs
+        let nodeCount = 0;
+        testDomBtn.addEventListener('click', () => {
+            nodeCount++;
+            const tempNode = document.createElement('div');
+            tempNode.className = 'temp-node';
+            tempNode.textContent = `📌 Temp node #${nodeCount} (will auto-clear)`;
+            tempNode.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: #4caf50;
+                color: white;
+                padding: 0.5rem 1rem;
+                border-radius: 0.5rem;
+                font-size: 0.75rem;
+                z-index: 1000;
+                animation: slideIn 0.3s ease;
+            `;
+            document.body.appendChild(tempNode);
+
+            domCount++;
+            domCounter.textContent = domCount;
+
+            setTimeout(() => tempNode.remove(), 2000);
+        });
+
+        // Cancel worker
+        cancelWorkerBtn.addEventListener('click', () => {
+            if (currentWorker) {
+                currentWorker.terminate();
+                currentWorker = null;
+                addLog('⛔ Worker cancelled by user', 'error');
+                showCancelButton(false);
+                startBtn.disabled = false;
+                iterationsInput.disabled = false;
+                progressContainer.style.display = 'none';
+
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = '<strong>⛔ Cancelled</strong><br>Worker was terminated by user.';
+            }
+        });
+
+        /**
+         * Readable iteration count
+         *
+         * Converts raw numbers into ultra-clean, readable text strings.
+         * Handles exact thresholds smoothly (e.g., 1.5 Million, 250 Thousand)
+         */
+        function formatReadableIterations(value) {
+            const num = parseInt(value, 10);
+            if (isNaN(num) || num <= 0) return '0'; if (num >= 1000000000) {
+                return (num / 1000000000).toFixed(1).replace('.0', '') + ' Billion';
+            }
+            if (num >= 1000000) {
+                return (num / 1000000).toFixed(1).replace('.0', '') + ' Million';
+            }
+            if (num >= 1000) {
+                return (num / 1000).toFixed(1).replace('.0', '') + ' Thousand';
+            }
+            return num.toString();
+        }
+
+        if (iterationsInput.value) {
+            readableSpan.textContent = formatReadableIterations(iterationsInput.value);
+        }
+
+        // Bind event listener to catch typing, clicking arrows, or step-changes instantly
+        iterationsInput.addEventListener('input', (e) => {
+            readableSpan.textContent = formatReadableIterations(e.target.value);
+        });
+    </script>
+</body>
+</html>
