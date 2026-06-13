@@ -14,8 +14,9 @@ export function validateTask(fn, {allowThis = false} = {}) {
         );
     }
 
-    // Detect `this.` usage in non-arrow functions only, unless allowThis is set
-    const isArrow = /^(\s*async\s*)?\s*(\w+|\([^)]*\))\s*=>/.test(src);
+    // Non-arrow functions start with `function` or `async function`.
+    // Checking the negative is unambiguous and avoids backtracking on long inputs.
+    const isArrow = !/^(\s*async\s+)?function[\s(]/.test(src);
     if (!allowThis && !isArrow && /\bthis\b/.test(src)) {
         throw new Error(
             `[YaiWorker] Task uses "this" which loses binding when serialized. ` +

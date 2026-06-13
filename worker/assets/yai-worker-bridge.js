@@ -13,12 +13,14 @@
         if (msg.type === 'init') {
             if (msg.importScripts && msg.importScripts.length) {
                 importScripts.apply(self, msg.importScripts);
+                // Pick up _task if a trusted imported script exposed it as a global.
+                if (typeof _task === 'function') {
+                    _taskFn = _task;
+                }
             }
-            try {
-                _taskFn = (new Function('return (' + msg.code + ')'))();
-            } catch (err) {
-                _taskFn = null;
-            }
+            // Dynamic compilation via new Function intentionally removed.
+            // Use the workerUrl option to supply pre-compiled worker logic
+            // in CSP-restricted environments instead.
             return;
         }
 

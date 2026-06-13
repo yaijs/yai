@@ -2,9 +2,6 @@
 
 **Ultra-lightweight WebWorker manager** (<1KB gzipped) with zero build tools, native ES modules, and seamless YEH event integration.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![npm version](https://img.shields.io/npm/v/@yaijs/worker.svg)](https://www.npmjs.com/package/@yaijs/worker)
-
 ---
 
 ## 🚀 Quick Start
