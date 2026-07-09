@@ -20,6 +20,19 @@ Build deeply nested, event-heavy interfaces with constant-time listener delegati
 
 ---
 
+## Real World Usage
+
+YaiJS isn't just for small components—it powers full-scale production applications.
+
+The privacy-focused browser dashboard and new-tab extension **Speedtab** completely migrated its core architectural foundation from VueJS to YaiJS[cite: 3, 4]. Instead of relying on a heavy runtime framework, Speedtab utilizes YaiJS and its integrated event hub (YEH) to orchestrate its entire reactive application shell.
+
+By switching to a stateless, attribute-driven architecture, Speedtab handles modular layouts, global navigation routing, and infinite nested notes on a minimal event footprint—drastically reducing extension weight, slashing boot times, and eliminating memory overhead[cite: 3, 4, 5].
+
+- **Extension Store:** [Speedtab on Chrome Web Store](https://chromewebstore.google.com/detail/speedtab/adkjbdepojalajhfkoobiedddlnoamff)
+- **GitHub Repository:** [5ElementsDesign/Speedtab](https://github.com/5ElementsDesign/Speedtab)
+
+---
+
 ## Quick Start
 
 ### CDN (No Build Required)
@@ -166,8 +179,7 @@ tabs
 - **[Performance Benchmark](https://yaijs.github.io/yai/tabs/Benchmark.html)** – Stress test with 400+ nesting levels through recursive injected AJAX
 - **[YaiWorker Demo](https://yaijs.github.io/yai/worker/Example.html)** - Self-calibrating progress bar
 - **[YaiInputUtils Demo](https://yaijs.github.io/yai/docs/utilities/yai-input-utils.html)** – Headless input tools
-- **[JSFiddle](https://jsfiddle.net/tqku5gzj/)**
-– Quick start playground, Challenge: Copy the component and paste it into `data-tab="1"` or `data-tab="2"`. And repeat the step in each pasted component. But set your expectations first, what's your first thought? And share your final conclusion.
+- **[JSFiddle](https://jsfiddle.net/tqku5gzj/)** – Quick start playground
 
 ---
 
@@ -185,11 +197,10 @@ tabs
 - **[NPM Package](https://npmjs.org/package/@yaijs/core)** – Install via npm
 - **[Report Issues](https://github.com/yaijs/yai/issues)** – Bug reports and feature requests
 - **[GitHub Pages](https://yaijs.github.io/yai/)** – Live documentation site
+- __Real World Usage__
+  - **[Speedtab on Chrome Web Store](https://chromewebstore.google.com/detail/speedtab/adkjbdepojalajhfkoobiedddlnoamff)**
+  - **[Speedtab Github Repo](https://github.com/5ElementsDesign/Speedtab)**
 
 ## Author
 
 - **Engin Ypsilon**
-
----
-
-**License:** MIT

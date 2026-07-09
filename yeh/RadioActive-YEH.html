@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="Engin Ypsilon" data-pattern>
+  <meta name="author" content="Sunny DeepSeek" data-demo>
+  <title>RadioActive YEH - Reactivity on steroids</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f5f7fa;
+    }
+    .container {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #2d3748;
+      margin-top: 0;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 15px;
+    }
+    .demo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin: 20px 0;
+    }
+    .demo-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 20px;
+      background: #f7fafc;
+    }
+    .demo-card h3 {
+      margin-top: 0;
+      color: #4a5568;
+    }
+    button {
+      background: #4299e1;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #3182ce;
+    }
+    button.danger {
+      background: #fc8181;
+    }
+    button.danger:hover {
+      background: #f56565;
+    }
+    .output {
+      background: #edf2f7;
+      border-radius: 6px;
+      padding: 12px;
+      margin: 10px 0;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      min-height: 40px;
+      border-left: 3px solid #4299e1;
+    }
+    .badge {
+      display: inline-block;
+      background: #48bb78;
+      color: white;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    input, select {
+      padding: 8px 12px;
+      border: 1px solid #cbd5e0;
+      border-radius: 6px;
+      font-size: 14px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .log-area {
+      background: #1a202c;
+      color: #68d391;
+      padding: 15px;
+      border-radius: 6px;
+      margin-top: 20px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .log-entry {
+      padding: 4px 0;
+      border-bottom: 1px solid #2d3748;
+    }
+    .log-entry .time {
+      color: #718096;
+      margin-right: 10px;
+    }
+    .flex {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    pre {
+      border: 1px solid #bbb;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>☢️ RadioActive YEH</h1>
+  <p>Controlled Chain Reactions = Reactivity on steroids</p>
+  <pre id="radio-active-code"></pre>
+  <script>
+  document.getElementById('radio-active-code').innerHTML = `
+  // React
+  const [value, setValue] = useState('')
+  useEffect(() => {
+    // 15 lines of setup
+  }, [value])
+
+  /**
+   * @mode RadioActive - Max Radiation Enabled
+   */
+
+  // YaiJS + RadioActive
+  <input data-input="handleUpdate" />
+  // That's it. We're done. 🎯
+  `.replace(/[&"'<>]/g, (i) => ({"&": "&amp;", '"': "&quot;", "'": "&#039;", "<": "&lt;", ">": "&gt;"}[i]))
+  </script>
+
+  <div class="demo-grid">
+    <!-- Demo 1: Trigger Change Event -->
+    <div class="demo-card">
+      <h3>🔄 Trigger Change</h3>
+      <p>Click to trigger a change event on a hidden input</p>
+      <div class="flex">
+        <button
+          data-click="triggerRadioActive"
+          data-config='{
+            "triggerEvent": "change",
+            "toValue": "RadioActive Value",
+            "handler": "handleChange",
+            "detail": { "source": "demo1" }
+          }'
+        >
+          Trigger Change
+        </button>
+        <span class="badge">change</span>
+      </div>
+      <div class="output" id="changeOutput">Waiting for change event...</div>
+    </div>
+
+    <!-- Demo 2: Trigger Input Event -->
+    <div class="demo-card">
+      <h3>⌨️ Trigger Input</h3>
+      <p>Click to trigger an input event</p>
+      <div class="flex">
+        <button
+          data-click="triggerRadioActive"
+          data-config='{
+            "triggerEvent": "input",
+            "toValue": "Typed via RadioActive",
+            "handler": "handleInput",
+            "detail": { "source": "demo2" }
+          }'
+        >
+          Trigger Input
+        </button>
+        <span class="badge">input</span>
+      </div>
+      <div class="output" id="inputOutput">Waiting for input event...</div>
+    </div>
+
+    <!-- Demo 3: Trigger Click Event -->
+    <div class="demo-card">
+      <h3>🖱️ Trigger Click</h3>
+      <p>Click to trigger a click event on a hidden element</p>
+      <div class="flex">
+        <button
+          data-click="triggerRadioActive"
+          data-config='{
+            "triggerEvent": "click",
+            "handler": "handleClick",
+            "detail": { "source": "demo3" }
+          }'
+        >
+          Trigger Click
+        </button>
+        <span class="badge">click</span>
+      </div>
+      <div class="output" id="clickOutput">Waiting for click event...</div>
+    </div>
+
+    <!-- Demo 4: Trigger with Real Input -->
+    <div class="demo-card">
+      <h3>📝 Real Input Demo</h3>
+      <p>Type in input or use button to trigger programmatically</p>
+      <input
+        type="text"
+        id="realInput"
+        placeholder="Type something..."
+        data-input="handleRealInput"
+        data-change="handleRealInput"
+      >
+      <div class="flex" style="margin-top: 10px;">
+        <button
+          data-click="triggerRadioActive"
+          data-config='{
+            "triggerEvent": "change",
+            "toValue": "Programmatic Change!",
+            "handler": "handleRealInput"
+          }'
+          style="flex:1"
+        >
+          Trigger Change on Input
+        </button>
+        <button
+          data-click="triggerRadioActive"
+          data-config='{
+            "triggerEvent": "input",
+            "toValue": "Programmatic Input!",
+            "handler": "handleRealInput"
+          }'
+          style="flex:1; background: #48bb78;"
+        >
+          Trigger Input on Input
+        </button>
+      </div>
+      <div class="output" id="realInputOutput">Waiting for events...</div>
+    </div>
+  </div>
+
+  <!-- Nested Element Test -->
+  <div class="demo-card" style="margin-top: 20px;">
+    <h3>🎯 Nested SVG Test</h3>
+    <p>Click the SVG inside the button - YEH's <code>findActionableTarget</code> handles it</p>
+    <button
+      data-click="handleNestedClick"
+      style="width: 100%; padding: 15px; display: flex; align-items: center; justify-content: center; gap: 10px;"
+    >
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+        <circle cx="12" cy="12" r="10" />
+        <path d="M12 8v8M8 12h8" />
+      </svg>
+      <span>Click me (SVG inside)</span>
+    </button>
+    <div class="output" id="nestedOutput">Waiting for click...</div>
+  </div>
+
+  <!-- Event Log -->
+  <div style="margin-top: 20px;">
+    <h3>📋 Event Log</h3>
+    <div class="log-area" id="logArea">
+      <div class="log-entry"><span class="time">[System]</span> RadioActive + YEH initialized</div>
+    </div>
+  </div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "@yaijs/core": "https://cdn.jsdelivr.net/npm/@yaijs/core@1.1.8/yeh/yeh.js"
+  }
+}
+</script>
+
+<script type="module">
+import { YEH } from '@yaijs/core';
+
+// ============================================================
+// 1. RadioActive Tool (Optimized for YEH)
+// ============================================================
+
+/**
+ * RadioActive YEH - Optimized for YEH event delegation
+ *
+ * Works with YEH's body-level delegation by triggering events
+ * that bubble up naturally through the DOM
+ */
+function radioActive(target, triggerEvent, toValue, handler, detail = {}) {
+  // Special handling for click events - use native click
+  if (triggerEvent === 'click') {
+    target.click();
+    return target;
+  }
+
+  // For keyboard events
+  if (triggerEvent.startsWith('key')) {
+    const event = new KeyboardEvent(triggerEvent, {
+      bubbles: true,
+      cancelable: true,
+      key: toValue || 'Enter',
+      code: toValue || 'Enter',
+      ...detail
+    });
+    target.dispatchEvent(event);
+    return target;
+  }
+
+  // For form submit
+  if (triggerEvent === 'submit') {
+    const form = target.closest('form') || target;
+    const event = new Event('submit', { bubbles: true, cancelable: true });
+    form.dispatchEvent(event);
+    return form;
+  }
+
+  // Create hidden input for change/input events
+  const triggerEl = document.createElement('input');
+  triggerEl.type = 'hidden';
+  triggerEl.name = 'radioactive-yai';
+  triggerEl.value = toValue || '';
+
+  // Store metadata for YEH's handler resolution
+  if (handler) {
+    triggerEl.dataset.handler = handler;
+  }
+
+  // Inject into target
+  target.append(triggerEl);
+
+  // Dispatch appropriate event from the element
+  let event;
+  if (triggerEvent === 'change' || triggerEvent === 'input') {
+    // These events bubble from the input
+    event = new Event(triggerEvent, { bubbles: true, cancelable: true });
+    triggerEl.dispatchEvent(event);
+
+    // For 'change' events, also trigger 'input' for better reactivity
+    if (triggerEvent === 'change') {
+      const inputEvent = new Event('input', { bubbles: true, cancelable: true });
+      triggerEl.dispatchEvent(inputEvent);
+    }
+  } else {
+    // Custom events
+    event = new CustomEvent(triggerEvent, {
+      bubbles: true,
+      cancelable: true,
+      detail: { ...detail, fromRadioActive: true }
+    });
+    triggerEl.dispatchEvent(event);
+  }
+
+  // Clean up after event loop tick
+  requestAnimationFrame(() => {
+    if (triggerEl.parentNode) {
+      triggerEl.remove();
+    }
+  });
+
+  return triggerEl;
+}
+
+// Interface to trigger from data-click
+function triggerRadioActive(target) {
+  let config;
+  try {
+    config = JSON.parse(target.dataset.config || '{}');
+  } catch (e) {
+    console.warn('RadioActive: Invalid config JSON', target.dataset.config);
+    return;
+  }
+
+  if (!config.triggerEvent) {
+    console.warn('RadioActive: No triggerEvent specified');
+    return;
+  }
+
+  // Find the target element - either the one with data-click or a specified target
+  let eventTarget = target;
+  if (config.target) {
+    const found = document.querySelector(config.target);
+    if (found) eventTarget = found;
+  }
+
+  radioActive(
+    eventTarget,
+    config.triggerEvent,
+    config.toValue,
+    config.handler,
+    config.detail || {}
+  );
+}
+
+// ============================================================
+// 2. Logging Helper
+// ============================================================
+
+const logArea = document.getElementById('logArea');
+
+function logEvent(eventType, detail = {}) {
+  const entry = document.createElement('div');
+  entry.className = 'log-entry';
+  const time = new Date().toLocaleTimeString();
+  const source = detail.source || 'unknown';
+  entry.innerHTML = `<span class="time">[${time}]</span> ${eventType} → ${source} ${detail.value ? `(value: "${detail.value}")` : ''}`;
+  logArea.appendChild(entry);
+  logArea.scrollTop = logArea.scrollHeight;
+}
+
+// ============================================================
+// 3. YEH Initialization
+// ============================================================
+
+const RESIZE_THROTTLE_MS = 200;
+const SCROLL_THROTTLE_MS = 100;
+
+// Helper to position dropdowns
+function positionPanel(el) {
+  if (!el || !el.getBoundingClientRect) return;
+  const rect = el.getBoundingClientRect();
+  // Simple positioning logic
+  if (rect.bottom > window.innerHeight - 100) {
+    el.style.top = 'auto';
+    el.style.bottom = '100%';
+  } else {
+    el.style.top = '100%';
+    el.style.bottom = 'auto';
+  }
+}
+
+const yeh = new YEH({
+  body: [
+    'click',
+    'keydown',
+    'submit',
+    'input',
+    'change',
+    'mouseover',
+    'mouseout',
+  ],
+  window: [
+    { type: 'resize', throttle: RESIZE_THROTTLE_MS },
+    { type: 'scroll', throttle: SCROLL_THROTTLE_MS },
+  ],
+}, {}, {
+  enableStats: false,
+  enableConfigValidation: false,
+  enableHandlerValidation: false,
+  methodsFirst: false,
+
+  // Enable auto target resolution for nested elements
+  autoTargetResolution: true,
+  actionableAttributes: [
+    'data-click',
+    'data-keydown',
+    'data-submit',
+    'data-input',
+    'data-change',
+    'data-mouseover',
+    'data-mouseout'
+  ],
+
+  methods: {
+    // ---------- Click Handlers ----------
+    handleClick(event, target) {
+      logEvent('click', { source: 'handleClick' });
+
+      // Check for data-click delegation
+      const clickable = target?.closest?.('[data-click]');
+      if (clickable?.dataset?.click) {
+        const methodName = clickable.dataset.click;
+
+        // Special handling for triggerRadioActive
+        if (methodName === 'triggerRadioActive') {
+          triggerRadioActive(clickable);
+          return;
+        }
+
+        // Execute other data-click methods
+        if (typeof this[methodName] === 'function') {
+          this[methodName](event, target, clickable);
+        }
+      }
+
+      // Update output
+      document.getElementById('clickOutput').textContent = `✅ Click detected! Target: ${target.tagName}${target.id ? ' #' + target.id : ''}`;
+    },
+
+    handleNestedClick(event, target) {
+      logEvent('click', { source: 'handleNestedClick' });
+      document.getElementById('nestedOutput').textContent = `✅ Nested click detected! Target: ${target.tagName}${target.id ? ' #' + target.id : ''}`;
+    },
+
+    // Keyboard - don't guess what was the key, set what you need - or so
+    handleKeydown(event, target) {
+      logEvent(event.type, {source: 'handleKeydown', value: event?.key || 'N/A'});
+    },
+
+    // ---------- Change Handlers ----------
+    handleChange(event, target) {
+      const value = target?.value || 'N/A';
+      logEvent('change', { source: 'handleChange', value });
+
+      document.getElementById('changeOutput').textContent = `✅ Change event! Value: "${value}"${event.detail?.source ? ` (source: ${event.detail.source})` : ''}`;
+
+      // Also update real input output if target is the real input
+      if (target?.id === 'realInput') {
+        document.getElementById('realInputOutput').textContent = `✅ Change on real input! Value: "${value}"`;
+      }
+    },
+
+    // ---------- Input Handlers ----------
+    handleInput(event, target) {
+      const value = target?.value || 'N/A';
+      logEvent('input', { source: 'handleInput', value });
+
+      document.getElementById('inputOutput').textContent = `✅ Input event! Value: "${value}"${event.detail?.source ? ` (source: ${event.detail.source})` : ''}`;
+
+      // Also update real input output if target is the real input
+      if (target?.id === 'realInput') {
+        document.getElementById('realInputOutput').textContent = `✅ Input on real input! Value: "${value}"`;
+      }
+    },
+
+    handleRealInput(event, target) {
+      const value = target?.value || 'N/A';
+      const eventType = event.type;
+      logEvent(eventType, { source: 'handleRealInput', value });
+
+      document.getElementById('realInputOutput').textContent = `✅ ${eventType} on real input! Value: "${value}"`;
+    },
+
+    // ---------- Window Events ----------
+    handleResize() {
+      logEvent('resize', { source: 'window' });
+      document.querySelectorAll('[data-dropdown][data-dropdown-open]').forEach(positionPanel);
+    },
+
+    handleScroll() {
+      // Throttled scroll handler
+      document.querySelectorAll('[data-dropdown][data-dropdown-open]').forEach(positionPanel);
+    },
+  }
+});
+
+// ============================================================
+// 4. Expose for debugging
+// ============================================================
+
+window.radioActive = radioActive;
+window.triggerRadioActive = triggerRadioActive;
+window.yeh = yeh;
+
+// Log ready
+logEvent('System', { source: 'RadioActive + YEH ready' });
+logEvent('System', { source: `YEH v${YEH.version || '1.0'}` });
+
+console.log('☢️ RadioActive + YEH initialized!');
+console.log('Available:', { radioActive, triggerRadioActive, yeh });
+
+// ============================================================
+// 5. Test: Trigger RadioActive from console
+// ============================================================
+
+// You can test from console:
+// radioActive(document.querySelector('#realInput'), 'change', 'Console Value!', 'handleRealInput');
+</script>
+</body>
+</html>
