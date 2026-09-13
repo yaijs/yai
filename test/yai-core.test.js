@@ -20,7 +20,7 @@ class MockYEH {
 global.YEH = MockYEH;
 
 // Import YaiCore
-const YaiCorePath = '../yai/yai-core.js';
+const YaiCorePath = '../yai-core.js';
 const YaiCore = (await import(YaiCorePath)).default || (await import(YaiCorePath)).YaiCore;
 
 describe('YaiCore', () => {
