@@ -19,6 +19,8 @@ export default class YaiWorker {
     #resolveCallback = null;
     #rejectCallback = null;
     #pendingPromise = null;
+    #abortSignal = null;
+    #abortHandler = null;
 
     /**
      * @param {Function|string} task
@@ -31,6 +33,7 @@ export default class YaiWorker {
      * @param {Function} [options.onProgress]
      * @param {AbortSignal} [options.abortSignal]
      * @param {boolean} [options.allowThis=false]
+     * @param {string} [options.workerUrl] Portable pre-compiled worker URL. Required for restricted CSP.
      */
     constructor(task, options = {}) {
         this.#task = task;
@@ -47,6 +50,7 @@ export default class YaiWorker {
             validateTask(task, {allowThis: this.#options.allowThis ?? false});
         }
         this.#setupWorker();
+        this.#bindAbortSignal();
     }
 
     /**
@@ -89,14 +93,7 @@ export default class YaiWorker {
         this.#worker.onmessage = (e) => this.#handleWorkerMessage(e);
         this.#worker.onerror = (e) => this.#handleWorkerError(e);
 
-        // 4. Wire external AbortSignal
-        if (this.#options.abortSignal) {
-            this.#options.abortSignal.addEventListener('abort', () => {
-                if (!this.#isTerminated) this.terminate();
-            }, {once: true});
-        }
-
-        // 5. Launch worker
+        // 4. Launch worker
         this.#worker.postMessage(
             {
                 type: 'run',
@@ -122,6 +119,8 @@ export default class YaiWorker {
             this.#workerUrl = null;
         }
 
+        this.#unbindAbortSignal();
+
         if (this.#rejectCallback) {
             this.#rejectCallback(new DOMException('Operation aborted', 'AbortError'));
         }
@@ -145,13 +144,10 @@ export default class YaiWorker {
         const taskStr = typeof this.#task === 'function' ? this.#task.toString() : this.#task;
 
         if (restricted) {
-            // CSP fallback: static asset path (works for BOTH transient and persistent modes)
-            this.#worker = new Worker('/assets/yai-worker-bridge.js');
-            this.#worker.postMessage({
-                type: 'init',
-                code: taskStr,
-                importScripts: this.#options.importScripts
-            });
+            throw new Error(
+                '[YaiWorker] Serialized function tasks require Blob workers and are unavailable in CSP-restricted environments. ' +
+                'Provide options.workerUrl for a portable pre-compiled worker.'
+            );
         } else {
             // Primary path: inline Blob
             const scripts = this.#options.importScripts
@@ -169,6 +165,33 @@ export default class YaiWorker {
             this.#workerUrl = URL.createObjectURL(blob);
             this.#worker = new Worker(this.#workerUrl);
         }
+    }
+
+    /**
+     * A persistent worker owns one external abort subscription for its entire lifetime.
+     * terminate() is the matching finalizer and removes it where supported.
+     */
+    #bindAbortSignal() {
+        const signal = this.#options.abortSignal;
+        if (!signal) return;
+
+        this.#abortSignal = signal;
+        this.#abortHandler = () => {
+            if (!this.#isTerminated) this.terminate();
+        };
+        signal.addEventListener('abort', this.#abortHandler, {once: true});
+
+        if (signal.aborted) {
+            this.#abortHandler();
+        }
+    }
+
+    #unbindAbortSignal() {
+        if (this.#abortSignal && this.#abortHandler) {
+            this.#abortSignal.removeEventListener?.('abort', this.#abortHandler);
+        }
+        this.#abortSignal = null;
+        this.#abortHandler = null;
     }
 
     #handleWorkerMessage(e) {

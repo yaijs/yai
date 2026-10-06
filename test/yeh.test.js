@@ -1,4 +1,4 @@
-import {afterEach, beforeEach, describe, expect, it} from 'vitest';
+import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 import {cleanupDOM, createMockContainer} from './setup.js';
 
 // Import YEH class - adjust path as needed
@@ -692,6 +692,99 @@ describe('YEH (Yai Event Hub)', () => {
       yeh.destroy();
 
       expect(abortCalled).toBe(true);
+    });
+
+    it('cancels a pending debounced event when the event is removed', () => {
+      vi.useFakeTimers();
+      const handler = vi.fn();
+      container.innerHTML = '<input class="search">';
+      const yeh = new YEH({
+        '.search': [{type: 'input', handler, debounce: 100, perElement: false}]
+      });
+
+      container.querySelector('.search').dispatchEvent(new Event('input', {bubbles: true}));
+      expect(yeh.debounceTimers.size).toBe(1);
+
+      yeh.removeEvent('.search', 'input');
+      vi.advanceTimersByTime(100);
+
+      expect(handler).not.toHaveBeenCalled();
+      expect(yeh.debounceTimers.size).toBe(0);
+      vi.useRealTimers();
+    });
+
+    it('cancels a pending debounced callback on destroy', () => {
+      vi.useFakeTimers();
+      const callback = vi.fn();
+      const yeh = new YEH();
+      yeh.debounce(callback, 100, 'destroy-test')();
+
+      yeh.destroy();
+      vi.advanceTimersByTime(100);
+
+      expect(callback).not.toHaveBeenCalled();
+      expect(yeh.debounceTimers.size).toBe(0);
+      vi.useRealTimers();
+    });
+  });
+
+  describe('Handler failure contract', () => {
+    const createEvent = (target) => ({
+      type: 'click',
+      target,
+      preventDefault: vi.fn(),
+      stopPropagation: vi.fn()
+    });
+
+    it('preserves handler errors while applying configured event cleanup', () => {
+      container.innerHTML = '<button class="action">Run</button>';
+      const after = vi.fn();
+      const failure = new Error('handler failed');
+      const yeh = new YEH({
+        '.action': [{type: 'click', handler: () => { throw failure; }, preventDefault: true}]
+      });
+      yeh.hook('afterHandleEvent', after);
+      const event = createEvent(container.querySelector('.action'));
+
+      expect(() => yeh.handleEvent(event)).toThrow(failure);
+      expect(after).not.toHaveBeenCalled();
+      expect(event.preventDefault).toHaveBeenCalledOnce();
+      expect(event.stopPropagation).toHaveBeenCalledOnce();
+    });
+
+    it('preserves before and after hook errors while applying event cleanup', () => {
+      container.innerHTML = '<button class="action">Run</button>';
+      const handler = vi.fn();
+      const yeh = new YEH({'.action': [{type: 'click', handler}]});
+      const event = createEvent(container.querySelector('.action'));
+      yeh.hook('beforeHandleEvent', () => { throw new Error('before failed'); });
+
+      expect(() => yeh.handleEvent(event)).toThrow('before failed');
+      expect(handler).not.toHaveBeenCalled();
+      expect(event.stopPropagation).toHaveBeenCalledOnce();
+
+      yeh.clearHooks('beforeHandleEvent');
+      yeh.hook('afterHandleEvent', () => { throw new Error('after failed'); });
+      const afterEvent = createEvent(container.querySelector('.action'));
+      expect(() => yeh.handleEvent(afterEvent)).toThrow('after failed');
+      expect(handler).toHaveBeenCalledOnce();
+      expect(afterEvent.stopPropagation).toHaveBeenCalledOnce();
+    });
+  });
+
+  describe('Statistics snapshots', () => {
+    it('does not expose mutable timer maps', () => {
+      const yeh = new YEH({}, {}, {enableStats: true});
+      yeh.debounce(() => {}, 100, 'stats-test')();
+      const stats = yeh.getStats();
+
+      stats.activeTimers.debounce = 0;
+      stats.eventTypes.mutated = 1;
+
+      expect(yeh.debounceTimers.size).toBe(1);
+      expect(yeh.getStats().activeTimers.debounce).toBe(1);
+      expect(yeh.getStats().eventTypes.mutated).toBeUndefined();
+      yeh.destroy();
     });
   });
 });

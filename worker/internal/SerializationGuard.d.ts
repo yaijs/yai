@@ -4,6 +4,7 @@
  * Validates task functions **before** a worker thread is spawned, converting
  * cryptic in-worker `ReferenceError`s into clear, actionable errors thrown
  * on the calling thread.
+ * This is early developer feedback, not a security sandbox and not a closure serializer.
  *
  * **Checks performed:**
  * - **Forbidden globals** — rejects tasks that reference `window`, `document`,

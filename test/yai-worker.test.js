@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { readFile } from 'node:fs/promises';
 import { cleanupDOM, createMockContainer } from './setup.js';
 
 // ─── MockWorker ──────────────────────────────────────────────────────────────
@@ -245,10 +246,12 @@ describe('YaiWorker', () => {
         MockWorker.reset();
         vi.clearAllMocks();
         cleanupDOM();
+        document.head.querySelectorAll('meta[http-equiv="Content-Security-Policy"]').forEach(meta => meta.remove());
     });
 
     afterEach(() => {
         MockWorker.last()?._terminated || MockWorker.last()?.terminate();
+        document.head.querySelectorAll('meta[http-equiv="Content-Security-Policy"]').forEach(meta => meta.remove());
     });
 
     // ── Constructor ────────────────────────────────────────────────────────
@@ -283,6 +286,15 @@ describe('YaiWorker', () => {
         it('accepts a serialized function string as the task', () => {
             expect(() => new YaiWorker('(data) => data + 1')).not.toThrow();
         });
+
+        it('fails synchronously for serialized tasks when CSP blocks Blob workers', () => {
+            const csp = document.createElement('meta');
+            csp.httpEquiv = 'Content-Security-Policy';
+            csp.content = "script-src 'self'";
+            document.head.appendChild(csp);
+
+            expect(() => new YaiWorker((x) => x)).toThrow(/options\.workerUrl/);
+        });
     });
 
     // ── workerUrl option ───────────────────────────────────────────────────
@@ -313,6 +325,19 @@ describe('YaiWorker', () => {
             MockWorker.last().autoSucceed('result-from-file');
             const result = await worker.start({ query: 'test' });
             expect(result).toBe('result-from-file');
+        });
+
+        it('starts a pre-compiled worker under CSP restrictions', async () => {
+            const csp = document.createElement('meta');
+            csp.httpEquiv = 'Content-Security-Policy';
+            csp.content = "script-src 'self'";
+            document.head.appendChild(csp);
+
+            const worker = new YaiWorker(null, {workerUrl: '/nested/assets/worker.js'});
+            MockWorker.last().autoSucceed('ok');
+
+            await expect(worker.start()).resolves.toBe('ok');
+            expect(MockWorker.last().url).toBe('/nested/assets/worker.js');
         });
     });
 
@@ -538,6 +563,24 @@ describe('YaiWorker', () => {
             await expect(pending).rejects.toMatchObject({ name: 'AbortError' });
             expect(MockWorker.last()._terminated).toBe(true);
         });
+
+        it('registers one abort listener for a persistent worker lifetime', async () => {
+            const controller = new AbortController();
+            const addSpy = vi.spyOn(controller.signal, 'addEventListener');
+            const removeSpy = vi.spyOn(controller.signal, 'removeEventListener');
+            const worker = new YaiWorker((x) => x, {mode: 'persistent', abortSignal: controller.signal});
+            const mock = MockWorker.last();
+
+            mock.autoSucceed('first');
+            await worker.start();
+            mock.autoSucceed('second');
+            await worker.start();
+
+            expect(addSpy).toHaveBeenCalledTimes(1);
+            controller.abort();
+            expect(mock._terminated).toBe(true);
+            expect(removeSpy).toHaveBeenCalledWith('abort', expect.any(Function));
+        });
     });
 
     // ── Mode ──────────────────────────────────────────────────────────────
@@ -572,5 +615,12 @@ describe('YaiWorker', () => {
             expect(r2).toBe(20);
             worker.terminate();
         });
+    });
+});
+
+describe('YaiWorker bridge artifacts', () => {
+    it('keeps the published bridge asset byte-identical to the injected bridge source', async () => {
+        const asset = await readFile(`${process.cwd()}/worker/assets/yai-worker-bridge.js`, 'utf8');
+        expect(asset.trim()).toBe(WORKER_BRIDGE_SOURCE.trim());
     });
 });

@@ -110,8 +110,9 @@ export interface YaiWorkerOptions {
    * - `{ taskId, status: 'error', payload: errorMessage }`
    * - `{ taskId, status: 'progress', payload: progressData }` (optional)
    *
-   * **Primary use case:** Chrome Extension MV3, where `new Function` is blocked by CSP
-   * and `blob:` workers are unavailable. Pass `chrome.runtime.getURL('your-worker.js')`.
+   * **Primary use case:** Chrome Extension MV3 or any CSP that blocks `blob:` workers.
+   * This is the portable, pre-compiled route: serialized function tasks are a Blob-worker
+   * convenience only, lose closures, and are not supported under restricted CSP.
    *
    * @example
    * ```typescript
@@ -272,6 +273,7 @@ export declare class YaiWorker {
    * @param options - Optional configuration overrides.
    * @throws {Error} When `task` references a forbidden main-thread global.
    * @throws {Error} When a non-arrow `task` uses `this` and `allowThis` is not set.
+   * @throws {Error} When a serialized task is used in a CSP-restricted environment without `workerUrl`.
    *
    * @example
    * ```typescript
@@ -312,7 +314,8 @@ export declare class YaiWorker {
    *
    * Immediately stops the underlying `Worker`, revokes the blob URL (if any),
    * rejects any pending promise with an `AbortError`, and unregisters the task
-   * from `TaskRegistry`. Safe to call multiple times — subsequent calls are no-ops.
+   * from `TaskRegistry`, and removes its one external AbortSignal subscription.
+   * Safe to call multiple times — subsequent calls are no-ops.
    *
    * @example
    * ```typescript

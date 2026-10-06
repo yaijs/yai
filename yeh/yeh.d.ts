@@ -10,10 +10,11 @@ interface AddEventListenerOptions {
 }
 
 /**
- * YEH (Yai Event Hub) - Advanced Multi-Handler Event System
+ * YEH (Yai Event Hub) - DOM event delegation with closest-match DOM resolution.
  *
- * The most advanced event delegation library for modern web applications.
- * Features the world's only multi-handler system with closest-match DOM resolution.
+ * Each DOM event is delivered to one closest registered handler, not broadcast to every
+ * matching handler. `stopPropagation` defaults to true; set it to false when parent DOM
+ * listeners must observe the event.
  *
  * ⚡ **Key Features:**
  * - Advanced multi-handler event delegation system
@@ -614,7 +615,8 @@ export declare class YEH {
      * Static debounce utility - Works without any instances
      * @param fn - Function to debounce
      * @param delay - Wait time after last call before executing
-     * @param key - Unique identifier (default: 'default')
+     * @param key - Unique identifier (default: 'default'). Calls using the default
+     *   key share one timer; pass a unique key for independent callers.
      */
     static debounce<T extends (...args: any[]) => void>(fn: T, delay: number, key?: string): T;
 

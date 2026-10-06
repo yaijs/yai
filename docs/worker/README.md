@@ -164,7 +164,9 @@ const result = await YaiWorker.run(
 
 ### CSP-Restricted Environments (Chrome Extensions)
 
-Place `/assets/yai-worker-bridge.js` in your public folder. Detection is automatic.
+Serialized tasks use Blob workers and are intentionally unavailable when CSP blocks
+`blob:` workers. Supply `workerUrl` with a pre-compiled worker that implements the
+documented `run`/result message protocol instead.
 
 ---
 
@@ -197,7 +199,7 @@ Place `/assets/yai-worker-bridge.js` in your public folder. Detection is automat
 - **Zero dependencies** (except optional YEH)
 - **Zero build tools** — pure ES modules + Classic Workers
 - **Memory safe** — WeakRef tracking + URL revocation
-- **CSP fallback** — auto-detects and switches to asset path
+- **CSP-safe contract** — serialized tasks fail early under restricted CSP; pre-compiled `workerUrl` remains portable
 
 ---
 

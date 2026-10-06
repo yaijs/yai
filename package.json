@@ -1,6 +1,6 @@
 {
   "name": "@yaijs/core",
-  "version": "1.1.9",
+  "version": "1.2.0",
   "description": "Advanced web components with YEH (Yai Event Hub) - the world's first DOM Event Scoping System. Everything you need in one package.",
   "type": "module",
   "main": "./dist/yai-bundle.js",
@@ -34,6 +34,10 @@
       "types": "./utils/yai-tabs-swipe.d.ts",
       "default": "./utils/yai-tabs-swipe.js"
     },
+    "./worker/yai-worker.js": {
+      "types": "./worker/yai-worker.d.ts",
+      "default": "./worker/yai-worker.js"
+    },
     "./autoswitch": {
       "types": "./utils/yai-auto-switch.d.ts",
       "default": "./utils/yai-auto-switch.js"
@@ -55,6 +59,10 @@
       "default": "./worker/yai-worker.js"
     },
     "./yeh": {
+      "types": "./yeh/yeh.d.ts",
+      "default": "./yeh/yeh.js"
+    },
+    "./yeh/yeh.js": {
       "types": "./yeh/yeh.d.ts",
       "default": "./yeh/yeh.js"
     }

@@ -1,8 +1,9 @@
 "use strict";
 
 /**
- * YEH (Yai Event Hub) - Lightweight multi-handler event system with closest-match DOM resolution.
- * Simplifies event management by centralizing listeners and providing advanced event delegation and routing options.
+ * YEH (Yai Event Hub) - Lightweight DOM event router with closest-match resolution.
+ * Each DOM event is delivered to one closest registered handler. By default it then stops
+ * propagation; use `stopPropagation: false` when surrounding DOM listeners must observe it.
  */
 class YEH {
     constructor(eventMapping = {}, aliases = {}, config = {}) {
@@ -104,40 +105,45 @@ class YEH {
                 // Find the actual closest matching element for this event target
                 const actualClosestElement = this.findClosest(event.target, closestHandler.selector);
 
-                // Execute beforeHandleEvent hook
-                this._executeHook('beforeHandleEvent', {
-                    event,
-                    target: resolvedTarget,
-                    element: actualClosestElement,
-                    eventType: event.type,
-                    handler: closestHandler.handler
-                });
+                let result;
 
-                // Call the actual handler
-                const result = handler.call(this, event, resolvedTarget, actualClosestElement);
+                try {
+                    // Before hooks may reject the operation by throwing.
+                    this._executeHook('beforeHandleEvent', {
+                        event,
+                        target: resolvedTarget,
+                        element: actualClosestElement,
+                        eventType: event.type,
+                        handler: closestHandler.handler
+                    });
 
-                // Execute afterHandleEvent hook
-                this._executeHook('afterHandleEvent', {
-                    event,
-                    target: resolvedTarget,
-                    element: actualClosestElement,
-                    eventType: event.type,
-                    handler: closestHandler.handler,
-                    result
-                });
+                    // Call the actual handler. Exceptions deliberately propagate to callers.
+                    result = handler.call(this, event, resolvedTarget, actualClosestElement);
 
-                // Auto preventDefault if configured (per-event config takes precedence)
-                const eventConfig = closestHandler.config;
-                const shouldPreventDefault = typeof eventConfig === 'object' && eventConfig.preventDefault !== undefined
-                    ? eventConfig.preventDefault
-                    : this.config.autoPreventDefault.includes(event.type);
+                    // After hooks observe successful handlers only; a failed handler has no result.
+                    this._executeHook('afterHandleEvent', {
+                        event,
+                        target: resolvedTarget,
+                        element: actualClosestElement,
+                        eventType: event.type,
+                        handler: closestHandler.handler,
+                        result
+                    });
+                } finally {
+                    // These event-level guarantees must not depend on user handler success.
+                    // The finally block preserves, rather than swallows, any original exception.
+                    const eventConfig = closestHandler.config;
+                    const shouldPreventDefault = typeof eventConfig === 'object' && eventConfig.preventDefault !== undefined
+                        ? eventConfig.preventDefault
+                        : this.config.autoPreventDefault.includes(event.type);
 
-                if (shouldPreventDefault) {
-                    event.preventDefault();
-                }
+                    if (shouldPreventDefault) {
+                        event.preventDefault();
+                    }
 
-                if (this.config.stopPropagation !== false) {
-                    event.stopPropagation();
+                    if (this.config.stopPropagation !== false) {
+                        event.stopPropagation();
+                    }
                 }
 
                 return;
@@ -961,7 +967,7 @@ class YEH {
         }
 
         if (this.debounceTimers.has(debounceKey)) {
-            clearTimeout(this.debounceTimers.get(debounceKey));
+            YEH._clearDebounceTimer(this.debounceTimers.get(debounceKey));
             this.debounceTimers.delete(debounceKey);
         }
     }
@@ -998,8 +1004,9 @@ class YEH {
         });
         this.throttleTimers.clear();
 
-        // Clean up debounce timers
-        this.debounceTimers.forEach((timerId) => clearTimeout(timerId));
+        // Debounce timer maps own their delayed callbacks. Clear their records so
+        // callbacks cannot outlive the DOM listener lifecycle that created them.
+        this.debounceTimers.forEach(YEH._clearDebounceTimer);
         this.debounceTimers.clear();
 
         return this;
@@ -1032,8 +1039,6 @@ class YEH {
             eventTypes,
             userHasInteracted: this.userHasInteracted,
             activeTimers: {
-                debounceMap: this.debounceTimers,
-                throttleMap: this.throttleTimers,
                 throttle: this.throttleTimers.size,
                 debounce: this.debounceTimers.size,
             },
@@ -1111,6 +1116,18 @@ class YEH {
     }
 
     /**
+     * Clear one debounce record created by _debounceImplementation.
+     * Timer maps own these records so delayed callbacks cannot outlive listener cleanup.
+     * @private
+     * @static
+     */
+    static _clearDebounceTimer(timerRecord) {
+        if (timerRecord?.timerId) {
+            clearTimeout(timerRecord.timerId);
+        }
+    }
+
+    /**
      * Shared throttle implementation used by both instance and static methods
      * Supports leading and trailing edge execution
      * @private
@@ -1152,6 +1169,10 @@ class YEH {
         };
     }
 
+    /**
+     * Static debouncers share the default key by design. Supply a unique key
+     * whenever independent callers must not cancel one another's trailing call.
+     */
     static debounce(fn, delay, key = 'default', options) {
         if (!YEH._staticDebounceTimers) {
             YEH._staticDebounceTimers = new Map();

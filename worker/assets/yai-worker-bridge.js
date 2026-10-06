@@ -1,52 +1,53 @@
-/**
- * Byte-identical to the string in `src/internal/worker-bridge-src.js::WORKER_BRIDGE_SOURCE`,
- * but as a raw Classic Script for CSP fallbacks.
- */
 (function () {
-    'use strict';
+  'use strict';
 
-    var _taskFn = typeof _task !== 'undefined' ? _task : null;
+  // In asset fallback mode, _task starts undefined and is built from 'init' message.
+  // In blob mode, _task is injected by the template before this script runs.
+  var _taskFn = typeof _task !== 'undefined' ? _task : null;
 
-    self.onmessage = async function (e) {
-        var msg = e.data;
+  self.onmessage = async function (e) {
+    var msg = e.data;
 
-        if (msg.type === 'init') {
-            if (msg.importScripts && msg.importScripts.length) {
-                importScripts.apply(self, msg.importScripts);
-                // Pick up _task if a trusted imported script exposed it as a global.
-                if (typeof _task === 'function') {
-                    _taskFn = _task;
-                }
-            }
-            // Dynamic compilation via new Function intentionally removed.
-            // Use the workerUrl option to supply pre-compiled worker logic
-            // in CSP-restricted environments instead.
-            return;
+    // ── INIT (CSP fallback path only) ──────────────────────────────────
+    if (msg.type === 'init') {
+      if (msg.importScripts && msg.importScripts.length) {
+        importScripts.apply(self, msg.importScripts);
+        // Pick up _task if a trusted imported script exposed it as a global.
+        if (typeof _task === 'function') {
+          _taskFn = _task;
         }
+      }
+      // Dynamic compilation via new Function intentionally removed.
+      // Use the workerUrl option to supply pre-compiled worker logic
+      // in CSP-restricted environments instead.
+      return; // Wait for 'run'
+    }
 
-        if (msg.type === 'run') {
-            if (typeof _taskFn !== 'function') {
-                self.postMessage({
-                    taskId: msg.taskId,
-                    status: 'error',
-                    payload: '[YaiWorker] Task function is not defined or failed to initialize.'
-                });
-                return;
-            }
-            try {
-                var result = await _taskFn(msg.inputData, msg.taskId, msg.sharedBuffer ?? null);
-                self.postMessage({
-                    taskId: msg.taskId,
-                    status: 'success',
-                    payload: result
-                });
-            } catch (err) {
-                self.postMessage({
-                    taskId: msg.taskId,
-                    status: 'error',
-                    payload: err.message || String(err)
-                });
-            }
-        }
-    };
+    // ── RUN ────────────────────────────────────────────────────────────
+    if (msg.type === 'run') {
+      if (typeof _taskFn !== 'function') {
+        self.postMessage({
+          taskId: msg.taskId,
+          status: 'error',
+          payload: '[YaiWorker] Task function is not defined or failed to initialize.'
+        });
+        return;
+      }
+      try {
+        // MICRO-ADJUSTMENT 2: Pass taskId as 2nd arg so user task can send progress updates
+        var result = await _taskFn(msg.inputData, msg.taskId, msg.sharedBuffer ?? null);
+        self.postMessage({
+          taskId: msg.taskId,
+          status: 'success',
+          payload: result
+        });
+      } catch (err) {
+        self.postMessage({
+          taskId: msg.taskId,
+          status: 'error',
+          payload: err.message || String(err)
+        });
+      }
+    }
+  };
 }());
