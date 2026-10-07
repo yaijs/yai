@@ -1,33 +1,31 @@
 (function () {
   'use strict';
 
-  // In asset fallback mode, _task starts undefined and is built from 'init' message.
-  // In blob mode, _task is injected by the template before this script runs.
   var _taskFn = typeof _task !== 'undefined' ? _task : null;
+  var _nativePostMessage = self.postMessage.bind(self);
+  var _activeTaskId = null;
+  var _activeRunId = null;
+
+  // User tasks keep their existing (inputData, taskId, sharedBuffer) signature.
+  // Add runId only to their YaiWorker progress envelopes while an operation is active.
+  self.postMessage = function (message, transferables) {
+    if (message && message.taskId === _activeTaskId && message.runId === undefined) {
+      message = Object.assign({}, message, {runId: _activeRunId});
+    }
+    _nativePostMessage(message, transferables);
+  };
 
   self.onmessage = async function (e) {
     var msg = e.data;
 
-    // ── INIT (CSP fallback path only) ──────────────────────────────────
-    if (msg.type === 'init') {
-      if (msg.importScripts && msg.importScripts.length) {
-        importScripts.apply(self, msg.importScripts);
-        // Pick up _task if a trusted imported script exposed it as a global.
-        if (typeof _task === 'function') {
-          _taskFn = _task;
-        }
-      }
-      // Dynamic compilation via new Function intentionally removed.
-      // Use the workerUrl option to supply pre-compiled worker logic
-      // in CSP-restricted environments instead.
-      return; // Wait for 'run'
-    }
-
     // ── RUN ────────────────────────────────────────────────────────────
     if (msg.type === 'run') {
+      _activeTaskId = msg.taskId;
+      _activeRunId = msg.runId;
       if (typeof _taskFn !== 'function') {
         self.postMessage({
           taskId: msg.taskId,
+          runId: msg.runId,
           status: 'error',
           payload: '[YaiWorker] Task function is not defined or failed to initialize.'
         });
@@ -38,12 +36,14 @@
         var result = await _taskFn(msg.inputData, msg.taskId, msg.sharedBuffer ?? null);
         self.postMessage({
           taskId: msg.taskId,
+          runId: msg.runId,
           status: 'success',
           payload: result
         });
       } catch (err) {
         self.postMessage({
           taskId: msg.taskId,
+          runId: msg.runId,
           status: 'error',
           payload: err.message || String(err)
         });

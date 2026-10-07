@@ -33,6 +33,10 @@ class YEH {
         this.eventListeners = new Map();
         this.elementHandlers = new WeakMap();
         this.eventHandlerMap = new Map();
+        this.registrationIndex = 0;
+        this.elementIds = new WeakMap();
+        this.nextElementId = 0;
+        this.handledNativeEvents = new WeakSet();
         this.throttleTimers = new Map();
         this.debounceTimers = new Map();
         this.userHasInteracted = false;
@@ -42,8 +46,12 @@ class YEH {
             'wheel', 'mousewheel', 'pointermove', 'pointerenter', 'pointerleave',
             'resize', 'orientationchange', 'load', 'beforeunload', 'unload'
         ];
-        this.config.callable.beforeHandleEvent = null;
-        this.config.callable.afterHandleEvent = null;
+        // Preserve constructor hooks while always giving the hook API arrays to append to.
+        this.config.callable = {
+            ...this.config.callable,
+            beforeHandleEvent: this.config.callable?.beforeHandleEvent || [],
+            afterHandleEvent: this.config.callable?.afterHandleEvent || []
+        };
         this.handlerPrefix = this.config.handlerPrefix !== undefined ? this.config.handlerPrefix : 'handle';
         this.abortController = this.config.abortController ? new AbortController() : null;
         this.autoTargetResolution = this.config.autoTargetResolution;
@@ -446,8 +454,10 @@ class YEH {
      * Create a wrapped handler with throttle/debounce if needed
      * @private
      */
-    createWrappedHandler(eventConfig, key, eventType) {
-        let handler = this;
+    createWrappedHandler(eventConfig, registration, eventType) {
+        // Native removeEventListener needs the exact listener identity. Even plain
+        // events get a dedicated wrapper so sibling registrations never share one.
+        let handler = {handleEvent: (event) => this.#handleNativeEvent(event, () => this.handleEvent(event))};
 
         if (typeof eventConfig === 'object') {
             // Warn if mixing debounce/throttle with preventDefault
@@ -460,6 +470,8 @@ class YEH {
             }
 
             if (eventConfig.throttle) {
+                const throttleKey = `${registration.id}-throttle`;
+                registration.timerKeys.add(throttleKey);
                 const options = {
                     leading: eventConfig.leading !== false,  // Default true
                     trailing: eventConfig.trailing !== false  // Default true
@@ -468,10 +480,12 @@ class YEH {
                     handleEvent: this.throttle(
                         (event) => this.handleEvent(event),
                         eventConfig.throttle,
-                        `${key}-${eventType}-throttle`,
+                        throttleKey,
                         options
                     )
                 };
+                const throttled = handler.handleEvent;
+                handler.handleEvent = (event) => this.#handleNativeEvent(event, () => throttled(event));
             } else if (eventConfig.debounce) {
                 const options = {
                     leading: eventConfig.leading === true,    // Default false
@@ -483,6 +497,7 @@ class YEH {
                 if (options.perElement) {
                     handler = {
                         handleEvent: (event) => {
+                            if (!this.#claimNativeEvent(event)) return;
                             // Generate unique key per element using WeakMap-style approach
                             let elementId = null;
                             const target = event.target;
@@ -493,9 +508,15 @@ class YEH {
                             }
 
                             // Fallback: use element itself as weak reference via Map
-                            const debounceKey = elementId
-                                ? `${key}-${eventType}-${elementId}-debounce`
-                                : `${key}-${eventType}-debounce`;
+                            if (!elementId && target && typeof target === 'object') {
+                                elementId = this.elementIds.get(target);
+                                if (!elementId) {
+                                    elementId = `element-${++this.nextElementId}`;
+                                    this.elementIds.set(target, elementId);
+                                }
+                            }
+                            const debounceKey = `${registration.id}-${elementId || 'target'}-debounce`;
+                            registration.timerKeys.add(debounceKey);
 
                             this.debounce(
                                 () => this.handleEvent(event),
@@ -511,15 +532,28 @@ class YEH {
                         handleEvent: this.debounce(
                             (event) => this.handleEvent(event),
                             eventConfig.debounce,
-                            `${key}-${eventType}-debounce`,
+                            `${registration.id}-debounce`,
                             options
                         )
                     };
+                    registration.timerKeys.add(`${registration.id}-debounce`);
+                    const debounced = handler.handleEvent;
+                    handler.handleEvent = (event) => this.#handleNativeEvent(event, () => debounced(event));
                 }
             }
         }
 
         return handler;
+    }
+
+    #claimNativeEvent(event) {
+        if (this.handledNativeEvents.has(event)) return false;
+        this.handledNativeEvents.add(event);
+        return true;
+    }
+
+    #handleNativeEvent(event, dispatch) {
+        if (this.#claimNativeEvent(event)) dispatch();
     }
 
     /**
@@ -784,22 +818,8 @@ class YEH {
      * Register a single event listener (internal helper)
      * @private
      */
-    registerEventListener(element, eventConfig, key, selector) {
+    registerEventListener(element, eventConfig, selector) {
         const eventType = typeof eventConfig === 'string' ? eventConfig : eventConfig.type;
-        const options = this.getEventOptions(eventConfig);
-        const handler = this.createWrappedHandler(eventConfig, key, eventType);
-
-        // Add the event listener
-        element.addEventListener(eventType, handler, options);
-
-        // Initialize tracking structures
-        if (!this.eventListeners.has(key)) {
-            this.eventListeners.set(key, { element, events: [] });
-        }
-
-        if (!this.elementHandlers.has(element)) {
-            this.elementHandlers.set(element, []);
-        }
 
         // Generate handler method name with configurable prefix
         const handlerMethodName = typeof eventConfig === 'object' && eventConfig.handler
@@ -811,23 +831,47 @@ class YEH {
         // Validate handler exists using enhanced resolution
         const validatedHandler = this.resolveHandler(handlerMethodName, eventType);
         const resolvedName = this.resolveMethodName(handlerMethodName, eventType);
-        this.validateResolvedHandler(handlerMethodName, eventType, validatedHandler, resolvedName);
+        if (!this.validateResolvedHandler(handlerMethodName, eventType, validatedHandler, resolvedName)) {
+            return false;
+        }
 
-        // Store tracking info
-        this.eventListeners.get(key).events.push({ type: eventType, handler, options });
-        this.elementHandlers.get(element).push({ type: eventType, handler, options });
+        const registration = {
+            id: `yeh-${++this.registrationIndex}`,
+            selector,
+            eventType,
+            element,
+            eventConfig,
+            handlerMethodName,
+            handler: null,
+            options: null,
+            timerKeys: new Set()
+        };
+        const options = this.getEventOptions(eventConfig);
+        const handler = this.createWrappedHandler(eventConfig, registration, eventType);
+        registration.handler = handler;
+        registration.options = options;
 
-        // Update handler mapping for multi-handler support
+        // Validate before attaching. If native attachment throws, no bookkeeping
+        // has been mutated, so failed registration cannot retain the element.
+        element.addEventListener(eventType, handler, options);
+
+        this.eventListeners.set(registration.id, registration);
+        const elementRegistrations = this.elementHandlers.get(element) || [];
+        elementRegistrations.push(registration);
+        this.elementHandlers.set(element, elementRegistrations);
+
         if (!this.eventHandlerMap.has(eventType)) {
             this.eventHandlerMap.set(eventType, []);
         }
 
         this.eventHandlerMap.get(eventType).push({
-            element: element,
+            element,
             handler: handlerMethodName,
-            selector: selector,
-            config: eventConfig
+            selector,
+            config: eventConfig,
+            registrationId: registration.id
         });
+        return true;
     }
 
     /**
@@ -840,13 +884,15 @@ class YEH {
 
         if (elements.length === 0) return;
 
-        elements.forEach((element, index) => {
-            const key = `${selector}_${eventType}_${index}`;
-
-            // Check if this exact combination is already registered
-            if (this.eventListeners.has(key)) return; // Already registered
-
-            this.registerEventListener(element, eventConfig, key, selector);
+        elements.forEach(element => {
+            const alreadyRegistered = Array.from(this.eventListeners.values()).some(registration =>
+                registration.element === element &&
+                registration.selector === selector &&
+                registration.eventType === eventType
+            );
+            if (!alreadyRegistered) {
+                this.registerEventListener(element, eventConfig, selector);
+            }
         });
     }
 
@@ -855,53 +901,32 @@ class YEH {
      * @private
      */
     unregisterSingleEvent(selector, eventType) {
-        const elements = this.getElements(selector);
-        if (elements.length === 0) return;
+        const registrations = Array.from(this.eventListeners.values()).filter(registration =>
+            registration.selector === selector && registration.eventType === eventType
+        );
+        registrations.forEach(registration => this.removeRegistration(registration));
+    }
 
-        elements.forEach((element, index) => {
-            const key = `${selector}_${eventType}_${index}`;
+    /**
+     * Registrations own native listeners and timer keys. Remove by stored identity
+     * so detached or reordered DOM elements cannot leave strong records behind.
+     * @private
+     */
+    removeRegistration(registration) {
+        registration.element.removeEventListener(registration.eventType, registration.handler, registration.options);
+        this.eventListeners.delete(registration.id);
 
-            // Remove from event listeners tracking
-            const listenerConfig = this.eventListeners.get(key);
-            if (listenerConfig) {
-                // Remove the actual event listener using the stored handler
-                const eventData = listenerConfig.events.find(e => e.type === eventType);
-                if (eventData) {
-                    element.removeEventListener(eventType, eventData.handler, eventData.options);
-                }
-            }
+        const elementRegistrations = this.elementHandlers.get(registration.element) || [];
+        const remaining = elementRegistrations.filter(item => item.id !== registration.id);
+        if (remaining.length) this.elementHandlers.set(registration.element, remaining);
+        else this.elementHandlers.delete(registration.element);
 
-            // Clean up tracking
-            this.eventListeners.delete(key);
+        const handlers = this.eventHandlerMap.get(registration.eventType) || [];
+        const remainingHandlers = handlers.filter(item => item.registrationId !== registration.id);
+        if (remainingHandlers.length) this.eventHandlerMap.set(registration.eventType, remainingHandlers);
+        else this.eventHandlerMap.delete(registration.eventType);
 
-            // Clean up WeakMap entries
-            const elementEvents = this.elementHandlers.get(element);
-            if (elementEvents) {
-                const filteredEvents = elementEvents.filter(e => e.type !== eventType);
-                if (filteredEvents.length === 0) {
-                    this.elementHandlers.delete(element);
-                } else {
-                    this.elementHandlers.set(element, filteredEvents);
-                }
-            }
-
-            // Clean up any timers for this event
-            this.cleanupEventTimers(key, eventType);
-        });
-
-        // Remove from handler mapping - clean all elements for this selector/eventType
-        const elementsToClean = this.getElements(selector);
-        elementsToClean.forEach(element => {
-            const handlers = this.eventHandlerMap.get(eventType);
-            if (handlers) {
-                const filteredHandlers = handlers.filter(h => h.element !== element);
-                if (filteredHandlers.length === 0) {
-                    this.eventHandlerMap.delete(eventType);
-                } else {
-                    this.eventHandlerMap.set(eventType, filteredHandlers);
-                }
-            }
-        });
+        this.cleanupEventTimers(registration);
     }
 
     getEventOptions(eventConfig) {
@@ -916,7 +941,8 @@ class YEH {
             return Object.keys(options).length > 0 ? options : false;
         }
 
-        const options = eventConfig.options || {};
+        const options = {...(eventConfig.options || {})};
+        if (options.signal === false) delete options.signal;
         // Apply passive if event type supports it, unless explicitly disabled with passive: false
         if (shouldBePassive && options.passive !== false) {
             options.passive = true;
@@ -939,12 +965,10 @@ class YEH {
             const elements = this.getElements(elementSelector);
             if (elements.length === 0) return;
 
-            elements.forEach((element, index) => {
+            elements.forEach((element) => {
                 events.forEach(eventConfig => {
-                    const eventType = typeof eventConfig === 'string' ? eventConfig : eventConfig.type;
-
                     // Use the shared registration logic
-                    this.registerEventListener(element, eventConfig, `${elementSelector}_${eventType}_${index}`, elementSelector);
+                    this.registerEventListener(element, eventConfig, elementSelector);
                 });
             });
         });
@@ -955,21 +979,21 @@ class YEH {
      * Clean up throttle/debounce timers for a specific event
      * @private
      */
-    cleanupEventTimers(key, eventType) {
-        const throttleKey = `${key}-${eventType}-throttle`;
-        const debounceKey = `${key}-${eventType}-debounce`;
+    cleanupEventTimers(registration) {
+        registration.timerKeys.forEach((key) => {
+            const throttleRecord = this.throttleTimers.get(key);
+            if (throttleRecord) {
+                YEH._clearThrottleTimer(throttleRecord);
+                this.throttleTimers.delete(key);
+            }
 
-        if (this.throttleTimers.has(throttleKey)) {
-            const timerData = this.throttleTimers.get(throttleKey);
-            if (timerData.timeout) clearTimeout(timerData.timeout);
-            if (timerData.trailingTimeout) clearTimeout(timerData.trailingTimeout);
-            this.throttleTimers.delete(throttleKey);
-        }
-
-        if (this.debounceTimers.has(debounceKey)) {
-            YEH._clearDebounceTimer(this.debounceTimers.get(debounceKey));
-            this.debounceTimers.delete(debounceKey);
-        }
+            const debounceRecord = this.debounceTimers.get(key);
+            if (debounceRecord) {
+                YEH._clearDebounceTimer(debounceRecord);
+                this.debounceTimers.delete(key);
+            }
+        });
+        registration.timerKeys.clear();
     }
 
     abort() {
@@ -981,27 +1005,18 @@ class YEH {
     }
 
     destroy() {
-        // Use AbortController for efficient cleanup if available
+        // AbortController removes signal-bound listeners, but explicit removal is
+        // still required for stable bookkeeping and non-signal listeners.
         if (this.abortController) {
-            this.abort(); // This automatically removes ALL DOM listeners with the signal
-        } else {
-            // Only do manual removal when AbortController is NOT enabled
-            this.eventListeners.forEach((config) => {
-                config.events.forEach(({ type, handler, options }) => {
-                    config.element.removeEventListener(type, handler, options);
-                });
-            });
+            this.abort();
         }
+        Array.from(this.eventListeners.values()).forEach(registration => this.removeRegistration(registration));
 
-        this.eventListeners.clear();
-        this.eventHandlerMap.clear();
+        this.elementHandlers = new WeakMap();
         this.distanceCache = new WeakMap();
 
         // Clean up throttle timers
-        this.throttleTimers.forEach((timerData) => {
-            if (timerData.timeout) clearTimeout(timerData.timeout);
-            if (timerData.trailingTimeout) clearTimeout(timerData.trailingTimeout);
-        });
+        this.throttleTimers.forEach(YEH._clearThrottleTimer);
         this.throttleTimers.clear();
 
         // Debounce timer maps own their delayed callbacks. Clear their records so
@@ -1020,12 +1035,11 @@ class YEH {
         if (!this.enableStats) return null;
 
         const configs = Array.from(this.eventListeners.values());
-        const events = configs.flatMap(config => config.events);
 
         // Count event types
         const eventTypes = {};
-        events.forEach(event => {
-            eventTypes[event.type] = (eventTypes[event.type] || 0) + 1;
+        configs.forEach(registration => {
+            eventTypes[registration.eventType] = (eventTypes[registration.eventType] || 0) + 1;
         });
 
         // Count unique elements
@@ -1097,21 +1111,23 @@ class YEH {
                 clearTimeout(timerData.timerId);
             }
 
-            // Leading edge: execute immediately on first call
-            if (leading && !hadTimer) {
-                fn.apply(this, args);
-            }
-
-            // Set new timer for trailing edge
-            const timerId = setTimeout(() => {
+            const timerRecord = {timerId: null, args};
+            timers.set(key, timerRecord);
+            // Set the record before calling user code so an exception cannot strand the key.
+            timerRecord.timerId = setTimeout(() => {
+                if (timers.get(key) !== timerRecord) return;
                 // Trailing edge: execute with latest arguments (unless leading-only)
-                if (trailing && (!leading || hadTimer)) {
-                    fn.apply(this, args);
+                try {
+                    if (trailing && (!leading || hadTimer)) {
+                        fn.apply(this, args);
+                    }
+                } finally {
+                    if (timers.get(key) === timerRecord) timers.delete(key);
                 }
-                timers.delete(key);
             }, delay);
 
-            timers.set(key, { timerId, args });
+            // Leading edge: execute after its cleanup record has been installed.
+            if (leading && !hadTimer) fn.apply(this, args);
         };
     }
 
@@ -1128,8 +1144,9 @@ class YEH {
     }
 
     /**
-     * Shared throttle implementation used by both instance and static methods
-     * Supports leading and trailing edge execution
+     * Shared throttle implementation used by both instance and static methods.
+     * One delay window owns at most one trailing call; a later window cannot run
+     * a callback queued by an earlier one.
      * @private
      * @static
      */
@@ -1137,36 +1154,41 @@ class YEH {
         const { leading = true, trailing = true } = options;
 
         return function(...args) {
-            const timerData = timers.get(key);
+            let timerRecord = timers.get(key);
 
-            if (!timerData || !timerData.timeout) {
-                // Leading edge: execute immediately if enabled
-                if (leading) {
-                    fn.apply(this, args);
-                }
-
-                timers.set(key, {
-                    timeout: setTimeout(() => { timers.delete(key) }, delay),
-                    lastArgs: args
-                });
-            } else {
-                // Update arguments for trailing edge
-                timerData.lastArgs = args;
-
-                // Clear existing trailing timeout and set new one if trailing is enabled
-                if (trailing) {
-                    if (timerData.trailingTimeout) {
-                        clearTimeout(timerData.trailingTimeout);
+            if (!timerRecord) {
+                timerRecord = {
+                    timerId: null,
+                    lastArgs: leading ? null : args,
+                    lastThis: leading ? null : this
+                };
+                timers.set(key, timerRecord);
+                timerRecord.timerId = setTimeout(() => {
+                    // A cleaned-up/replaced record must never invoke a stale callback.
+                    if (timers.get(key) !== timerRecord) return;
+                    try {
+                        if (trailing && timerRecord.lastArgs) {
+                            fn.apply(timerRecord.lastThis, timerRecord.lastArgs);
+                        }
+                    } finally {
+                        if (timers.get(key) === timerRecord) timers.delete(key);
                     }
+                }, delay);
+                if (leading) fn.apply(this, args);
+                return;
+            }
 
-                    timerData.trailingTimeout = setTimeout(() => {
-                        // Trailing edge: execute with latest arguments
-                        fn.apply(this, timerData.lastArgs);
-                        timers.delete(key);
-                    }, delay);
-                }
+            // Calls inside this window replace the one optional trailing callback.
+            if (trailing) {
+                timerRecord.lastArgs = args;
+                timerRecord.lastThis = this;
             }
         };
+    }
+
+    /** @private */
+    static _clearThrottleTimer(timerRecord) {
+        if (timerRecord?.timerId) clearTimeout(timerRecord.timerId);
     }
 
     /**

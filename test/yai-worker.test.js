@@ -12,8 +12,14 @@ const mockInstances = [];
 
 class MockWorker {
     static _nextHandler = null;
+    static _constructorError = null;
 
     constructor(url) {
+        if (MockWorker._constructorError) {
+            const error = MockWorker._constructorError;
+            MockWorker._constructorError = null;
+            throw error;
+        }
         this.url = url;
         this.onmessage = null;
         this.onerror = null;
@@ -24,6 +30,11 @@ class MockWorker {
     }
 
     postMessage(data) {
+        if (this._throwOnPostMessage) {
+            const error = this._throwOnPostMessage;
+            this._throwOnPostMessage = null;
+            throw error;
+        }
         if (this._terminated) return;
         this._messages.push(data);
 
@@ -46,17 +57,17 @@ class MockWorker {
 
     // Instance helpers — configure AFTER construction, BEFORE start()
     autoSucceed(payload) {
-        this._runHandler = (msg) => ({ taskId: msg.taskId, status: 'success', payload });
+        this._runHandler = (msg) => ({ taskId: msg.taskId, runId: msg.runId, status: 'success', payload });
         return this;
     }
     autoFail(message) {
-        this._runHandler = (msg) => ({ taskId: msg.taskId, status: 'error', payload: message });
+        this._runHandler = (msg) => ({ taskId: msg.taskId, runId: msg.runId, status: 'error', payload: message });
         return this;
     }
     sendProgress(payload) {
         const runMsg = this._messages.find(m => m.type === 'run');
         if (runMsg && this.onmessage) {
-            this.onmessage({ data: { taskId: runMsg.taskId, status: 'progress', payload } });
+            this.onmessage({ data: { taskId: runMsg.taskId, runId: runMsg.runId, status: 'progress', payload } });
         }
     }
     // Trigger success/error directly — use instead of autoSucceed when the run message
@@ -66,7 +77,7 @@ class MockWorker {
         if (runMsg) {
             Promise.resolve().then(() => {
                 if (!this._terminated && this.onmessage) {
-                    this.onmessage({ data: { taskId: runMsg.taskId, status: 'success', payload } });
+                    this.onmessage({ data: { taskId: runMsg.taskId, runId: runMsg.runId, status: 'success', payload } });
                 }
             });
         }
@@ -76,7 +87,7 @@ class MockWorker {
         if (runMsg) {
             Promise.resolve().then(() => {
                 if (!this._terminated && this.onmessage) {
-                    this.onmessage({ data: { taskId: runMsg.taskId, status: 'error', payload } });
+                    this.onmessage({ data: { taskId: runMsg.taskId, runId: runMsg.runId, status: 'error', payload } });
                 }
             });
         }
@@ -88,13 +99,20 @@ class MockWorker {
             }
         });
     }
+    throwOnNextPostMessage(error = new Error('postMessage failed')) {
+        this._throwOnPostMessage = error;
+        return this;
+    }
+    emit(envelope) {
+        this.onmessage?.({data: envelope});
+    }
 
     // Static helpers — configure BEFORE construction (for static run() etc.)
     static succeedNext(payload) {
-        MockWorker._nextHandler = (msg) => ({ taskId: msg.taskId, status: 'success', payload });
+        MockWorker._nextHandler = (msg) => ({ taskId: msg.taskId, runId: msg.runId, status: 'success', payload });
     }
     static failNext(message) {
-        MockWorker._nextHandler = (msg) => ({ taskId: msg.taskId, status: 'error', payload: message });
+        MockWorker._nextHandler = (msg) => ({ taskId: msg.taskId, runId: msg.runId, status: 'error', payload: message });
     }
     static last() {
         return mockInstances[mockInstances.length - 1] ?? null;
@@ -102,6 +120,10 @@ class MockWorker {
     static reset() {
         mockInstances.length = 0;
         MockWorker._nextHandler = null;
+        MockWorker._constructorError = null;
+    }
+    static throwOnNextConstruction(error) {
+        MockWorker._constructorError = error;
     }
 }
 
@@ -121,6 +143,16 @@ import YaiWorker from '../worker/yai-worker.js';
 // ─── SerializationGuard ───────────────────────────────────────────────────────
 
 describe('SerializationGuard', () => {
+    it('allows ordinary property names, comments, and quoted prose', () => {
+        const tasks = [
+            () => ({top: 1}).top,
+            (entity) => entity.location,
+            (node) => node.parent,
+            () => { /* top-level calculation */ return 'the window is open'; }
+        ];
+        tasks.forEach(task => expect(() => validateTask(task)).not.toThrow());
+    });
+
     it('passes for a clean arrow function', () => {
         expect(() => validateTask((data) => data * 2)).not.toThrow();
     });
@@ -295,6 +327,14 @@ describe('YaiWorker', () => {
 
             expect(() => new YaiWorker((x) => x)).toThrow(/options\.workerUrl/);
         });
+
+        it('reports Blob-worker CSP construction failures and revokes the temporary URL', () => {
+            const securityError = Object.assign(new Error('blocked'), {name: 'SecurityError'});
+            MockWorker.throwOnNextConstruction(securityError);
+
+            expect(() => new YaiWorker((x) => x)).toThrow(/Blob workers.*options\.workerUrl/);
+            expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:mock-worker-url');
+        });
     });
 
     // ── workerUrl option ───────────────────────────────────────────────────
@@ -388,6 +428,49 @@ describe('YaiWorker', () => {
             const worker = new YaiWorker((x) => x);
             worker.terminate();
             await expect(worker.start()).rejects.toMatchObject({ name: 'AbortError' });
+        });
+
+        it('cleans synchronous postMessage failures so a persistent worker can be reused', async () => {
+            const worker = new YaiWorker((x) => x, {mode: 'persistent', targetElement: createMockContainer()});
+            const mock = MockWorker.last();
+            const failure = new Error('cannot clone payload');
+            const unregisterSpy = vi.spyOn(TaskRegistry, 'unregister');
+            mock.throwOnNextPostMessage(failure);
+
+            await expect(worker.start({bad: true})).rejects.toBe(failure);
+            expect(unregisterSpy).toHaveBeenCalledOnce();
+
+            mock.autoSucceed('reused');
+            await expect(worker.start({good: true})).resolves.toBe('reused');
+            worker.terminate();
+            unregisterSpy.mockRestore();
+        });
+
+        it('terminates a transient worker after a synchronous postMessage failure', async () => {
+            const worker = new YaiWorker((x) => x);
+            const mock = MockWorker.last();
+            mock.throwOnNextPostMessage(new Error('cannot clone payload'));
+
+            await expect(worker.start({bad: true})).rejects.toThrow('cannot clone payload');
+            expect(mock._terminated).toBe(true);
+            await expect(worker.start()).rejects.toMatchObject({name: 'AbortError'});
+        });
+
+        it('ignores a delayed reply from an earlier persistent operation', async () => {
+            const worker = new YaiWorker((x) => x, {mode: 'persistent'});
+            const mock = MockWorker.last();
+
+            mock.autoSucceed('first');
+            await worker.start('first');
+            const firstRun = mock._messages.find(message => message.type === 'run');
+
+            const second = worker.start('second');
+            const secondRun = mock._messages.filter(message => message.type === 'run')[1];
+            mock.emit({taskId: firstRun.taskId, runId: firstRun.runId, status: 'success', payload: 'stale'});
+
+            mock.emit({taskId: secondRun.taskId, runId: secondRun.runId, status: 'success', payload: 'second'});
+            await expect(second).resolves.toBe('second');
+            worker.terminate();
         });
     });
 
@@ -553,6 +636,17 @@ describe('YaiWorker', () => {
     // ── AbortSignal ───────────────────────────────────────────────────────
 
     describe('AbortSignal', () => {
+        it('unbinds a transient worker signal after successful completion', async () => {
+            const controller = new AbortController();
+            const addSpy = vi.spyOn(controller.signal, 'addEventListener');
+            const removeSpy = vi.spyOn(controller.signal, 'removeEventListener');
+            MockWorker.succeedNext('done');
+
+            await YaiWorker.run((x) => x, null, {abortSignal: controller.signal});
+
+            expect(addSpy).toHaveBeenCalledOnce();
+            expect(removeSpy).toHaveBeenCalledWith('abort', expect.any(Function));
+        });
         it('terminates the worker when the signal fires', async () => {
             const controller = new AbortController();
             const worker = new YaiWorker((x) => x, { abortSignal: controller.signal });
@@ -580,6 +674,29 @@ describe('YaiWorker', () => {
             controller.abort();
             expect(mock._terminated).toBe(true);
             expect(removeSpy).toHaveBeenCalledWith('abort', expect.any(Function));
+        });
+    });
+
+    describe('fatal worker errors', () => {
+        it('stores a startup error and does not post a later operation', async () => {
+            const worker = new YaiWorker((x) => x, {mode: 'persistent'});
+            const mock = MockWorker.last();
+            mock.triggerThreadError('startup failed');
+            await Promise.resolve();
+
+            await expect(worker.start()).rejects.toThrow('startup failed');
+            expect(mock._messages).toHaveLength(0);
+        });
+
+        it('rejects an active persistent operation once and makes the worker unusable', async () => {
+            const worker = new YaiWorker((x) => x, {mode: 'persistent'});
+            const mock = MockWorker.last();
+            const pending = worker.start();
+            mock.triggerThreadError('worker crashed');
+
+            await expect(pending).rejects.toThrow('worker crashed');
+            await expect(worker.start()).rejects.toThrow('worker crashed');
+            expect(mock._messages.filter(message => message.type === 'run')).toHaveLength(1);
         });
     });
 
@@ -622,5 +739,32 @@ describe('YaiWorker bridge artifacts', () => {
     it('keeps the published bridge asset byte-identical to the injected bridge source', async () => {
         const asset = await readFile(`${process.cwd()}/worker/assets/yai-worker-bridge.js`, 'utf8');
         expect(asset.trim()).toBe(WORKER_BRIDGE_SOURCE.trim());
+    });
+
+    it('emits matching runId envelopes for success, errors, and task progress', async () => {
+        const asset = await readFile(`${process.cwd()}/worker/assets/yai-worker-bridge.js`, 'utf8');
+        const sources = [WORKER_BRIDGE_SOURCE, asset];
+
+        for (const source of sources) {
+            const messages = [];
+            const self = {postMessage: message => messages.push(message)};
+            const task = async (_input, taskId) => {
+                self.postMessage({taskId, status: 'progress', payload: 50});
+                return 'done';
+            };
+            new Function('self', '_task', source)(self, task);
+            await self.onmessage({data: {type: 'run', taskId: 'task', runId: 7, inputData: null}});
+
+            expect(messages).toEqual([
+                {taskId: 'task', runId: 7, status: 'progress', payload: 50},
+                {taskId: 'task', runId: 7, status: 'success', payload: 'done'}
+            ]);
+
+            const errors = [];
+            const failingSelf = {postMessage: message => errors.push(message)};
+            new Function('self', '_task', source)(failingSelf, () => { throw new Error('failed'); });
+            await failingSelf.onmessage({data: {type: 'run', taskId: 'task', runId: 8, inputData: null}});
+            expect(errors).toEqual([{taskId: 'task', runId: 8, status: 'error', payload: 'failed'}]);
+        }
     });
 });

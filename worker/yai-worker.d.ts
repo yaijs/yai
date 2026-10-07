@@ -2,12 +2,12 @@
  * 🧵 **YaiWorker - Zero-Build Web Worker Orchestration**
  *
  * Runs any serializable function in a dedicated `Worker` thread without a build step.
- * Handles worker creation, message routing, promise settlement, CSP fallback, and
+ * Handles worker creation, message routing, promise settlement, CSP guidance, and
  * cleanup automatically — leaving the caller with a clean `async/await` interface.
  *
  * **🚀 Key Features:**
  * - **Two modes:** `transient` (auto-terminated after one run) and `persistent` (reusable)
- * - **CSP-safe:** falls back to a static asset worker when `blob:` URLs are blocked
+ * - **CSP-safe:** reports blocked `blob:` workers clearly; use `workerUrl` for a pre-compiled worker
  * - **DOM integration:** dispatches `CustomEvent`s to a `targetElement` alongside promise resolution
  * - **Transferables:** zero-copy `ArrayBuffer` / `SharedArrayBuffer` support
  * - **AbortSignal:** integrates with the native cancellation API
@@ -104,11 +104,14 @@ export interface YaiWorkerOptions {
    * entirely — it simply calls `new Worker(workerUrl)`. The `task` constructor argument is
    * ignored and may be `null`.
    *
-   * The worker file must handle `{ type: 'run', taskId, inputData, sharedBuffer }` messages
+   * The worker file must handle `{ type: 'run', taskId, runId, inputData, sharedBuffer }` messages
    * and respond with standard envelopes:
-   * - `{ taskId, status: 'success', payload: result }`
-   * - `{ taskId, status: 'error', payload: errorMessage }`
-   * - `{ taskId, status: 'progress', payload: progressData }` (optional)
+   * - `{ taskId, runId, status: 'success', payload: result }`
+   * - `{ taskId, runId, status: 'error', payload: errorMessage }`
+   * - `{ taskId, runId, status: 'progress', payload: progressData }` (optional)
+   *
+   * `taskId` identifies this YaiWorker instance. `runId` identifies one `start()` call
+   * and must be echoed unchanged, so delayed replies cannot settle a later persistent run.
    *
    * **Primary use case:** Chrome Extension MV3 or any CSP that blocks `blob:` workers.
    * This is the portable, pre-compiled route: serialized function tasks are a Blob-worker
@@ -135,6 +138,8 @@ export interface YaiWorkerOptions {
 export interface WorkerSuccessDetail {
   /** Unique identifier of the task that produced this result. */
   taskId: string;
+  /** Identifier of the individual `start()` operation. */
+  runId: number;
   /** The value returned (or resolved) by the task function. */
   payload: any;
   /** The element that originally triggered the worker. */
@@ -150,6 +155,8 @@ export interface WorkerSuccessDetail {
 export interface WorkerErrorDetail {
   /** Unique identifier of the task that produced this error. */
   taskId: string;
+  /** Identifier of the operation when the thread failed, if one was active. */
+  runId: number | null;
   /** The error message string from the worker thread. */
   payload: string;
   /** The element that originally triggered the worker. */
@@ -202,6 +209,7 @@ export interface WorkerErrorDetail {
  * const worker = new YaiWorker(
  *   async (data, taskId) => {
  *     for (let i = 0; i <= 100; i += 10) {
+ *       // The built-in Blob bridge adds runId to this matching progress envelope.
  *       self.postMessage({ taskId, status: 'progress', payload: i });
  *       await new Promise(r => setTimeout(r, 50));
  *     }

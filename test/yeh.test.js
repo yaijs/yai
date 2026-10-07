@@ -49,7 +49,7 @@ describe('YEH (Yai Event Hub)', () => {
 
       container.innerHTML = '<button class="test-button">Test</button>';
 
-      const yeh = new YEH(eventMapping);
+      const yeh = new YEH(eventMapping, {}, {methods: {handleClick: () => {}}});
 
       expect(yeh.eventListeners.size).toBeGreaterThan(0);
     });
@@ -61,7 +61,9 @@ describe('YEH (Yai Event Hub)', () => {
 
       container.innerHTML = '<input class="test-input" />';
 
-      const yeh = new YEH(eventMapping);
+      const yeh = new YEH(eventMapping, {}, {
+        methods: {handleInput: () => {}, handleChange: () => {}, handleBlur: () => {}}
+      });
 
       // Should register all three event types
       expect(yeh.eventHandlerMap.has('input')).toBe(true);
@@ -74,7 +76,7 @@ describe('YEH (Yai Event Hub)', () => {
         window: [{ type: 'scroll', throttle: 100 }],
       };
 
-      const yeh = new YEH(eventMapping);
+      const yeh = new YEH(eventMapping, {}, {methods: {handleScroll: () => {}}});
 
       expect(yeh.eventHandlerMap.has('scroll')).toBe(true);
     });
@@ -86,7 +88,7 @@ describe('YEH (Yai Event Hub)', () => {
 
       container.innerHTML = '<input class="search" />';
 
-      const yeh = new YEH(eventMapping);
+      const yeh = new YEH(eventMapping, {}, {methods: {handleInput: () => {}}});
 
       expect(yeh.eventHandlerMap.has('input')).toBe(true);
     });
@@ -424,6 +426,105 @@ describe('YEH (Yai Event Hub)', () => {
   });
 
   describe('Throttle & Debounce', () => {
+    it('recovers when a leading throttled callback throws', () => {
+      vi.useFakeTimers();
+      let calls = 0;
+      const throttled = YEH.throttle(() => {
+        calls++;
+        if (calls === 1) throw new Error('boom');
+      }, 20, 'throwing-leading-throttle');
+
+      expect(() => throttled()).toThrow('boom');
+      vi.advanceTimersByTime(20);
+      throttled();
+
+      expect(calls).toBe(2);
+      vi.useRealTimers();
+    });
+
+    it('cleans a throttled window after a trailing callback throws', () => {
+      vi.useFakeTimers();
+      let calls = 0;
+      const throttled = YEH.throttle(() => {
+        calls++;
+        if (calls === 2) throw new Error('boom');
+      }, 20, 'throwing-trailing-throttle');
+
+      throttled();
+      throttled();
+      expect(() => vi.advanceTimersByTime(20)).toThrow('boom');
+      throttled();
+
+      expect(calls).toBe(3);
+      vi.useRealTimers();
+    });
+
+    it('cleans a debounced window after a trailing callback throws', () => {
+      vi.useFakeTimers();
+      let calls = 0;
+      const debounced = YEH.debounce(() => {
+        calls++;
+        if (calls === 2) throw new Error('boom');
+      }, 20, 'throwing-trailing-debounce', {leading: true, trailing: true});
+
+      debounced();
+      debounced();
+      expect(() => vi.advanceTimersByTime(20)).toThrow('boom');
+      debounced();
+
+      expect(calls).toBe(3);
+      vi.useRealTimers();
+    });
+
+    it('keeps unnamed per-element debounces independent', () => {
+      vi.useFakeTimers();
+      const handler = vi.fn();
+      container.innerHTML = '<input class="input"><input class="input">';
+      new YEH({body: [{type: 'input', handler, debounce: 20}]});
+      const [first, second] = container.querySelectorAll('.input');
+
+      first.dispatchEvent(new Event('input', {bubbles: true}));
+      second.dispatchEvent(new Event('input', {bubbles: true}));
+      vi.advanceTimersByTime(20);
+
+      expect(handler).toHaveBeenCalledTimes(2);
+      vi.useRealTimers();
+    });
+
+    it('does not carry a stale trailing call into the next throttle window', () => {
+      vi.useFakeTimers();
+      const calls = [];
+      const yeh = new YEH();
+      const throttled = yeh.throttle((value) => calls.push(value), 100, 'window-boundary');
+
+      throttled('first');
+      vi.advanceTimersByTime(50);
+      throttled('trailing');
+      vi.advanceTimersByTime(50);
+      throttled('next-window');
+      vi.advanceTimersByTime(100);
+
+      expect(calls).toEqual(['first', 'trailing', 'next-window']);
+      yeh.destroy();
+      vi.useRealTimers();
+    });
+
+    it('applies the same window boundary rule to static throttles', () => {
+      vi.useFakeTimers();
+      const calls = [];
+      const throttled = YEH.throttle((value) => calls.push(value), 100, 'static-window-boundary');
+
+      throttled('first');
+      vi.advanceTimersByTime(50);
+      throttled('trailing');
+      vi.advanceTimersByTime(50);
+      throttled('next-window');
+      vi.advanceTimersByTime(100);
+
+      expect(calls).toEqual(['first', 'trailing', 'next-window']);
+      vi.useRealTimers();
+    });
+
     it('should throttle function calls', (done) => {
       const yeh = new YEH();
       let callCount = 0;
@@ -660,6 +761,37 @@ describe('YEH (Yai Event Hub)', () => {
   });
 
   describe('Cleanup', () => {
+    it('runs overlapping registrations only once for one native event', () => {
+      const handler = vi.fn();
+      container.innerHTML = '<div id="outer"><div id="inner"><button>Click</button></div></div>';
+      new YEH({
+        '#outer': [{type: 'click', handler}],
+        '#inner': [{type: 'click', handler}]
+      }, {}, {stopPropagation: false});
+
+      container.querySelector('button').click();
+      expect(handler).toHaveBeenCalledOnce();
+    });
+
+    it('preserves hooks supplied in config.callable', () => {
+      const before = vi.fn();
+      container.innerHTML = '<button class="action">Click</button>';
+      new YEH({'.action': [{type: 'click', handler: () => {}}]}, {}, {
+        callable: {beforeHandleEvent: [before]}
+      });
+
+      container.querySelector('button').click();
+      expect(before).toHaveBeenCalledOnce();
+    });
+
+    it('does not mutate listener options and accepts signal:false as an opt-out', () => {
+      const options = {signal: false};
+      container.innerHTML = '<button class="action">Click</button>';
+      expect(() => new YEH({'.action': [{type: 'click', handler: () => {}, options}]}, {}, {
+        abortController: true
+      })).not.toThrow();
+      expect(options).toEqual({signal: false});
+    });
     it('should destroy and cleanup event listeners', () => {
       const eventMapping = {
         '.test-button': ['click'],
@@ -667,7 +799,7 @@ describe('YEH (Yai Event Hub)', () => {
 
       container.innerHTML = '<button class="test-button">Test</button>';
 
-      const yeh = new YEH(eventMapping);
+      const yeh = new YEH(eventMapping, {}, {methods: {handleClick: () => {}}});
 
       expect(yeh.eventListeners.size).toBeGreaterThan(0);
 
@@ -713,6 +845,69 @@ describe('YEH (Yai Event Hub)', () => {
       vi.useRealTimers();
     });
 
+    it('removes a detached element using its original listener identity', () => {
+      const handler = vi.fn();
+      container.innerHTML = '<button class="item">Item</button>';
+      const element = container.querySelector('.item');
+      const yeh = new YEH({'.item': [{type: 'click', handler}]});
+
+      element.remove();
+      expect(yeh.removeEvent('.item', 'click')).toBe(true);
+      container.append(element);
+      element.click();
+
+      expect(handler).not.toHaveBeenCalled();
+      expect(yeh.eventListeners.size).toBe(0);
+    });
+
+    it('removes all records after elements are reordered', () => {
+      const handler = vi.fn();
+      container.innerHTML = '<button class="item">A</button><button class="item">B</button>';
+      const yeh = new YEH({'.item': [{type: 'click', handler}]});
+      const [first, second] = container.querySelectorAll('.item');
+      container.append(first);
+
+      yeh.removeEvent('.item', 'click');
+      first.click();
+      second.click();
+
+      expect(handler).not.toHaveBeenCalled();
+      expect(yeh.eventListeners.size).toBe(0);
+    });
+
+    it('keeps a second selector registration when the first is removed', () => {
+      const firstHandler = vi.fn();
+      const secondHandler = vi.fn();
+      container.innerHTML = '<button class="first second">Both</button>';
+      const yeh = new YEH({
+        '.first': [{type: 'click', handler: firstHandler}],
+        '.second': [{type: 'click', handler: secondHandler}]
+      });
+
+      yeh.removeEvent('.first', 'click');
+      container.querySelector('button').click();
+
+      expect(firstHandler).not.toHaveBeenCalled();
+      expect(secondHandler).toHaveBeenCalledOnce();
+    });
+
+    it('cancels a pending throttled callback when its registration is removed', () => {
+      vi.useFakeTimers();
+      const handler = vi.fn();
+      container.innerHTML = '<button class="item">Item</button>';
+      const yeh = new YEH({'.item': [{type: 'click', handler, throttle: 100}]});
+      const element = container.querySelector('.item');
+
+      element.click();
+      element.click();
+      yeh.removeEvent('.item', 'click');
+      vi.advanceTimersByTime(100);
+
+      expect(handler).toHaveBeenCalledOnce();
+      expect(yeh.throttleTimers.size).toBe(0);
+      vi.useRealTimers();
+    });
+
     it('cancels a pending debounced callback on destroy', () => {
       vi.useFakeTimers();
       const callback = vi.fn();
@@ -725,6 +920,20 @@ describe('YEH (Yai Event Hub)', () => {
       expect(callback).not.toHaveBeenCalled();
       expect(yeh.debounceTimers.size).toBe(0);
       vi.useRealTimers();
+    });
+
+    it('does not retain records for missing handlers or failed native attachment', () => {
+      container.innerHTML = '<button class="missing"></button><button class="throws"></button>';
+      const missing = new YEH({'.missing': [{type: 'click', handler: 'notDefined'}]});
+      expect(missing.eventListeners.size).toBe(0);
+      expect(missing.eventHandlerMap.size).toBe(0);
+
+      const throws = container.querySelector('.throws');
+      const error = new Error('native listener failed');
+      throws.addEventListener = () => { throw error; };
+      expect(() => missing.registerEventListener(throws, {type: 'click', handler: () => {}}, '.throws')).toThrow(error);
+      expect(missing.eventListeners.size).toBe(0);
+      expect(missing.eventHandlerMap.size).toBe(0);
     });
   });
 

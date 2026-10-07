@@ -1,3 +1,56 @@
+# YaiJS v1.2.1 Release Notes (upcoming)
+
+## Reliability hardening
+
+This maintenance update strengthens the YEH event lifecycle and YaiWorker
+operation protocol without changing the YaiTabs public API.
+
+### YEH
+
+- Listener registrations now retain their own native listener identity, so
+  removal stays reliable after elements are detached or reordered.
+- A physical browser event is handled once even when matching registrations
+  overlap.
+- Throttled and debounced handlers recover after user callback errors; their
+  timer records cannot become stuck.
+- Per-element debouncing no longer merges unnamed inputs, constructor hooks are
+  preserved, and listener options are copied before YEH adds its own settings.
+
+### YaiWorker
+
+- Each `start()` operation now has a `runId`; delayed worker replies cannot
+  settle a later run on a persistent worker.
+- Transient workers clean up their AbortSignal subscription on every terminal
+  path, including synchronous `postMessage` failures.
+- Blob-worker CSP failures now explain that a pre-compiled `workerUrl` is
+  required, and temporary Blob URLs are revoked.
+- Relative `importScripts` URLs are resolved against the page URL before the
+  Blob worker is created.
+- Serialization validation no longer rejects ordinary property names, comments,
+  or quoted prose while still rejecting bare DOM-global access.
+
+### Verification
+
+- 162 automated tests passed; 5 existing browser-environment tests remain
+  skipped.
+- The worker bridge source and published asset are tested for protocol parity.
+- Ynforcer completed a dynamic YaiTabs stress run without errors: 122 steps in
+  111.82 seconds, across 525 components and 5,201 elements. The page-wide
+  listener snapshot was 46 listeners on 12 elements (3.83 average), including
+  roughly 5–6 browser-engine listeners in Vivaldi; it is not a per-component
+  YaiTabs metric.
+- The run reported 98 forced-reflow and 77 long-`setTimeout` warnings. Under
+  this workload—60 initial YaiTabs components, then dynamic additions—these are
+  diagnostics to monitor, not failures.
+
+## Compatibility
+
+This is a maintenance release. Existing YaiTabs behavior remains unchanged.
+Custom pre-compiled workers must echo the documented `runId` in their response
+envelopes.
+
+---
+
 # YaiJS v1.2.0 Release Notes
 
 ## Correctness and lifecycle release

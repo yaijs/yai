@@ -257,7 +257,8 @@ export interface EventConfig {
     /**
      * **Throttle delay** in milliseconds (optional)
      *
-     * Limits execution to at most once per delay period using leading+trailing edge execution.
+     * Runs once at the leading edge by default and, at most, once more at the end
+     * of that same delay window. A trailing call never carries into the next window.
      * Perfect for high-frequency events like scroll, mousemove, resize.
      *
      * **Recommended values:**
@@ -541,7 +542,8 @@ export declare class YEH {
 
     /**
      * Throttle any function - limit execution to at most once per delay period
-     * Uses leading+trailing edge execution for smooth performance
+     * Uses a bounded leading/trailing delay window; its trailing call is cancelled
+     * by `destroy()` or `removeEvent()` when it belongs to a registered event.
      * @param fn - Function to throttle
      * @param delay - Minimum time between executions (milliseconds)
      * @param key - Unique identifier for this throttle instance
@@ -607,7 +609,7 @@ export declare class YEH {
      * Static throttle utility - Works without any instances
      * @param fn - Function to throttle
      * @param delay - Minimum time between executions
-     * @param key - Unique identifier (default: 'default')
+     * @param key - Unique identifier (default: 'default'). Calls sharing a key share one window.
      */
     static throttle<T extends (...args: any[]) => void>(fn: T, delay: number, key?: string): T;
 
