@@ -3,12 +3,40 @@
  */
 const FORBIDDEN = /(?<![\w$.])\b(window|document|localStorage|sessionStorage|parent|top|opener|location)\b(?!\s*:)/;
 
-// This is deliberately a small guard, not a JavaScript parser. Remove comments and
-// quoted literals first so ordinary prose and property names do not reject a task.
-const stripNonCode = (source) => source.replace(
-    /\/\*[\s\S]*?\*\/|\/\/[^\n\r]*|(['"`])(?:\\.|(?!\1)[^\\])*\1/g,
-    ' '
-);
+// This is deliberately a small guard, not a JavaScript parser. A linear scanner
+// removes comments and quoted literals without a backtracking regular expression.
+const stripNonCode = (source) => {
+    let code = '';
+    let index = 0;
+
+    while (index < source.length) {
+        const char = source[index];
+        const next = source[index + 1];
+
+        if (char === '/' && next === '/') {
+            const lineEnd = source.indexOf('\n', index + 2);
+            index = lineEnd === -1 ? source.length : lineEnd;
+            code += ' ';
+        } else if (char === '/' && next === '*') {
+            const commentEnd = source.indexOf('*/', index + 2);
+            index = commentEnd === -1 ? source.length : commentEnd + 2;
+            code += ' ';
+        } else if (char === "'" || char === '"' || char === '`') {
+            const quote = char;
+            index++;
+            while (index < source.length) {
+                if (source[index] === '\\') index += 2;
+                else if (source[index++] === quote) break;
+            }
+            code += ' ';
+        } else {
+            code += char;
+            index++;
+        }
+    }
+
+    return code;
+};
 
 export function validateTask(fn, {allowThis = false} = {}) {
     const src = typeof fn === 'function' ? fn.toString() : fn;

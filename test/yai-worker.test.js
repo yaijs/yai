@@ -153,6 +153,11 @@ describe('SerializationGuard', () => {
         tasks.forEach(task => expect(() => validateTask(task)).not.toThrow());
     });
 
+    it('handles long and unterminated quoted source without regex backtracking', () => {
+        const source = `() => '${'\\'.repeat(20_000)}`;
+        expect(() => validateTask(source)).not.toThrow();
+    });
+
     it('passes for a clean arrow function', () => {
         expect(() => validateTask((data) => data * 2)).not.toThrow();
     });
