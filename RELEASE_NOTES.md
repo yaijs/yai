@@ -1,4 +1,29 @@
-# YaiJS v1.2.1 Release Notes (upcoming)
+# YaiJS v1.2.2 Release Notes (upcoming)
+
+## Dependency security maintenance
+
+This patch updates the development and test toolchain to resolve current npm
+security advisories without changing the YaiJS runtime API.
+
+- Happy DOM is updated to 21.0.4, which includes the ESM compiler code-injection fix.
+- Vitest, its UI and V8 coverage packages are updated to 4.1.12, including the
+  patched `@vitest/mocker` dependency.
+- Vite is updated to 6.4.5 to resolve the refreshed launch-editor advisories.
+
+## Verification
+
+- `npm install` completed successfully.
+- 163 automated tests passed; 5 existing browser-environment tests remain skipped.
+- `npm audit` reports zero vulnerabilities.
+
+## Compatibility
+
+This is a dependency-only maintenance release. The public YaiJS API and YaiTabs
+behavior are unchanged.
+
+---
+
+# YaiJS v1.2.1 Release Notes
 
 ## Reliability hardening
 
@@ -31,7 +56,7 @@ operation protocol without changing the YaiTabs public API.
 
 ### Verification
 
-- 162 automated tests passed; 5 existing browser-environment tests remain
+- 163 automated tests passed; 5 existing browser-environment tests remain
   skipped.
 - The worker bridge source and published asset are tested for protocol parity.
 - Ynforcer completed a dynamic YaiTabs stress run without errors: 122 steps in
