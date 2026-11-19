@@ -312,7 +312,7 @@ class YaiTabs extends YaiCore {
 
         // Final ARIA state update after hash processing and initialization
         // This ensures hash-opened tabs have correct aria-hidden states and manages focusable elements
-        setTimeout(() => {
+        this._initTimeout = setTimeout(() => {
             document.querySelectorAll(this.config.rootSelector).forEach(container => {
                 this._updateAriaStates(container);
             });
@@ -322,6 +322,20 @@ class YaiTabs extends YaiCore {
         if (!('inert' in HTMLElement.prototype)) {
             console.warn('YaiTabs: `inert` not supported. Hidden panels may be clickable in this browser. Upgrade for full accessibility.');
         }
+    }
+
+    /**
+     * Release Tabs-specific asynchronous state before the shared core cleanup.
+     * @returns {YaiTabs}
+     */
+    destroy() {
+        if (this._initTimeout) {
+            clearTimeout(this._initTimeout);
+            this._initTimeout = null;
+        }
+        this.routeMap?.clear();
+        super.destroy();
+        return this;
     }
 
     /**

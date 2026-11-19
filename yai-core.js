@@ -62,6 +62,7 @@ class YaiCore {
          * Event handler will be created by factory method
          */
         this.events = null;
+        this._isDestroyed = false;
     }
 
     /**
@@ -232,9 +233,9 @@ class YaiCore {
             this._safeShallowMerge(methods, options.methods);
         }
 
-        if (typeof this.config.callable.globalMouseWatch !== null) {
-            methods.globalMouseWatch = (...args) => this.globalMouseWatch(...args);
-        }
+        // Keep the historical bridge available regardless of whether a callback
+        // is configured; global mouse listeners resolve this method by name.
+        methods.globalMouseWatch = (...args) => this.globalMouseWatch(...args);
 
         const finalOptions = {
             ...eventOptions,
@@ -296,7 +297,7 @@ class YaiCore {
             const callableName = `event${this._capitalize(eventType)}`;
 
             // Only add if not already defined
-            if (!this.config.callable.hasOwnProperty(callableName)) {
+            if (!Object.prototype.hasOwnProperty.call(this.config.callable, callableName)) {
                 this.config.callable[callableName] = null;
             }
         });
@@ -1005,14 +1006,26 @@ class YaiCore {
      */
     _executeHook(hookName, context = {}, instance = this) {
         if (!this.events) {
-            // Events not initialized - check if hook exists in config.callable
+            // Events not initialized - normalize the legacy function and modern
+            // array forms to the same callable contract as YEH.
             const hook = this.config?.callable?.[hookName];
-            if (typeof hook === 'function') {
-                return hook(context, instance);
-            }
-            return undefined;
+            const callbacks = YaiCore._normalizeCallable(hook);
+            if (!callbacks.length) return undefined;
+            const results = callbacks.map(callback => callback(context, instance));
+            return Array.isArray(hook) ? results : results[0];
         }
         return this.events._executeHook(hookName, context, instance);
+    }
+
+    /**
+     * Normalize configured hooks without requiring callers to choose between
+     * the original single-function form and YEH's callback-array form.
+     */
+    static _normalizeCallable(hook) {
+        if (hook == null) return [];
+        if (typeof hook === 'function') return [hook];
+        if (Array.isArray(hook)) return hook.filter(callback => typeof callback === 'function');
+        return [];
     }
 
     /**
@@ -1027,10 +1040,37 @@ class YaiCore {
             if (!this.config.callable) {
                 this.config.callable = {};
             }
-            this.config.callable[hookName] = callback;
+            this.config.callable[hookName] = [
+                ...YaiCore._normalizeCallable(this.config.callable[hookName]),
+                ...YaiCore._normalizeCallable(callback)
+            ];
             return this;
         }
         this.events.hook(hookName, callback, instance);
+        return this;
+    }
+
+    /**
+     * Release event, request, and DOM-cache resources. Safe to call repeatedly.
+     * @returns {YaiCore}
+     */
+    destroy() {
+        if (this._isDestroyed) return this;
+        this._isDestroyed = true;
+
+        this.yaiEmit('beforeDestroy', {context: this});
+        if (this.events) {
+            try { this.events.destroy(); } catch (_) { }
+            this.events = null;
+        }
+        for (const controller of this._fetchControllers.values()) {
+            try { controller.abort(); } catch (_) { }
+        }
+        this._fetchControllers.clear();
+        this._domCache.clear();
+        this.processingContainers.clear();
+        this.isProcessing = false;
+        this._executeHook('afterDestroy', {context: this});
         return this;
     }
 

@@ -4,6 +4,35 @@ Utilities that extend YaiTabs functionality. All examples below are working snip
 
 ---
 
+## YaiToggle
+
+**[YaiToggle live demo →](./yai-toggle/yai-toggle.html)**
+
+Declarative, delegation-first toggles for disclosures, accordions, self-state, content swaps, and dynamically injected markup. The DOM carries the state, so no element registration or initialization scan is needed.
+
+```javascript
+import { YaiToggle } from '@yaijs/core/toggle';
+
+const toggle = new YaiToggle();
+```
+
+```html
+<button data-click="toggleTarget" data-toggle-target=".details"
+        data-toggle-target-class="!hidden"
+        data-toggle-self-content="Show:Hide">Show</button>
+<div class="details hidden">Details</div>
+```
+
+Inside a YaiTabs container, share the tabs event hub instead of creating a second document listener:
+
+```javascript
+new YaiToggle({ listen: false }).setInstance(tabs).watchHooks();
+```
+
+See the [YaiToggle guide](./yai-toggle/README.md) for the class/attribute grammar and accordion groups.
+
+---
+
 ## YaiInputUtils
 
 **[YaiInputUtils Live Demo On JSFiddle →](https://yaijs.github.io/yai/docs/utilities/yai-input-utils.html)**
@@ -192,6 +221,7 @@ import { YaiTabs, YaiTabsSwipe, YaiViewport } from 'https://cdn.jsdelivr.net/npm
 import { YaiTabs, YaiTabsSwipe, YaiViewport } from 'https://cdn.jsdelivr.net/npm/@yaijs/core@latest/dist/yai-bundle-full.js';
 
 // Individual utility imports
+import { YaiToggle } from 'https://cdn.jsdelivr.net/npm/@yaijs/core@latest/utils/yai-toggle.js';
 import { YaiInputUtils } from 'https://cdn.jsdelivr.net/npm/@yaijs/core@latest/utils/yai-input-utils.js';
 import { YaiViewport } from 'https://cdn.jsdelivr.net/npm/@yaijs/core@latest/utils/yai-viewport.js';
 import { YEH } from 'https://cdn.jsdelivr.net/npm/@yaijs/core@latest/yeh/yeh.js';

@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!--
+  http://localhost:8000/docs/examples/yai-toggle-demo.html
+-->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>YaiToggle demo</title>
+<style>
+    body {
+        max-width: 1000px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+        font: 16px/1.5 system-ui, sans-serif;
+        background: #f5f6f8;
+        color: #12141a
+    }
+
+    main {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1rem
+    }
+
+    .card {
+        padding: 1rem;
+        border: 1px solid #dfe3e8;
+        border-radius: .75rem;
+        background: #fff
+    }
+
+    .box {
+        margin-top: .7rem;
+        padding: .7rem;
+        border: 1px dashed #9ca3af;
+        border-radius: .4rem
+    }
+
+    .hidden {
+        display: none !important
+    }
+
+    .active {
+        outline: 2px solid #4f46e5;
+        outline-offset: 2px
+    }
+
+    .primary {
+        background: #4f46e5;
+        color: #fff
+    }
+
+    .success {
+        background: #059669;
+        color: #fff
+    }
+
+    button {
+        padding: .5rem .8rem;
+        border: 0;
+        border-radius: .4rem;
+        cursor: pointer;
+        font: inherit
+    }
+
+    [data-yai-toggle] {
+        display: grid;
+        gap: .5rem
+    }
+
+    .faq button {
+        width: 100%;
+        text-align: left;
+        background: #f3f4f6;
+        margin-top: .35rem
+    }
+
+    .faq .active {
+        background: #e0e7ff
+    }
+
+    .tabs [data-tab] {
+        display: none
+    }
+
+    .tabs [data-tab].active {
+        display: block
+    }
+
+    .tabs [data-controller] {
+        display: flex;
+        gap: .4rem;
+        margin-bottom: .7rem
+    }
+
+    .tabs [data-controller] .active {
+        background: #4f46e5;
+        color: #fff
+    }
+
+    code,
+    pre {
+        font-family: ui-monospace, monospace
+    }
+
+    pre {
+        padding: .7rem;
+        overflow: auto;
+        background: #111827;
+        color: #e5e7eb;
+        border-radius: .4rem
+    }
+
+    #log {
+        grid-column: 1/-1;
+        min-height: 5rem;
+        background: #111827;
+        color: #d1fae5;
+        padding: .7rem;
+        border-radius: .4rem
+    }
+</style>
+</head>
+<body>
+    <h1>YaiToggle</h1>
+    <p>One declarative component, one delegated listener, no registration scan. See the <a href="#README.md">README</a> for the attribute grammar.</p>
+    <main>
+      <section class="card">
+          <h2>1. Classes, attributes, content</h2>
+          <div data-yai-toggle><button class="primary" data-click="toggleTarget" data-toggle-target=".info" data-toggle-target-class="!hidden" data-toggle-target-attr="!inert" data-toggle-self-class="active,primary:success" data-toggle-self-content="Show:Hide">Show</button>
+              <div class="box info hidden">Target content</div>
+          </div>
+      </section>
+      <section class="card">
+          <h2>2. Scoped multiple targets</h2>
+          <div data-yai-toggle><button data-click="toggleTarget" data-toggle-target=".multi" data-toggle-target-class="plain:active">Highlight both</button>
+              <div class="box multi plain">A</div>
+              <div class="box multi plain">B</div>
+          </div>
+      </section>
+      <section class="card">
+          <h2>3. Accordion group</h2>
+          <div class="faq" data-yai-toggle><button data-click="toggleTarget" data-toggle-group="faq" data-toggle-target="#answer-one" data-toggle-target-class="!hidden" data-toggle-self-class="active">What holds the state?</button>
+              <div id="answer-one" class="box hidden">The trigger holds <code>data-toggle-state</code>.</div><button data-click="toggleTarget" data-toggle-group="faq" data-toggle-target="#answer-two" data-toggle-target-class="!hidden" data-toggle-self-class="active">What about targets?</button>
+              <div id="answer-two" class="box hidden">They are resolved from the DOM each time.</div>
+          </div>
+      </section>
+      <section class="card">
+          <h2>4. Inside YaiTabs</h2>
+          <div class="tabs" data-yai-tabs data-ref-path="toggle-demo">
+              <div data-controller><button data-tab-action="open" data-open="one" data-default>One</button><button data-tab-action="open" data-open="two">Two</button></div>
+              <div data-content>
+                  <div data-tab="one" data-yai-toggle><button data-click="toggleTarget" data-toggle-target=".nested" data-toggle-target-class="!hidden" data-toggle-self-content="Open:Close">Open</button>
+                      <div class="box nested hidden">Uses the tabs event hub.</div>
+                  </div>
+                  <div data-tab="two">Second tab remains fully functional.</div>
+              </div>
+          </div>
+      </section>
+      <section class="card">
+          <h2>5. Dynamic markup</h2><button id="inject">Inject a toggle</button> <button id="remove">Remove all</button>
+          <div id="injected"></div>
+      </section>
+      <section class="card">
+          <h2>6. Hooks</h2><label><input id="lock" type="checkbox"> veto standalone toggles</label>
+          <pre>toggle.hook('beforeToggle', () => false);
+document.addEventListener('yai.toggle.toggleOn', listener);</pre>
+      </section>
+      <div id="log">Ready.</div>
+    </main>
+
+    <script type="module">
+      import {
+        YEH, YaiTabs
+      } from '../../../dist/yai-bundle-core.js';
+
+      // import { YEH } from 'https://cdn.jsdelivr.net/npm/@yaijs/core@latest/yeh/yeh.js';
+      // import { YaiTabs } from 'https://cdn.jsdelivr.net/npm/@yaijs/core@latest/tabs/yai-tabs.js';
+      import { YaiToggle } from '../../../utils/yai-toggle.js';
+      import { createElement } from '../../../utils/yai-util.js';
+
+      // const log = text => document.querySelector('#log').textContent = text; const toggle = new YaiToggle(); const tabs = new YaiTabs(); new YaiToggle({ listen: false }).setInstance(tabs).watchHooks(); let locked = false, count = 0;
+      // document.querySelector('#lock').addEventListener('change', event => { locked = event.target.checked; }); toggle.hook('beforeToggle', () => locked ? false : undefined);
+      // document.addEventListener('yai.toggle.toggleOn', ({ detail }) => log(`On: ${detail.targets.length} target(s).`)); document.addEventListener('yai.toggle.toggleOff', ({ detail }) => log(`Off: ${detail.targets.length} target(s).`));
+      // document.querySelector('#inject').addEventListener('click', () => { count++; document.querySelector('#injected').insertAdjacentHTML('beforeend', createElement({ div: { attributes: { 'data-yai-toggle': '', class: 'box' }, content: [{ button: { attributes: { 'data-click': 'toggleTarget', 'data-toggle-target': '.late', 'data-toggle-target-class': '!hidden', 'data-toggle-self-content': `Open #${count}:Close #${count}` }, content: `Open #${count}` } }, { div: { attributes: { class: 'late hidden' }, content: 'Added after initialization.' } }] } })); }); document.querySelector('#remove').addEventListener('click', () => document.querySelector('#injected').replaceChildren());
+      // log(`Ready: ${toggle.events.eventListeners.size + tabs.events.eventListeners.size} native listeners across the two hubs.`);
+
+      class MyHandler extends YEH {
+        constructor() {
+          super({ '#app': ['click'] });
+        }
+
+        handleClick(event, target, container) {
+          const action = target.dataset[event.type];
+          if (action && this[action]) this[action](target, event, container);
+        }
+
+        save(target) { console.log('Saving...'); }
+        delete(target) { console.log('Deleting...'); }
+      }
+
+      // new MyHandler();
+
+
+
+
+      const log = (text) => (document.querySelector("#log").textContent = text);
+      const toggle = new YaiToggle();
+      const tabs = new YaiTabs();
+      new YaiToggle({ listen: false }).setInstance(tabs).watchHooks();
+      let locked = false,
+        count = 0;
+
+      document.querySelector("#lock").addEventListener("change", (event) => {
+        locked = event.target.checked;
+      });
+
+      toggle.hook("beforeToggle", () => (locked ? false : undefined));
+
+      document.addEventListener("yai.toggle.toggleOn", ({ detail }) => log(`On: ${detail.targets.length} target(s).`));
+      document.addEventListener("yai.toggle.toggleOff", ({ detail }) => log(`Off: ${detail.targets.length} target(s).`));
+
+      document.querySelector("#inject").addEventListener("click", () => {
+        count++;
+        document
+          .querySelector("#injected")
+          .insertAdjacentHTML(
+            "beforeend",
+            createElement({
+              div: {
+                attributes: { "data-yai-toggle": "", class: "box" },
+                content: [
+                  {
+                    button: {
+                      attributes: {
+                        "data-click": "toggleTarget",
+                        "data-toggle-target": ".late",
+                        "data-toggle-target-class": "!hidden",
+                        "data-toggle-self-content": `Open #${count}:Close #${count}`,
+                      },
+                      content: `Open #${count}`,
+                    },
+                  },
+                  { div: { attributes: { class: "late hidden" }, content: "Added after initialization." } },
+                ],
+              },
+            })
+          );
+      });
+      document
+        .querySelector("#remove")
+        .addEventListener("click", () => document.querySelector("#injected").replaceChildren());
+      log(
+        `Ready: ${toggle.events.eventListeners.size + tabs.events.eventListeners.size} native listeners across the two hubs.`
+      );
+
+    </script>
+</body>
+</html>

@@ -42,9 +42,10 @@ export default defineConfig({
     // Setup files
     setupFiles: ['./test/setup.js'],
 
-    // Include/exclude patterns
+    // Include/exclude patterns. __yai-toggle is an unintegrated staging area
+    // whose tests target the planned src/ layout, not this package tree.
     include: ['**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
-    exclude: ['node_modules', 'dist', 'build'],
+    exclude: ['node_modules', 'dist', 'build', '**/__yai-toggle/**'],
 
     // Reporter configuration
     reporters: ['verbose'],

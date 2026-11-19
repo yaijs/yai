@@ -6,7 +6,7 @@
  *
  * @example
  * ```javascript
- * import { YEH, YaiTabs, YaiTabsSwipe, YaiAutoSwitch } from 'https://cdn.jsdelivr.net/npm/@yaijs/core@latest/dist/yai-bundle-full.js';
+ * import { YEH, YaiTabs, YaiTabsSwipe, YaiAutoSwitch, YaiToggle } from 'https://cdn.jsdelivr.net/npm/@yaijs/core@latest/dist/yai-bundle-full.js';
  *
  * const tabs = new YaiTabs();
  * ```
@@ -19,6 +19,7 @@
  * - YaiAutoSwitch: Automated tab cycling for demos/testing
  * - YaiViewport: Advanced viewport tracking (observer-free)
  * - YaiSearchAndClick: Deep navigation testing utility
+ * - YaiToggle: Declarative toggle and accordion utility
  *
  * Bundle size: ~90 KB uncompressed, ~22-28 KB gzipped (via JSDelivr)
  * Tree-shakeable when used with modern bundlers
@@ -28,8 +29,9 @@ import {YaiTabs} from '../tabs/yai-tabs.js';
 import {YaiAutoSwitch} from '../utils/yai-auto-switch.js';
 import {YaiSearchAndClick} from '../utils/yai-search-and-click.js';
 import {YaiTabsSwipe} from '../utils/yai-tabs-swipe.js';
+import {YaiToggle} from '../utils/yai-toggle.js';
 import {YaiViewport} from '../utils/yai-viewport.js';
 import {YaiCore} from '../yai-core.js';
 import {YEH} from '../yeh/yeh.js';
 
-export {YaiAutoSwitch, YaiCore, YaiSearchAndClick, YaiTabs, YaiTabsSwipe, YaiViewport, YEH};
+export {YaiAutoSwitch, YaiCore, YaiSearchAndClick, YaiTabs, YaiTabsSwipe, YaiToggle, YaiViewport, YEH};

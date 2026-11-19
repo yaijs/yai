@@ -10,7 +10,7 @@ This document explains the different bundle files available in `@yaijs/core` and
 |-------------|------|----------|----------|
 | **yai-bundle-core.js** | Minimal | YaiCore + YaiTabs + YEH | Basic tabs functionality |
 | **yai-bundle.js** | Recommended | + YaiTabsSwipe + YaiViewport | Most projects (includes touch/viewport) |
-| **yai-bundle-full.js** | Complete | + YaiAutoSwitch + YaiSearchAndClick | Testing/demos with automation |
+| **yai-bundle-full.js** | Complete | + YaiAutoSwitch + YaiSearchAndClick + YaiToggle | Testing/demos and declarative UI helpers |
 
 ---
 
@@ -73,6 +73,7 @@ import { YaiTabs, YaiTabsSwipe, YaiViewport } from '@yaijs/core/bundle';
 - Everything from `yai-bundle.js`
 - `YaiAutoSwitch` - Automated tab cycling for demos
 - `YaiSearchAndClick` - Automated testing utility
+- `YaiToggle` - Declarative toggles and accordion behavior
 
 **When to use:**
 - Building interactive demos or presentations

@@ -794,11 +794,18 @@ class YaiTabsSwipe {
      * @private
      */
     _executeHook(hookName, context = {}, instance = this) {
-        const callback = instance.config?.callable?.[hookName];
-        if (typeof callback === 'function') {
-            return callback(context, instance);
-        }
-        return undefined;
+        const hook = instance.config?.callable?.[hookName];
+        const callbacks = YaiTabsSwipe._normalizeCallable(hook);
+        if (!callbacks.length) return undefined;
+        const results = callbacks.map(callback => callback(context, instance));
+        return Array.isArray(hook) ? results : results[0];
+    }
+
+    static _normalizeCallable(hook) {
+        if (hook == null) return [];
+        if (typeof hook === 'function') return [hook];
+        if (Array.isArray(hook)) return hook.filter(callback => typeof callback === 'function');
+        return [];
     }
 
     /**
@@ -816,7 +823,7 @@ class YaiTabsSwipe {
         if (!instance.config.callable) {
             instance.config.callable = {};
         }
-        if (instance.config.callable.hasOwnProperty(hookName)) {
+        if (Object.prototype.hasOwnProperty.call(instance.config.callable, hookName)) {
             instance.config.callable[hookName] = callback;
         }
         return instance;
@@ -1014,6 +1021,18 @@ class YaiTabsSwipe {
 
         this.clearSelection();
 
+        return this;
+    }
+
+    /**
+     * Cancel delayed boundary transitions when swipe support is discarded.
+     * @returns {YaiTabsSwipe}
+     */
+    destroy() {
+        if (this._pendingTimeout) {
+            clearTimeout(this._pendingTimeout);
+            this._pendingTimeout = null;
+        }
         return this;
     }
 

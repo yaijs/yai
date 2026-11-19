@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="A structured catalogue of runnable YaiJS examples.">
+    <base href="./">
+    <title>YaiJS Examples</title>
+    <link rel="stylesheet" href="../../tabs/yai-tabs.css">
+    <style>
+        :root { color-scheme: dark; --page: #10131a; --panel: #181d27; --panel-alt: #202736; --ink: #edf2f7; --muted: #b8c2d1; --line: #354158; --accent: #7dd3fc; --accent-strong: #38bdf8; }
+        * { box-sizing: border-box; }
+        body { max-width: 1180px; min-height: 100vh; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; color: var(--ink); background: radial-gradient(circle at top left, #1f3150, transparent 35rem), var(--page); font: 1rem/1.6 system-ui, sans-serif; }
+        header { max-width: 72rem; margin-bottom: 2rem; }
+        h1 { margin: 0; font-size: clamp(2rem, 6vw, 4.25rem); line-height: 1; letter-spacing: -.05em; }
+        h1 span { color: var(--accent); }
+        h2 { margin-top: 0; line-height: 1.2; } p { color: var(--muted); } a { color: var(--accent); } code { color: #e9d5ff; }
+        .eyebrow { margin-bottom: .6rem; color: var(--accent); font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+        .lede { max-width: 65ch; font-size: 1.2rem; }
+        [data-yai-tabs] { overflow: hidden; border: 1px solid var(--line); border-radius: 1rem; background: var(--panel); box-shadow: 0 1.25rem 4rem #0005; }
+        [data-controller] { display: flex; gap: .25rem; flex-wrap: wrap; padding: .75rem; border-bottom: 1px solid var(--line); background: #121721; }
+        [data-controller] button { border: 0; border-radius: .5rem; padding: .6rem .85rem; color: var(--muted); background: transparent; font: inherit; cursor: pointer; }
+        [data-controller] button:hover, [data-controller] button.active { color: #062033; background: var(--accent); }
+        [data-content] { padding: clamp(1rem, 3vw, 2rem); min-height: 20rem; }
+        [data-tab] { display: none; } [data-tab].active { display: block; }
+        [data-content] [data-tab] .grid, [data-content] [data-tab] .note { margin: var(--yai-tabs-content-elements-margin); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 1rem; }
+        .card { display: flex; flex-direction: column; gap: .75rem; min-height: 11rem; padding: 1.15rem; border: 1px solid var(--line); border-radius: .75rem; background: var(--panel-alt); }
+        .card h3 { margin: 0; } .card p { margin: 0; } .card a { margin-top: auto; font-weight: 700; }
+        .tag { align-self: flex-start; padding: .2rem .5rem; border-radius: 999px; color: #dbeafe; background: #1e3a5f; font-size: .78rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+        .note { padding: 1rem; border-left: 3px solid var(--accent-strong); background: #0f2535; }
+        footer { margin-top: 1.5rem; color: var(--muted); font-size: .9rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="eyebrow">YaiJS example catalogue</div>
+        <h1>Working demos, <span>properly findable.</span></h1>
+        <p class="lede">This is the quiet front door to YaiJS. The individual demos keep their own voice; this catalogue makes clear what each one proves, where to start, and which pages are experiments rather than product documentation.</p>
+    </header>
+
+    <main data-yai-tabs data-ref-path="examples">
+        <nav data-controller aria-label="Example categories">
+            <button data-tab-action="open" data-open="overview" data-default data-url="./content/overview.html" data-delay="100" data-min-loading="500">Overview</button>
+            <button data-tab-action="open" data-open="tabs" data-url="./content/yai-tabs.html" data-delay="100" data-min-loading="500">YaiTabs</button>
+            <button data-tab-action="open" data-open="yeh" data-url="./content/yeh.html" data-delay="100" data-min-loading="500">YEH</button>
+            <button data-tab-action="open" data-open="utilities" data-url="./content/utilities.html" data-delay="100" data-min-loading="500">Utilities</button>
+            <button data-tab-action="open" data-open="worker" data-url="./content/worker.html" data-delay="100" data-min-loading="500">YaiWorker</button>
+        </nav>
+        <div data-content>
+            <section data-tab="overview" data-spaceless aria-live="polite"></section>
+            <section data-tab="tabs" data-spaceless aria-live="polite"></section>
+            <section data-tab="yeh" data-spaceless aria-live="polite"></section>
+            <section data-tab="utilities" data-spaceless aria-live="polite"></section>
+            <section data-tab="worker" data-spaceless aria-live="polite"></section>
+        </div>
+    </main>
+
+    <footer>
+        This catalogue deliberately loads its category panels through <code>data-url</code>. The dynamically loaded YaiTabs panel contains another tab component, exercising the same delegation model used by the larger demos.
+    </footer>
+
+    <script type="module">
+        import {YaiTabs} from '../../tabs/yai-tabs.js';
+        new YaiTabs();
+    </script>
+</body>
+</html>

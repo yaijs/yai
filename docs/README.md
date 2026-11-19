@@ -15,7 +15,7 @@ Complete documentation for YaiJS - Advanced web components with YEH (Yai Event H
 
 ### Utilities
 
-- **[Utilities Overview](https://yaijs.github.io/yai/docs/utilities/overview.html)** - YaiTabsSwipe, YaiViewport, YaiAutoSwitch with working examples
+- **[Utilities Overview](https://yaijs.github.io/yai/docs/utilities/overview.html)** - YaiToggle, YaiTabsSwipe, YaiViewport, and more
 
 ### YaiWorker
 
@@ -64,7 +64,8 @@ docs/
 ├── components/
 │   └── tabs.md                    # YaiTabs complete guide
 ├── utilities/
-│   └── overview.md                # All utilities with working examples
+│   ├── overview.md                # All utilities with working examples
+│   └── yai-toggle/                # Toggle guide and live demo
 └── yeh/
     └── README.md                  # YEH event system overview
 ```

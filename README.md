@@ -20,6 +20,17 @@ Build deeply nested, event-heavy interfaces with constant-time listener delegati
 
 ---
 
+## Examples
+
+**[Explore the YaiJS examples catalogue →](https://yaijs.github.io/yai/docs/examples/)**
+
+The catalogue is a small YaiTabs application itself: it dynamically loads focused
+examples for YaiTabs, YEH, YaiWorker, and utilities. It keeps the broad demos,
+benchmarks, and runtime fixtures discoverable without turning the main README
+into another mega-demo.
+
+---
+
 ## Real World Usage
 
 YaiJS isn't just for small components—it powers full-scale production applications.
@@ -122,6 +133,7 @@ class AppBus extends YEH {
 - **YaiTabsSwipe** – Circular navigation, nested ascend/descend, axis locking
 - **YaiViewport** – Observer-free visibility tracking with throttled events ([Demo →](https://jsfiddle.net/cmp5zynh/))
 - **YaiAutoSwitch** – Automated tab cycling for demos (bundle-full only)
+- **YaiToggle** – Declarative toggles, accordions, and content swaps with no init scan ([Guide →](https://yaijs.github.io/yai/docs/utilities/yai-toggle/))
 
 ---
 

@@ -290,6 +290,33 @@ describe('YaiCore', () => {
   });
 
   describe('Hook System', () => {
+    it('normalizes single and array callables before the event hub exists', () => {
+      const single = vi.fn(() => 'single');
+      const first = vi.fn(() => 'first');
+      const second = vi.fn(() => 'second');
+      const core = new YaiCore({
+        callable: {afterLoad: single, contentReady: [first, null, second]}
+      });
+
+      expect(core._executeHook('afterLoad', {})).toBe('single');
+      expect(core._executeHook('contentReady', {})).toEqual(['first', 'second']);
+      expect(single).toHaveBeenCalledOnce();
+      expect(first).toHaveBeenCalledOnce();
+      expect(second).toHaveBeenCalledOnce();
+    });
+
+    it('appends pre-hub hooks using the normalized callable shape', () => {
+      const first = vi.fn();
+      const second = vi.fn();
+      const core = new YaiCore({callable: {afterLoad: first}});
+
+      core.hook('afterLoad', second);
+      core._executeHook('afterLoad', {});
+
+      expect(first).toHaveBeenCalledOnce();
+      expect(second).toHaveBeenCalledOnce();
+    });
+
     it('should execute hooks when defined', () => {
       let hookCalled = false;
 
@@ -403,6 +430,50 @@ describe('YaiCore', () => {
       core.updateHash();
 
       expect(window.location.hash).toBe('');
+    });
+  });
+
+  describe('Lifecycle cleanup', () => {
+    it('handles null-prototype callable config when generating custom hooks', () => {
+      const core = new YaiCore();
+      core.config.callable = Object.create(null);
+
+      expect(() => core._generateCallableHooks(['mousedown'])).not.toThrow();
+      expect(core.config.callable.eventMousedown).toBeNull();
+    });
+
+    it('keeps globalMouseWatch available regardless of callback configuration', () => {
+      const core = new YaiCore({callable: {globalMouseWatch: null}});
+      const events = core.createEventHandler({document: ['mousemove']}, {});
+
+      expect(events.methods.globalMouseWatch).toEqual(expect.any(Function));
+      core.destroy();
+    });
+
+    it('releases event, fetch, DOM-cache, and processing state exactly once', () => {
+      const afterDestroy = vi.fn();
+      const core = new YaiCore({callable: {afterDestroy}});
+      const eventHub = {destroy: vi.fn(), dispatch: vi.fn()};
+      const controller = {abort: vi.fn()};
+      core.events = eventHub;
+      core._fetchControllers.set('request', controller);
+      core._domCache.set('element', document.createElement('div'));
+      core.processingContainers.add(document.body);
+      core.isProcessing = true;
+
+      expect(core.destroy()).toBe(core);
+      expect(eventHub.destroy).toHaveBeenCalledOnce();
+      expect(controller.abort).toHaveBeenCalledOnce();
+      expect(core.events).toBeNull();
+      expect(core._fetchControllers.size).toBe(0);
+      expect(core._domCache.size).toBe(0);
+      expect(core.processingContainers.size).toBe(0);
+      expect(core.isProcessing).toBe(false);
+      expect(afterDestroy).toHaveBeenCalledOnce();
+
+      core.destroy();
+      expect(eventHub.destroy).toHaveBeenCalledOnce();
+      expect(controller.abort).toHaveBeenCalledOnce();
     });
   });
 

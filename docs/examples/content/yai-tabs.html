@@ -1,0 +1,11 @@
+<h2>YaiTabs</h2>
+<p>The core demo is deliberately broad. Start with the overview, then use the benchmark when you specifically want to explore recursive dynamic content.</p>
+<div class="grid">
+    <article class="card"><span class="tag">Demo</span><h3>Full overview</h3><p>The canonical feature demonstration: nesting, themes, accessibility, routing, loading, and YEH integration.</p><a href="yai-tabs/overview/">Open YaiTabs overview</a></article>
+    <article class="card"><span class="tag">Benchmark</span><h3>Recursive stress test</h3><p>Loads the mega-tree fixture repeatedly. Use it to explore the extreme dynamic-content case.</p><a href="yai-tabs/benchmark/">Open benchmark</a></article>
+</div>
+<div class="note"><strong>This panel arrived through <code>data-url</code>.</strong> The nested component below was inserted with it and is ready immediately.</div>
+<div data-yai-tabs data-ref-path="examples-tabs-nested">
+    <nav data-controller aria-label="Nested YaiTabs demonstration"><button data-tab-action="open" data-open="basic" data-default>Basic pattern</button><button data-tab-action="open" data-open="dynamic">Dynamic content</button></nav>
+    <div data-content><section data-tab="basic"><p>A nested component needs no new document-wide listener. YEH resolves the closest component scope.</p></section><section data-tab="dynamic"><p>The outer catalogue loaded this entire panel as a fragment. The nested tabs work immediately because YaiTabs processes inserted component markup.</p></section></div>
+</div>
