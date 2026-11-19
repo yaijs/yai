@@ -37,6 +37,23 @@ describe('YaiToggle utilities', () => {
         expect(util.createElement({div: {attributes: {'data-x': 'a"b'}, content: [{span: {content: 'ok'}}, {br: {}}]}}))
             .toBe('<div data-x="a&quot;b"><span>ok</span><br></div>');
     });
+
+    it('treats content strings as text and restores original child nodes safely', () => {
+        const element = document.createElement('div');
+        element.innerHTML = '<strong>Original</strong>';
+
+        util.content(element, '<img src=x onerror=alert(1)>', true);
+        expect(element.querySelector('img')).toBeNull();
+        expect(element.textContent).toBe('<img src=x onerror=alert(1)>');
+
+        util.content(element, '<img src=x onerror=alert(1)>', false);
+        expect(element.querySelector('strong')?.textContent).toBe('Original');
+
+        const trustedNode = document.createElement('em');
+        trustedNode.textContent = 'Trusted node';
+        util.content(element, trustedNode, true);
+        expect(element.querySelector('em')?.textContent).toBe('Trusted node');
+    });
 });
 
 describe('YaiToggle standalone', () => {

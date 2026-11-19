@@ -33,7 +33,7 @@ A token always names the **on** state. The same grammar applies to classes, attr
 
 Use `data-toggle-self-class`, `data-toggle-self-attr`, and `data-toggle-self-content` for the trigger; use the corresponding `data-toggle-target-*` attributes for targets. Attribute values may use `name=off:on`, for example `data-toggle-target-attr="!inert, !aria-hidden"`.
 
-For content, `Off:On` is an explicit swap. A single on value stores the original HTML once in `data-toggle-content-off` and restores it on close. Content is authored HTML, so do not pass untrusted values into these attributes or `createElement()`.
+For content, `Off:On` is an explicit text swap. A single on value keeps cloned original child nodes in a private weak cache and restores them on close; `data-toggle-content-off` is only a marker. Attribute strings are always rendered as text, never interpreted as HTML. For trusted programmatic markup, pass a DOM `Node` to `content()` directly. `createElement()` remains an explicit authored-template helper, so do not pass untrusted values into it.
 
 ## Scope, groups, and accessibility
 

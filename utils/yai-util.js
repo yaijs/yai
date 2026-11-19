@@ -51,13 +51,16 @@ const attrs = (element, value, on, separators = SEPARATORS) => {
 };
 
 const POSITIONS = {replace: 'replaceChildren', append: 'append', prepend: 'prepend', before: 'before', after: 'after'};
+// Original child nodes stay out of markup attributes so restoring content never
+// parses DOM-derived text as HTML. Weak ownership keeps removed elements collectible.
+const CONTENT_STASH = new WeakMap();
 const nodes = value => {
+    if (Array.isArray(value)) return value.flatMap(nodes);
     if (typeof Node !== 'undefined' && value instanceof Node) return [value];
-    const fragment = document.createRange().createContextualFragment(String(value ?? ''));
-    return Array.from(fragment.childNodes);
+    return [document.createTextNode(String(value ?? ''))];
 };
 
-/** Raw HTML is intentional: this API is for authored markup, never untrusted input. */
+/** Strings are text, not HTML. Pass a Node when trusted programmatic markup is required. */
 const content = (element, value, on, options = {}) => {
     if (!element || value == null || value === '') return;
     const {position = 'replace', separators = SEPARATORS, stash = 'data-toggle-content-off'} = options;
@@ -65,8 +68,11 @@ const content = (element, value, on, options = {}) => {
     let next;
     if (swap) next = on ? swap[1] : swap[0];
     else {
-        if (!element.hasAttribute(stash)) element.setAttribute(stash, element.innerHTML);
-        next = on ? value : element.getAttribute(stash);
+        if (!CONTENT_STASH.has(element)) {
+            CONTENT_STASH.set(element, Array.from(element.childNodes).map(node => node.cloneNode(true)));
+            element.toggleAttribute(stash, true);
+        }
+        next = on ? value : CONTENT_STASH.get(element).map(node => node.cloneNode(true));
     }
     const method = POSITIONS[on ? position : 'replace'] || POSITIONS.replace;
     element[method](...nodes(next));
