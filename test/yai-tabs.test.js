@@ -214,22 +214,23 @@ describe('YaiTabs - Lifecycle cleanup', () => {
 
   afterEach(() => {
     cleanupDOM();
-    vi.useRealTimers();
+    vi.restoreAllMocks();
   });
 
   it('clears route state and its deferred initialization on destroy', () => {
-    vi.useFakeTimers();
+    const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout');
+    vi.spyOn(globalThis, 'setTimeout').mockReturnValue(1);
     const tabs = new YaiTabs({lazyNestedComponents: false});
     tabs.routeMap.set('root', 'one');
     const controller = {abort: vi.fn()};
     tabs._fetchControllers.set('request', controller);
 
     tabs.destroy();
-    vi.runAllTimers();
 
     expect(tabs.routeMap.size).toBe(0);
     expect(tabs.events).toBeNull();
     expect(controller.abort).toHaveBeenCalledOnce();
+    expect(clearTimeoutSpy).toHaveBeenCalledWith(1);
     expect(tabs.destroy()).toBe(tabs);
   });
 });
